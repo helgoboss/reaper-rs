@@ -1,7 +1,6 @@
 use crate::{
     BookmarkId, CommandId, Handle, Hidden, Hwnd, InsertMediaFlag, KbdSectionInfo, MediaTrack,
-    MidiFrameOffset, MidiOutputDeviceId, ReaProject, ReaperPanValue, ReaperStr, ReaperStringArg,
-    ReaperWidthValue,
+    MidiOutputDeviceId, ReaProject, ReaperPanValue, ReaperStr, ReaperStringArg, ReaperWidthValue,
 };
 
 use crate::util::concat_reaper_strs;
@@ -1641,7 +1640,7 @@ pub enum SendMidiTime {
     /// MIDI message will be sent instantly.
     Instantly,
     /// MIDI messages will be sent at the given frame offset.
-    AtFrameOffset(MidiFrameOffset),
+    AtFrameOffset(u32),
 }
 
 impl SendMidiTime {
@@ -1650,7 +1649,7 @@ impl SendMidiTime {
         use SendMidiTime::*;
         match self {
             Instantly => -1,
-            AtFrameOffset(o) => o.to_raw(),
+            AtFrameOffset(o) => o as i32,
         }
     }
 }

@@ -1,7 +1,7 @@
 use helgoboss_midi::{ShortMessage, U7};
 use reaper_low::raw;
 
-use crate::{MidiFrameOffset, SendMidiTime};
+use crate::SendMidiTime;
 use reaper_low::raw::MIDI_event_t;
 use ref_cast::RefCast;
 use std::os::raw::c_int;
@@ -23,6 +23,9 @@ impl MidiInput {
     /// Returns the list of MIDI events which are currently in the buffer.
     ///
     /// This must only be called in the real-time audio thread! See [`get_midi_input()`].
+    ///
+    /// This event list returned from this function has frame offsets that are in units of 1/1024000 of a second,
+    /// **not** sample frames. This frame rate is also available as constant [`crate::MIDI_INPUT_FRAME_RATE`].
     ///
     /// # Design
     ///
@@ -215,13 +218,13 @@ impl MidiEvent {
     }
 
     /// Returns the frame offset.
-    pub fn frame_offset(&self) -> MidiFrameOffset {
-        MidiFrameOffset::new(self.0.frame_offset as u32)
+    pub fn frame_offset(&self) -> u32 {
+        self.0.frame_offset as _
     }
 
     /// Sets the frame offset.
-    pub fn set_frame_offset(&mut self, offset: MidiFrameOffset) {
-        self.0.frame_offset = offset.to_raw();
+    pub fn set_frame_offset(&mut self, frame_offset: u32) {
+        self.0.frame_offset = frame_offset as _;
     }
 
     /// Returns the actual message.
@@ -265,13 +268,9 @@ impl LongMidiEvent {
     ///
     /// Size needs to be given because the actual message length is probably lower than the maximum
     /// size of a long message.  
-    pub fn new(
-        frame_offset: MidiFrameOffset,
-        midi_message: [u8; Self::MAX_LENGTH],
-        size: u32,
-    ) -> Self {
+    pub fn new(frame_offset: u32, midi_message: [u8; Self::MAX_LENGTH], size: u32) -> Self {
         Self {
-            frame_offset: frame_offset.to_raw(),
+            frame_offset: frame_offset as _,
             size: size as _,
             midi_message,
         }
@@ -284,10 +283,7 @@ impl LongMidiEvent {
     /// # Errors
     ///
     /// Returns an error if the given slice is longer than the supported maximum.
-    pub fn try_from_slice(
-        frame_offset: MidiFrameOffset,
-        midi_message: &[u8],
-    ) -> Result<Self, &'static str> {
+    pub fn try_from_slice(frame_offset: u32, midi_message: &[u8]) -> Result<Self, &'static str> {
         if midi_message.len() > Self::MAX_LENGTH {
             return Err("given MIDI message too long");
         }

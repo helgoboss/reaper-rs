@@ -1,8 +1,6 @@
 use crate::ReactiveEvent;
 use helgoboss_midi::{RawShortMessage, ShortMessage, ShortMessageType};
-use reaper_medium::{
-    MidiFrameOffset, MidiInputDeviceId, OnAudioBufferArgs, RealTimeAudioThreadScope,
-};
+use reaper_medium::{MidiInputDeviceId, OnAudioBufferArgs, RealTimeAudioThreadScope};
 use rxrust::prelude::*;
 
 pub struct MidiRxMiddleware {
@@ -57,12 +55,12 @@ impl MidiRx {
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub struct MidiEvent<M> {
-    frame_offset: MidiFrameOffset,
+    frame_offset: u32,
     msg: M,
 }
 
 impl<M> MidiEvent<M> {
-    pub fn new(frame_offset: MidiFrameOffset, msg: M) -> MidiEvent<M> {
+    pub fn new(frame_offset: u32, msg: M) -> MidiEvent<M> {
         MidiEvent { frame_offset, msg }
     }
 }

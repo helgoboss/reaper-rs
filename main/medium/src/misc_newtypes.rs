@@ -862,35 +862,8 @@ impl<'a> Display for ReaperVersion<'a> {
     }
 }
 
-/// A MIDI frame offset.
-///
-/// This is a 1/1024000 of a second, *not* a sample frame!
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct MidiFrameOffset(pub(crate) u32);
-
-impl MidiFrameOffset {
-    /// Minimum frame offset (zero).
-    pub const MIN: MidiFrameOffset = MidiFrameOffset(0);
-
-    /// The frame rate to which this unit relates.
-    pub const REFERENCE_FRAME_RATE: Hz = unsafe { Hz::new_unchecked(1_024_000.0) };
-
-    /// Creates a MIDI frame offset.
-    pub fn new(value: u32) -> MidiFrameOffset {
-        MidiFrameOffset(value)
-    }
-
-    /// Returns the wrapped value.
-    pub const fn get(self) -> u32 {
-        self.0
-    }
-
-    /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(self) -> i32 {
-        self.0 as i32
-    }
-}
+/// The frame rate used for MIDI events in [`crate::MidiInput::get_read_buf`] in Hertz.
+pub const MIDI_INPUT_FRAME_RATE: Hz = unsafe { Hz::new_unchecked(1_024_000.0) };
 
 // TODO-medium This is debatable. Yes, we don't want information loss. But hiding the value?
 //  Too idealistic.
