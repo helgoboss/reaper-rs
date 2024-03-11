@@ -8,28 +8,29 @@ use crate::ProjectContext::CurrentProject;
 use crate::{
     require_media_track_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
     AutoSeekBehavior, AutomationMode, BeatAttachMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint,
-    CommandId, Db, DurationInSeconds, EditMode, EnvChunkName, FadeCurvature, FadeShape,
-    FullPitchShiftMode, FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction,
-    GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd, InitialAction,
-    InputMonitoringMode, InsertMediaFlag, InsertMediaMode, ItemAttributeKey, ItemGroupId,
-    KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake, MediaTrack,
-    MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
-    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior,
-    OpenMediaExplorerMode, OpenProjectBehavior, OwnedPcmSource, OwnedReaperPitchShift,
-    OwnedReaperResample, PanMode, ParamId, PcmSource, PeakFileMode, PitchShiftMode,
-    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionInBeats,
-    PositionInPulsesPerQuarterNote, PositionInQuarterNotes, PositionInSeconds, Progress,
-    ProjectContext, ProjectInfoAttributeKey, ProjectRef, PromptForActionResult, ReaProject,
-    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RecordingMode,
-    ReorderTracksBehavior, RequiredViewMode, ResampleMode, SectionContext, SectionId, SendTarget,
-    SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, TakeAttributeKey, TimeModeOverride,
-    TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope,
-    TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation, TrackMuteState,
-    TrackPolarity, TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey,
-    TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior,
-    UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    CommandId, CommandItem, Db, DurationInSeconds, EditMode, EnvChunkName, FadeCurvature,
+    FadeShape, FullPitchShiftMode, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
+    FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
+    InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, ItemAttributeKey,
+    ItemGroupId, KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake,
+    MediaTrack, MenuOrToolbarItem, MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput,
+    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
+    NotificationBehavior, OpenMediaExplorerMode, OpenProjectBehavior, OwnedPcmSource,
+    OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PeakFileMode,
+    PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionDescriptor,
+    PositionInBeats, PositionInPulsesPerQuarterNote, PositionInQuarterNotes, PositionInSeconds,
+    Progress, ProjectContext, ProjectInfoAttributeKey, ProjectRef, PromptForActionResult,
+    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
+    ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg,
+    ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput,
+    RecordingMode, ReorderTracksBehavior, RequiredViewMode, ResampleMode, SectionContext,
+    SectionId, SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, SubMenuStart,
+    TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey,
+    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
+    TrackMuteOperation, TrackMuteState, TrackPolarity, TrackPolarityOperation,
+    TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
+    TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
+    ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -8103,6 +8104,189 @@ impl<UsageScope> Reaper<UsageScope> {
             self.low
                 .OpenMediaExplorer(file_name_reaper_string.as_ptr(), mode.to_raw());
         }
+    }
+
+    // TODO-high document
+    pub fn add_custom_menu_or_toolbar_item_separator<'a>(
+        &self,
+        menu_name: impl Into<ReaperStringArg<'a>>,
+        pos: PositionDescriptor,
+        refresh_behavior: UiRefreshBehavior,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.add_custom_menu_or_toolbar_item_internal(
+            menu_name,
+            pos,
+            -1,
+            0,
+            null(),
+            null(),
+            refresh_behavior,
+        )
+    }
+
+    // TODO-high document
+    pub fn add_custom_menu_or_toolbar_item_command<'a>(
+        &self,
+        menu_name: impl Into<ReaperStringArg<'a>>,
+        pos: PositionDescriptor,
+        command_id: CommandId,
+        toolbar_flags: u32,
+        label: impl Into<ReaperStringArg<'a>>,
+        // "toolbar_*.png"
+        icon_file_name: Option<&Path>,
+        // TODO-high This is a flag originally
+        refresh_behavior: UiRefreshBehavior,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        let icon_file_name = icon_file_name.map(convert_path_to_reaper_string);
+        self.add_custom_menu_or_toolbar_item_internal(
+            menu_name,
+            pos,
+            command_id.to_raw(),
+            toolbar_flags as i32,
+            label.into().as_ptr(),
+            icon_file_name
+                .as_ref()
+                .map(|n| n.as_ptr())
+                .unwrap_or(null()),
+            refresh_behavior,
+        )
+    }
+
+    fn add_custom_menu_or_toolbar_item_internal<'a>(
+        &self,
+        menu_name: impl Into<ReaperStringArg<'a>>,
+        pos: PositionDescriptor,
+        command_id: c_int,
+        toolbarflags: c_int,
+        str: *const c_char,
+        iconfn: *const c_char,
+        refresh_behavior: UiRefreshBehavior,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let extra_flags = match refresh_behavior {
+            UiRefreshBehavior::NoRefresh => 1,
+            UiRefreshBehavior::Refresh => 0,
+        };
+        let successful = unsafe {
+            self.low.AddCustomMenuOrToolbarItem(
+                menu_name.into().as_ptr(),
+                pos.to_raw(),
+                command_id,
+                toolbarflags,
+                str,
+                iconfn,
+                extra_flags,
+            )
+        };
+        if !successful {
+            return Err("couldn't add toolbar item".into());
+        }
+        Ok(())
+    }
+
+    // TODO-high document
+    pub fn delete_custom_menu_or_toolbar_item<'a>(
+        &self,
+        menu_name: impl Into<ReaperStringArg<'a>>,
+        pos: u32,
+        // TODO-high This is a flag originally
+        refresh_behavior: UiRefreshBehavior,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let extra_flags = match refresh_behavior {
+            UiRefreshBehavior::NoRefresh => 1,
+            UiRefreshBehavior::Refresh => 0,
+        };
+        let successful = unsafe {
+            self.low.DeleteCustomMenuOrToolbarItem(
+                menu_name.into().as_ptr(),
+                pos as i32,
+                extra_flags,
+            )
+        };
+        if !successful {
+            return Err("couldn't delete toolbar item".into());
+        }
+        Ok(())
+    }
+
+    // TODO-high document
+    pub fn get_custom_menu_or_toolbar_item<'a, R>(
+        &self,
+        menu_name: impl Into<ReaperStringArg<'a>>,
+        pos: u32,
+        use_result: impl FnOnce(Option<MenuOrToolbarItem<&ReaperStr, &ReaperStr>>) -> R,
+    ) -> R
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let mut command_id = MaybeUninit::zeroed();
+        let mut toolbar_flags = MaybeUninit::zeroed();
+        let mut label = MaybeUninit::zeroed();
+        let mut icon_file_name = MaybeUninit::zeroed();
+        let successful = unsafe {
+            self.low.GetCustomMenuOrToolbarItem(
+                menu_name.into().as_ptr(),
+                pos as i32,
+                command_id.as_mut_ptr(),
+                toolbar_flags.as_mut_ptr(),
+                label.as_mut_ptr(),
+                icon_file_name.as_mut_ptr(),
+            )
+        };
+        if !successful {
+            // No more items
+            return use_result(None);
+        }
+        // Extract values
+        let command_id = unsafe { command_id.assume_init() };
+        let toolbar_flags = unsafe { toolbar_flags.assume_init() };
+        let label = unsafe {
+            let label_ptr = label.assume_init();
+            if label_ptr.is_null() {
+                reaper_str!("")
+            } else {
+                ReaperStr::from_ptr(label_ptr)
+            }
+        };
+        let icon_file_name = unsafe {
+            let icon_file_name_ptr = icon_file_name.assume_init();
+            if icon_file_name_ptr.is_null() {
+                reaper_str!("")
+            } else {
+                ReaperStr::from_ptr(icon_file_name.assume_init())
+            }
+        };
+        let item = match command_id {
+            -3 => MenuOrToolbarItem::SubMenuEnd,
+            -2 => MenuOrToolbarItem::SubMenuStart(SubMenuStart { label }),
+            -1 => MenuOrToolbarItem::Separator,
+            id if id > 0 => MenuOrToolbarItem::Command(CommandItem {
+                command_id: CommandId::new(command_id as _),
+                toolbar_flags: toolbar_flags as u32,
+                label,
+                icon_file_name: if icon_file_name.to_str().is_empty() {
+                    None
+                } else {
+                    Some(icon_file_name)
+                },
+            }),
+            _ => panic!("unexpected menu or toolbar item type"),
+        };
+        use_result(Some(item))
     }
 
     /// Parses the given string as pan value.

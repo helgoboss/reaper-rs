@@ -1832,6 +1832,21 @@ impl<'a> ParamId<'a> {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum PositionDescriptor {
+    AtPos(u32),
+    Append,
+}
+
+impl PositionDescriptor {
+    pub(crate) fn to_raw(&self) -> i32 {
+        match self {
+            PositionDescriptor::AtPos(pos) => *pos as _,
+            PositionDescriptor::Append => -1,
+        }
+    }
+}
+
 /// Decides where to insert a media file.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum InsertMediaMode {
@@ -1882,4 +1897,37 @@ impl InsertMediaMode {
         };
         bits as i32
     }
+}
+
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+pub enum MenuOrToolbarItem<S1, S2> {
+    Separator,
+    SubMenuStart(SubMenuStart<S1>),
+    SubMenuEnd,
+    Command(CommandItem<S1, S2>),
+}
+
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+pub struct SubMenuStart<S> {
+    pub label: S,
+}
+
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+pub struct CommandItem<S1, S2> {
+    /// Command ID.
+    pub command_id: CommandId,
+    /// Toolbar flags.
+    // TODO-high Use bitflags
+    pub toolbar_flags: u32,
+    /// Item label.
+    pub label: S1,
+    /// Name of the icon file.
+    ///
+    /// For menu items, this is always `None`.
+    ///
+    /// For toolbar items, this is `None` if there's no associated icon or if it uses the default icon
+    /// (for built-in toolbar items or actions with icon map).
+    ///
+    /// Example: `toolbar_add.png`
+    pub icon_file_name: Option<S2>,
 }

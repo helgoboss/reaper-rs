@@ -3321,6 +3321,19 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(fxDoReaperPresetAction)).as_ptr()),
                 ),
+                AddCustomMenuOrToolbarItem: std::mem::transmute(
+                    plugin_context.GetFunc(
+                        c_str_macro::c_str!(stringify!(AddCustomMenuOrToolbarItem)).as_ptr(),
+                    ),
+                ),
+                DeleteCustomMenuOrToolbarItem: std::mem::transmute(plugin_context.GetFunc(
+                    c_str_macro::c_str!(stringify!(DeleteCustomMenuOrToolbarItem)).as_ptr(),
+                )),
+                GetCustomMenuOrToolbarItem: std::mem::transmute(
+                    plugin_context.GetFunc(
+                        c_str_macro::c_str!(stringify!(GetCustomMenuOrToolbarItem)).as_ptr(),
+                    ),
+                ),
                 InitializeCoolSB: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(InitializeCoolSB)).as_ptr()),
@@ -5896,6 +5909,15 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.fxDoReaperPresetAction.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.AddCustomMenuOrToolbarItem.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.DeleteCustomMenuOrToolbarItem.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.GetCustomMenuOrToolbarItem.is_some() {
             loaded_count += 1;
         }
         if pointers.InitializeCoolSB.is_some() {
@@ -19532,6 +19554,79 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn AddCustomMenuOrToolbarItem(
+        &self,
+        menuname: *const ::std::os::raw::c_char,
+        pos: ::std::os::raw::c_int,
+        command_id: ::std::os::raw::c_int,
+        toolbarflags: ::std::os::raw::c_int,
+        str: *const ::std::os::raw::c_char,
+        iconfn: *const ::std::os::raw::c_char,
+        extra_flags: ::std::os::raw::c_int,
+    ) -> bool {
+        match self.pointers.AddCustomMenuOrToolbarItem {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(AddCustomMenuOrToolbarItem)
+            ),
+            Some(f) => f(
+                menuname,
+                pos,
+                command_id,
+                toolbarflags,
+                str,
+                iconfn,
+                extra_flags,
+            ),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn DeleteCustomMenuOrToolbarItem(
+        &self,
+        menuname: *const ::std::os::raw::c_char,
+        pos: ::std::os::raw::c_int,
+        extra_flags: ::std::os::raw::c_int,
+    ) -> bool {
+        match self.pointers.DeleteCustomMenuOrToolbarItem {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(DeleteCustomMenuOrToolbarItem)
+            ),
+            Some(f) => f(menuname, pos, extra_flags),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetCustomMenuOrToolbarItem(
+        &self,
+        menuname: *const ::std::os::raw::c_char,
+        pos: ::std::os::raw::c_int,
+        commandOutOptional: *mut ::std::os::raw::c_int,
+        toolbarFlagsOutOptional: *mut ::std::os::raw::c_int,
+        strOutOptional: *mut *const ::std::os::raw::c_char,
+        iconFnOutOptional: *mut *const ::std::os::raw::c_char,
+    ) -> bool {
+        match self.pointers.GetCustomMenuOrToolbarItem {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetCustomMenuOrToolbarItem)
+            ),
+            Some(f) => f(
+                menuname,
+                pos,
+                commandOutOptional,
+                toolbarFlagsOutOptional,
+                strOutOptional,
+                iconFnOutOptional,
+            ),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn InitializeCoolSB(&self, hwnd: root::HWND) -> root::BOOL {
         match self.pointers.InitializeCoolSB {
             None => panic!(
@@ -24352,6 +24447,34 @@ pub struct ReaperFunctionPointers {
             flag: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
+    pub AddCustomMenuOrToolbarItem: Option<
+        unsafe extern "C" fn(
+            menuname: *const ::std::os::raw::c_char,
+            pos: ::std::os::raw::c_int,
+            command_id: ::std::os::raw::c_int,
+            toolbarflags: ::std::os::raw::c_int,
+            str: *const ::std::os::raw::c_char,
+            iconfn: *const ::std::os::raw::c_char,
+            extra_flags: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
+    pub DeleteCustomMenuOrToolbarItem: Option<
+        unsafe extern "C" fn(
+            menuname: *const ::std::os::raw::c_char,
+            pos: ::std::os::raw::c_int,
+            extra_flags: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
+    pub GetCustomMenuOrToolbarItem: Option<
+        unsafe extern "C" fn(
+            menuname: *const ::std::os::raw::c_char,
+            pos: ::std::os::raw::c_int,
+            commandOutOptional: *mut ::std::os::raw::c_int,
+            toolbarFlagsOutOptional: *mut ::std::os::raw::c_int,
+            strOutOptional: *mut *const ::std::os::raw::c_char,
+            iconFnOutOptional: *mut *const ::std::os::raw::c_char,
+        ) -> bool,
+    >,
     pub InitializeCoolSB: Option<unsafe extern "system" fn(hwnd: root::HWND) -> root::BOOL>,
     pub UninitializeCoolSB: Option<unsafe extern "system" fn(hwnd: root::HWND) -> root::HRESULT>,
     pub CoolSB_SetMinThumbSize: Option<
@@ -24407,5 +24530,5 @@ pub struct ReaperFunctionPointers {
     >,
 }
 impl ReaperFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 855u32;
+    pub(crate) const TOTAL_COUNT: u32 = 858u32;
 }

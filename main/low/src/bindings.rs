@@ -9024,6 +9024,43 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions26AddCustomMenuOrToolbarItemE"]
+            pub static mut AddCustomMenuOrToolbarItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    menuname: *const ::std::os::raw::c_char,
+                    pos: ::std::os::raw::c_int,
+                    command_id: ::std::os::raw::c_int,
+                    toolbarflags: ::std::os::raw::c_int,
+                    str: *const ::std::os::raw::c_char,
+                    iconfn: *const ::std::os::raw::c_char,
+                    extra_flags: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions29DeleteCustomMenuOrToolbarItemE"]
+            pub static mut DeleteCustomMenuOrToolbarItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    menuname: *const ::std::os::raw::c_char,
+                    pos: ::std::os::raw::c_int,
+                    extra_flags: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions26GetCustomMenuOrToolbarItemE"]
+            pub static mut GetCustomMenuOrToolbarItem: ::std::option::Option<
+                unsafe extern "C" fn(
+                    menuname: *const ::std::os::raw::c_char,
+                    pos: ::std::os::raw::c_int,
+                    commandOutOptional: *mut ::std::os::raw::c_int,
+                    toolbarFlagsOutOptional: *mut ::std::os::raw::c_int,
+                    strOutOptional: *mut *const ::std::os::raw::c_char,
+                    iconFnOutOptional: *mut *const ::std::os::raw::c_char,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions16InitializeCoolSBE"]
             pub static mut InitializeCoolSB:
                 ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::BOOL>;

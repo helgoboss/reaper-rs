@@ -15,4 +15,19 @@ midi_Output *(*GetMidiOutput)(int idx);
 
 */
 
+// fxDoReaperPresetAction(parentid, "preset name",0);  // will save the preset to 'preset name'
 int (*fxDoReaperPresetAction)(void* fx, const char* name, int flag);
+
+// - extra_flags can have 1 set to signify "do not refresh the toolbar/menus" -- if you do a batch of updates you'd set 1 for everything except the final one
+// - all changes do not persist. If the user customizes the menu after your change was added, then it does persist, because the user customization makes it stick.
+// - toolbarflags: &1= animate if enabled-state, &2=animate if disabled-state, &0x7f8 is the animation mode
+// - returns true on success or false on failure
+bool (*AddCustomMenuOrToolbarItem)(const char *menuname, int pos, int command_id, int toolbarflags, const char *str, const char *iconfn, int extra_flags);
+
+// - extra_flags can have 1 set to signify "do not refresh the toolbar/menus" -- if you do a batch of updates you'd set 1 for everything except the final one
+// - all changes do not persist. If the user customizes the menu after your change was added, then it does persist, because the user customization makes it stick.
+// - returns true on success or false on failure
+bool (*DeleteCustomMenuOrToolbarItem)(const char *menuname, int pos, int extra_flags);
+
+// - returns true on success or false on failure
+bool (*GetCustomMenuOrToolbarItem)(const char *menuname, int pos, int *commandOutOptional, int *toolbarFlagsOutOptional, const char **strOutOptional, const char **iconFnOutOptional);
