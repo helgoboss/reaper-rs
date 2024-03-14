@@ -1839,9 +1839,9 @@ pub enum PositionDescriptor {
 }
 
 impl PositionDescriptor {
-    pub(crate) fn to_raw(&self) -> i32 {
+    pub(crate) fn to_raw(self) -> i32 {
         match self {
-            PositionDescriptor::AtPos(pos) => *pos as _,
+            PositionDescriptor::AtPos(pos) => pos as _,
             PositionDescriptor::Append => -1,
         }
     }

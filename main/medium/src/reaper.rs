@@ -8127,7 +8127,8 @@ impl<UsageScope> Reaper<UsageScope> {
         )
     }
 
-    // TODO-high document
+    // TODO-high document and improve design
+    #[allow(clippy::too_many_arguments)]
     pub fn add_custom_menu_or_toolbar_item_command<'a>(
         &self,
         menu_name: impl Into<ReaperStringArg<'a>>,
@@ -8158,6 +8159,8 @@ impl<UsageScope> Reaper<UsageScope> {
         )
     }
 
+    // TODO-high document and improve design
+    #[allow(clippy::too_many_arguments)]
     fn add_custom_menu_or_toolbar_item_internal<'a>(
         &self,
         menu_name: impl Into<ReaperStringArg<'a>>,

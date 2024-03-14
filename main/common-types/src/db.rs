@@ -73,7 +73,7 @@ mod tests {
     #[test]
     fn basics() {
         assert!(Db::new(60.0).unwrap() < Db::new(120.0).unwrap());
-        assert_eq!(Db::default(), Db::new(1.0).unwrap());
+        assert_eq!(Db::default(), Db::new(0.0).unwrap());
         assert_eq!(
             serde_json::from_str::<Db>("5").unwrap(),
             Db::new(5.0).unwrap()

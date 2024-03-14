@@ -36,9 +36,9 @@ mod tests {
     #[test]
     fn from_bpm() {
         // Given
-        let tempo = Tempo::from_bpm(Bpm::new(120.0));
+        let tempo = Tempo::from_bpm(Bpm::new_panic(120.0));
         // Then
-        assert_eq!(tempo.bpm(), Bpm::new(120.0));
+        assert_eq!(tempo.bpm(), Bpm::new_panic(120.0));
         let normalized_value = tempo.normalized_value();
         assert!(0.1240 < normalized_value && normalized_value < 0.1241);
     }
@@ -48,6 +48,6 @@ mod tests {
         // Given
         let tempo = Tempo::from_normalized_value(0.5);
         // Then
-        assert_eq!(tempo.bpm(), Bpm::new(480.5));
+        assert_eq!(tempo.bpm(), Bpm::new_panic(480.5));
     }
 }
