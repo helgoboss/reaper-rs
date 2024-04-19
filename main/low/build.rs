@@ -166,6 +166,8 @@ mod codegen {
                 .whitelist_var("DT_.*")
                 .whitelist_var("GMEM_.*")
                 .whitelist_var("COLOR_.*")
+                .whitelist_var("THREAD_PRIORITY_.*")
+                .whitelist_var("THREAD_BASE_PRIORITY_.*")
                 .whitelist_var("SRCCOPY")
                 .whitelist_var("SRCCOPY_USEALPHACHAN")
                 .whitelist_var("ID.*")

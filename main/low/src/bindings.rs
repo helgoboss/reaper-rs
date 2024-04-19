@@ -379,6 +379,17 @@ pub mod root {
     pub const SM_CYMENU: i32 = 15;
     pub const SM_CYVSCROLL: i32 = 20;
     pub const SM_CXHSCROLL: i32 = 21;
+    pub const THREAD_BASE_PRIORITY_LOWRT: u32 = 15;
+    pub const THREAD_BASE_PRIORITY_MAX: u32 = 2;
+    pub const THREAD_BASE_PRIORITY_MIN: i32 = -2;
+    pub const THREAD_BASE_PRIORITY_IDLE: i32 = -15;
+    pub const THREAD_PRIORITY_LOWEST: i32 = -2;
+    pub const THREAD_PRIORITY_BELOW_NORMAL: i32 = -1;
+    pub const THREAD_PRIORITY_NORMAL: u32 = 0;
+    pub const THREAD_PRIORITY_HIGHEST: u32 = 2;
+    pub const THREAD_PRIORITY_ABOVE_NORMAL: u32 = 1;
+    pub const THREAD_PRIORITY_TIME_CRITICAL: u32 = 15;
+    pub const THREAD_PRIORITY_IDLE: i32 = -15;
     pub const REAPER_PLUGIN_VERSION: i32 = 526;
     pub const PCM_SOURCE_EXT_INLINEEDITOR: i32 = 256;
     pub const PCM_SOURCE_EXT_PROJCHANGENOTIFY: i32 = 8192;
