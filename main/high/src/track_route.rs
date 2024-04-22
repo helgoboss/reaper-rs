@@ -222,6 +222,18 @@ impl TrackRoute {
         self.set_prop_enabled(TrackSendAttributeKey::Phase, inverted)
     }
 
+    pub fn set_raw_midi_flags(&self, flags: u32) -> ReaperResult<()> {
+        self.set_prop_numeric_value(TrackSendAttributeKey::MidiFlags, flags as _)
+    }
+
+    pub fn set_raw_src_channel(&self, raw_src_channel: i32) -> ReaperResult<()> {
+        self.set_prop_numeric_value(TrackSendAttributeKey::SrcChan, raw_src_channel as _)
+    }
+
+    pub fn set_raw_dst_channel(&self, raw_dst_channel: u32) -> ReaperResult<()> {
+        self.set_prop_numeric_value(TrackSendAttributeKey::DstChan, raw_dst_channel as _)
+    }
+
     pub fn set_automation_mode(&self, mode: AutomationMode) -> ReaperResult<()> {
         self.set_prop_numeric_value(TrackSendAttributeKey::AutoMode, mode.to_raw() as _)
     }

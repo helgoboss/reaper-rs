@@ -829,6 +829,16 @@ impl Track {
     }
 
     pub fn set_shown(&self, area: TrackArea, value: bool) {
+        self.set_shown_without_updating_ui(area, value);
+        // The following is actually not necessary if this was the master track
+        let reaper = &Reaper::get().medium_reaper;
+        match area {
+            TrackArea::Tcp => reaper.track_list_adjust_windows_minor(),
+            TrackArea::Mcp => reaper.track_list_adjust_windows_major(),
+        };
+    }
+
+    pub fn set_shown_without_updating_ui(&self, area: TrackArea, value: bool) {
         let reaper = &Reaper::get().medium_reaper;
         if self.is_master_track() {
             let mut flags = reaper.get_master_track_visibility();
@@ -846,10 +856,6 @@ impl Track {
                     if value { 1.0 } else { 0.0 },
                 );
             }
-            match area {
-                TrackArea::Tcp => reaper.track_list_adjust_windows_minor(),
-                TrackArea::Mcp => reaper.track_list_adjust_windows_major(),
-            };
         }
     }
 
