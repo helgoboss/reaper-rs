@@ -9,6 +9,7 @@ use crate::{
     Chunk, ChunkRegion, Item, Pan, Project, Reaper, SendPartnerType, TrackRoutePartner, Width,
 };
 
+use crate::error::ReaperResult;
 use either::Either;
 use enumflags2::BitFlags;
 use reaper_medium::NotificationBehavior::NotifyAll;
@@ -186,6 +187,33 @@ impl Track {
             },
         };
         unsafe { reaper.get_set_media_track_info_set_custom_color(self.raw_internal(), value) };
+    }
+
+    pub fn set_anticipative_fx_enabled(&self, value: bool) -> ReaperResult<()> {
+        self.load_and_check_if_necessary_or_err()?;
+        let perf_flags = self.perf_flags_internal();
+        let mut new_perf_flags = perf_flags | 2;
+        self.set_perf_flags_internal(new_perf_flags)
+    }
+
+    fn perf_flags_internal(&self) -> u32 {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_media_track_info_value(self.raw_internal(), TrackAttributeKey::PerfFlags)
+                as u32
+        }
+    }
+
+    fn set_perf_flags_internal(&self, value: u32) -> ReaperResult<()> {
+        unsafe {
+            Reaper::get().medium_reaper.set_media_track_info_value(
+                self.raw_internal(),
+                TrackAttributeKey::PerfFlags,
+                value as f64,
+            )?;
+        }
+        Ok(())
     }
 
     pub fn input_monitoring_mode(&self) -> InputMonitoringMode {
