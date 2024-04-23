@@ -5736,6 +5736,17 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions12Menu_GetHashE"]
+            pub static mut Menu_GetHash: ::std::option::Option<
+                unsafe extern "C" fn(
+                    menuname: *const ::std::os::raw::c_char,
+                    flag: ::std::os::raw::c_int,
+                    hashOut: *mut ::std::os::raw::c_char,
+                    hashOut_sz: ::std::os::raw::c_int,
+                ) -> bool,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions14MIDI_CountEvtsE"]
             pub static mut MIDI_CountEvts: ::std::option::Option<
                 unsafe extern "C" fn(

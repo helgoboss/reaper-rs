@@ -331,6 +331,9 @@ mod codegen {
             "GlobalAlloc",
             "GlobalLock",
             "GlobalUnlock",
+            // # processthreadsapi.h
+            "SetThreadPriority",
+            "GetCurrentThreadId",
         ];
 
         /// This is a list of types that influence if a generated method will be marked as unsafe

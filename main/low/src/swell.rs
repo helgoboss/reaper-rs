@@ -7769,6 +7769,21 @@ impl Swell {
         unsafe { windows::GlobalUnlock(h) }
     }
     #[cfg(target_family = "windows")]
+    pub fn GetCurrentThreadId(&self) -> root::DWORD {
+        unsafe { windows::GetCurrentThreadId() }
+    }
+    #[cfg(target_family = "windows")]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn SetThreadPriority(
+        &self,
+        evt: root::HANDLE,
+        prio: ::std::os::raw::c_int,
+    ) -> root::BOOL {
+        unsafe { windows::SetThreadPriority(evt, prio) }
+    }
+    #[cfg(target_family = "windows")]
     pub fn CreateSolidBrush(&self, col: ::std::os::raw::c_int) -> root::HBRUSH {
         unsafe { windows::CreateSolidBrush(col) }
     }
@@ -9561,6 +9576,12 @@ mod windows {
     }
     extern "system" {
         pub fn GlobalUnlock(h: root::HANDLE);
+    }
+    extern "system" {
+        pub fn GetCurrentThreadId() -> root::DWORD;
+    }
+    extern "system" {
+        pub fn SetThreadPriority(evt: root::HANDLE, prio: ::std::os::raw::c_int) -> root::BOOL;
     }
     extern "system" {
         pub fn CreateSolidBrush(col: ::std::os::raw::c_int) -> root::HBRUSH;

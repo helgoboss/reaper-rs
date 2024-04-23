@@ -1932,6 +1932,9 @@ impl Reaper {
                         c_str_macro::c_str!(stringify!(MediaItemDescendsFromTrack)).as_ptr(),
                     ),
                 ),
+                Menu_GetHash: std::mem::transmute(
+                    plugin_context.GetFunc(c_str_macro::c_str!(stringify!(Menu_GetHash)).as_ptr()),
+                ),
                 MIDI_CountEvts: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(MIDI_CountEvts)).as_ptr()),
@@ -4838,6 +4841,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.MediaItemDescendsFromTrack.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.Menu_GetHash.is_some() {
             loaded_count += 1;
         }
         if pointers.MIDI_CountEvts.is_some() {
@@ -13677,6 +13683,24 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn Menu_GetHash(
+        &self,
+        menuname: *const ::std::os::raw::c_char,
+        flag: ::std::os::raw::c_int,
+        hashOut: *mut ::std::os::raw::c_char,
+        hashOut_sz: ::std::os::raw::c_int,
+    ) -> bool {
+        match self.pointers.Menu_GetHash {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(Menu_GetHash)
+            ),
+            Some(f) => f(menuname, flag, hashOut, hashOut_sz),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn MIDI_CountEvts(
         &self,
         take: *mut root::MediaItem_Take,
@@ -22424,6 +22448,14 @@ pub struct ReaperFunctionPointers {
             track: *mut root::MediaTrack,
         ) -> ::std::os::raw::c_int,
     >,
+    pub Menu_GetHash: Option<
+        unsafe extern "C" fn(
+            menuname: *const ::std::os::raw::c_char,
+            flag: ::std::os::raw::c_int,
+            hashOut: *mut ::std::os::raw::c_char,
+            hashOut_sz: ::std::os::raw::c_int,
+        ) -> bool,
+    >,
     pub MIDI_CountEvts: Option<
         unsafe extern "C" fn(
             take: *mut root::MediaItem_Take,
@@ -24530,5 +24562,5 @@ pub struct ReaperFunctionPointers {
     >,
 }
 impl ReaperFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 858u32;
+    pub(crate) const TOTAL_COUNT: u32 = 859u32;
 }
