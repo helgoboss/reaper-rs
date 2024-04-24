@@ -26,7 +26,6 @@ use reaper_medium::{
     SectionContext, ToggleAction, ToggleActionResult, WindowContext,
 };
 use slog::{debug, Logger};
-use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
 use std::sync::Mutex;
@@ -92,7 +91,7 @@ impl ReaperBuilder {
                     command_by_id: RefCell::new(HashMap::new()),
                     action_value_change_history: RefCell::new(Default::default()),
                     undo_block_is_active: Cell::new(false),
-                    session_status: RefCell::new(SessionStatus::Sleeping(Some(SleepingState {}))),
+                    session_status: RefCell::new(SessionStatus::Sleeping),
                     helper_task_sender,
                 };
                 INSTANCE = Some(reaper);
@@ -141,16 +140,8 @@ pub struct Reaper {
 
 #[derive(Debug)]
 enum SessionStatus {
-    Sleeping(Option<SleepingState>),
+    Sleeping,
     Awake(AwakeState),
-}
-
-struct SleepingState {}
-
-impl Debug for SleepingState {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.debug_struct("SleepingState").finish()
-    }
 }
 
 #[derive(Debug)]
@@ -327,7 +318,7 @@ impl Reaper {
         self.require_main_thread();
         let mut session_status = self.session_status.borrow_mut();
         let awake_state = match session_status.deref() {
-            SessionStatus::Sleeping(_) => return Err("Session is already sleeping"),
+            SessionStatus::Sleeping => return Err("Session is already sleeping"),
             SessionStatus::Awake(s) => s,
         };
         debug!(self.logger(), "Going to sleep...");
@@ -350,7 +341,7 @@ impl Reaper {
         medium.plugin_register_remove_hook_post_command_2::<HighLevelHookPostCommand2>();
         medium.plugin_register_remove_toggle_action::<HighLevelToggleAction>();
         medium.plugin_register_remove_hook_command::<HighLevelHookCommand>();
-        *session_status = SessionStatus::Sleeping(Some(SleepingState {}));
+        *session_status = SessionStatus::Sleeping;
         debug!(self.logger(), "Sleeping");
         Ok(())
     }
@@ -411,7 +402,7 @@ impl Reaper {
         // Immediately register if active
         let mut session_status = self.session_status.borrow_mut();
         let awake_state = match session_status.deref_mut() {
-            SessionStatus::Sleeping(_) => return registered_action,
+            SessionStatus::Sleeping => return registered_action,
             SessionStatus::Awake(s) => s,
         };
         let action_reg = register_action(
@@ -433,7 +424,7 @@ impl Reaper {
         // Unregister if active
         let mut session_status = self.session_status.borrow_mut();
         let awake_state = match session_status.deref_mut() {
-            SessionStatus::Sleeping(_) => return,
+            SessionStatus::Sleeping => return,
             SessionStatus::Awake(s) => s,
         };
         if let Some(reg) = awake_state.action_regs.get(&command_id) {

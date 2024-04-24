@@ -192,7 +192,11 @@ impl Track {
     pub fn set_anticipative_fx_enabled(&self, value: bool) -> ReaperResult<()> {
         self.load_and_check_if_necessary_or_err()?;
         let perf_flags = self.perf_flags_internal();
-        let mut new_perf_flags = perf_flags | 2;
+        let new_perf_flags = if value {
+            perf_flags | 2
+        } else {
+            perf_flags & !2
+        };
         self.set_perf_flags_internal(new_perf_flags)
     }
 
