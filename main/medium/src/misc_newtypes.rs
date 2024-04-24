@@ -155,22 +155,17 @@ impl BookmarkId {
 /// An OS-dependent color.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Display)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct NativeColor(pub(crate) u32);
+pub struct NativeColor(pub(crate) i32);
 
 impl NativeColor {
     /// Creates a native color.
-    pub fn new(number: u32) -> NativeColor {
+    pub fn new(number: i32) -> NativeColor {
         NativeColor(number)
     }
 
-    /// Returns the wrapped value.
-    pub const fn get(self) -> u32 {
-        self.0
-    }
-
     /// Converts this value to an integer as expected by the low-level API.
-    pub fn to_raw(self) -> i32 {
-        self.0 as i32
+    pub const fn to_raw(self) -> i32 {
+        self.0
     }
 }
 

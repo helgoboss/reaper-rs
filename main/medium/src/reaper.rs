@@ -10,27 +10,27 @@ use crate::{
     AutoSeekBehavior, AutomationMode, BeatAttachMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint,
     CommandId, CommandItem, Db, DurationInSeconds, EditMode, EnvChunkName, FadeCurvature,
     FadeShape, FullPitchShiftMode, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
-    FxShowInstruction, GangBehavior, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd,
-    InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode, ItemAttributeKey,
-    ItemGroupId, KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem, MediaItemTake,
-    MediaTrack, MenuOrToolbarItem, MessageBoxResult, MessageBoxType, MidiImportBehavior, MidiInput,
-    MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor, NormalizedPlayRate,
-    NotificationBehavior, OpenMediaExplorerMode, OpenProjectBehavior, OwnedPcmSource,
-    OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource, PeakFileMode,
-    PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionDescriptor,
-    PositionInBeats, PositionInPulsesPerQuarterNote, PositionInQuarterNotes, PositionInSeconds,
-    Progress, ProjectContext, ProjectInfoAttributeKey, ProjectRef, PromptForActionResult,
-    ReaProject, ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue,
-    ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg,
-    ReaperVersion, ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput,
-    RecordingMode, ReorderTracksBehavior, RequiredViewMode, ResampleMode, SectionContext,
-    SectionId, SendTarget, SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, SubMenuStart,
-    TakeAttributeKey, TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey,
-    TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation,
-    TrackMuteOperation, TrackMuteState, TrackPolarity, TrackPolarityOperation,
-    TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory, TrackSendDirection,
-    TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope,
-    ValueChange, VolumeSliderValue, WindowContext,
+    FxShowInstruction, GangBehavior, GetThemeColorFlags, GlobalAutomationModeOverride, HelpMode,
+    Hidden, Hwnd, InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode,
+    ItemAttributeKey, ItemGroupId, KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem,
+    MediaItemTake, MediaTrack, MenuOrToolbarItem, MessageBoxResult, MessageBoxType,
+    MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor,
+    NormalizedPlayRate, NotificationBehavior, OpenMediaExplorerMode, OpenProjectBehavior,
+    OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource,
+    PeakFileMode, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
+    PositionDescriptor, PositionInBeats, PositionInPulsesPerQuarterNote, PositionInQuarterNotes,
+    PositionInSeconds, Progress, ProjectContext, ProjectInfoAttributeKey, ProjectRef,
+    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, RecordingMode, ReorderTracksBehavior, RequiredViewMode,
+    ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
+    StuffMidiMessageTarget, SubMenuStart, TakeAttributeKey, TimeModeOverride, TimeRangeType,
+    TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
+    TrackFxLocation, TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity,
+    TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory,
+    TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior,
+    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -431,6 +431,25 @@ impl<UsageScope> Reaper<UsageScope> {
     {
         self.require_main_thread();
         self.low.UpdateArrange();
+    }
+
+    pub fn get_theme_color<'a>(
+        &self,
+        ini_key: impl Into<ReaperStringArg<'a>>,
+        flags: BitFlags<GetThemeColorFlags>,
+    ) -> ReaperFunctionResult<NativeColor>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let color = unsafe {
+            self.low
+                .GetThemeColor(ini_key.into().as_ptr(), flags.bits() as _)
+        };
+        if color == -1 {
+            return Err(ReaperFunctionError::new("failed to get theme color"));
+        }
+        Ok(NativeColor::new(color))
     }
 
     /// Updates the track list after a minor change.
@@ -5182,7 +5201,7 @@ impl<UsageScope> Reaper<UsageScope> {
         let native_color = self
             .low
             .ColorToNative(color.r as _, color.g as _, color.b as _);
-        NativeColor(native_color as u32)
+        NativeColor(native_color)
     }
 
     /// Runs the system color chooser dialog.

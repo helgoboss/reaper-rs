@@ -110,3 +110,11 @@ pub enum SetTrackUiFlags {
     PreventTrackGrouping = 1,
     PreventSelectionGanging = 2,
 }
+
+/// Defines how a color is returned.
+#[enumflags2::bitflags]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[repr(u32)]
+pub enum GetThemeColorFlags {
+    OriginalColor = 1,
+}
