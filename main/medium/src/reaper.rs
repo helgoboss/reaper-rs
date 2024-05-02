@@ -8530,7 +8530,7 @@ pub struct EnumProjectsResult {
 pub struct GetMidiDevNameResult {
     /// Whether the device is currently connected.
     pub is_present: bool,
-    /// Name of the device (only if name requested).
+    /// Name of the device (only if name requested and device known).
     pub name: Option<ReaperString>,
 }
 

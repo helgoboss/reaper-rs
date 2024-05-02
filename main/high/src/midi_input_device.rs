@@ -18,12 +18,11 @@ impl MidiInputDevice {
         self.id
     }
 
-    pub fn name(self) -> ReaperString {
+    pub fn name(self) -> Option<ReaperString> {
         Reaper::get()
             .medium_reaper()
             .get_midi_input_name(self.id, 64)
             .name
-            .unwrap()
     }
 
     /// Must be called from real-time audio thread only!

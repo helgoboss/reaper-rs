@@ -18,12 +18,11 @@ impl MidiOutputDevice {
         self.id
     }
 
-    pub fn name(self) -> ReaperString {
+    pub fn name(self) -> Option<ReaperString> {
         Reaper::get()
             .medium_reaper()
             .get_midi_output_name(self.id, 64)
             .name
-            .unwrap()
     }
 
     /// For REAPER < 5.94 this is the same like isConnected(). For REAPER >=5.94 it returns true if
