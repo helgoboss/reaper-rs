@@ -387,6 +387,13 @@ impl Reaper {
         .unwrap()
     }
 
+    pub fn vst_scan_is_enabled(&self) -> bool {
+        // 2 means that Preferences => Plug-ins => VST => "Scan new/updated plug-ins on startup" is disabled.
+        // 0 means the default (scan normally in external process)
+        // 1 means IIRC that the VSTs are scanned in the same process as REAPER (good for debugging)
+        self.get_preference_ref("vst_scan") != Ok(&mut 2)
+    }
+
     pub fn smooth_seek_is_enabled(&self) -> bool {
         self.get_preference_ref("smoothseek") == Ok(&mut 1)
     }
