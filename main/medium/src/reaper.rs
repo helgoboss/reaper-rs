@@ -515,16 +515,16 @@ impl<UsageScope> Reaper<UsageScope> {
     /// you want to store/read other metadata. E.g. the MP3 side uses ".reapindex" for the MP3
     /// seeking index file.
     ///
-    /// # Panics
-    ///
-    /// Panics if the given file name is not valid UTF-8.
+    /// This returns a [`ReaperString`] instead of a [`PathBuf`] because REAPER versions < v7.15+dev0509 had
+    /// a bug that could cause the resulting string to not be proper UTF-8 if the
+    /// system temp path included non-ASCII characters. So one must be careful when interpreting the result.
     pub fn get_peak_file_name_ex_2<'a>(
         &self,
         file_name: &Path,
         buffer_size: u32,
         mode: PeakFileMode,
         peaks_file_extension: impl Into<ReaperStringArg<'a>>,
-    ) -> PathBuf
+    ) -> CString
     where
         UsageScope: MainThreadOnly,
     {
@@ -539,8 +539,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 peaks_file_extension.into().as_ptr(),
             );
         });
-        let owned_string = reaper_string.into_string();
-        PathBuf::from(owned_string)
+        reaper_string.into_inner()
     }
 
     /// Gets or sets a track attribute.
