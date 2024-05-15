@@ -120,7 +120,7 @@ impl ControlSurfaceRxMiddleware {
                     self.rx.master_tempo_touched.borrow_mut().next(());
                 }
             }
-            MasterPlayrateChanged(e) => {
+            MasterPlayRateChanged(e) => {
                 self.rx.master_playrate_changed.borrow_mut().next(());
                 if e.touched {
                     self.rx.master_playrate_touched.borrow_mut().next(());

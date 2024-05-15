@@ -618,8 +618,8 @@ impl ChangeDetectionMiddleware {
                     }));
                 }
                 if let Some(play_rate) = args.play_rate {
-                    handle_change(ChangeEvent::MasterPlayrateChanged(
-                        MasterPlayrateChangedEvent {
+                    handle_change(ChangeEvent::MasterPlayRateChanged(
+                        MasterPlayRateChangedEvent {
                             project: Reaper::get().current_project(),
                             // The playrate affected by automation is something else, so we can
                             // always consider this as touched.
@@ -1276,7 +1276,7 @@ pub enum ChangeEvent {
     FxParameterValueChanged(FxParameterValueChangedEvent),
     FxPresetChanged(FxPresetChangedEvent),
     MasterTempoChanged(MasterTempoChangedEvent),
-    MasterPlayrateChanged(MasterPlayrateChangedEvent),
+    MasterPlayRateChanged(MasterPlayRateChangedEvent),
     GlobalAutomationOverrideChanged(GlobalAutomationOverrideChangedEvent),
     PlayStateChanged(PlayStateChangedEvent),
     RepeatStateChanged(RepeatStateChangedEvent),
@@ -1330,7 +1330,7 @@ impl ChangeEvent {
             ChangeEvent::FxParameterValueChanged(evt) => evt.parameter.is_available(),
             ChangeEvent::FxPresetChanged(evt) => evt.fx.is_available(),
             ChangeEvent::MasterTempoChanged(evt) => evt.project.is_available(),
-            ChangeEvent::MasterPlayrateChanged(evt) => evt.project.is_available(),
+            ChangeEvent::MasterPlayRateChanged(evt) => evt.project.is_available(),
             ChangeEvent::GlobalAutomationOverrideChanged(evt) => evt.project.is_available(),
             ChangeEvent::PlayStateChanged(evt) => evt.project.is_available(),
             ChangeEvent::RepeatStateChanged(evt) => evt.project.is_available(),
@@ -1538,13 +1538,15 @@ pub struct FxPresetChangedEvent {
 
 #[derive(Clone, Debug)]
 pub struct MasterTempoChangedEvent {
+    /// Warning: Due to REAPER API limitations, this is currently always the **current** project!
     pub project: Project,
     pub touched: bool,
     pub new_value: Bpm,
 }
 
 #[derive(Clone, Debug)]
-pub struct MasterPlayrateChangedEvent {
+pub struct MasterPlayRateChangedEvent {
+    /// Warning: Due to REAPER API limitations, this is currently always the **current** project!
     pub project: Project,
     pub touched: bool,
     pub new_value: PlaybackSpeedFactor,
