@@ -5206,17 +5206,21 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Runs the system color chooser dialog.
     ///
     /// Returns `None` if the user cancels the dialog.
-    pub fn gr_select_color(&self, window: WindowContext) -> Option<NativeColor>
+    pub fn gr_select_color(
+        &self,
+        window: WindowContext,
+        current_color: NativeColor,
+    ) -> Option<NativeColor>
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let mut raw = MaybeUninit::uninit();
-        let picked = unsafe { self.low.GR_SelectColor(window.to_raw(), raw.as_mut_ptr()) };
+        let mut raw = current_color.to_raw();
+        let picked = unsafe { self.low.GR_SelectColor(window.to_raw(), &mut raw) };
         if picked == 0 {
             return None;
         }
-        Some(NativeColor::new(unsafe { raw.assume_init() } as _))
+        Some(NativeColor::new(raw))
     }
 
     /// Sets the track automation mode.
