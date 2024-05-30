@@ -16,7 +16,7 @@ use reaper_medium::{
     ReaperStringArg, SetEditCurPosOptions, TimeMap2TimeToBeatsResult, TimeMode, TimeModeOverride,
     TimeRangeType, TimeSignature, TrackDefaultsBehavior, TrackLocation, UndoBehavior,
 };
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct Project {
@@ -452,15 +452,18 @@ impl Project {
         Some(dir.to_owned())
     }
 
-    pub fn make_path_relative(self, path: &Path) -> Option<PathBuf> {
+    pub fn make_path_relative(self, path: &Utf8Path) -> Option<PathBuf> {
         let dir = self.directory()?;
         pathdiff::diff_paths(path, dir)
     }
 
-    pub fn make_path_relative_if_in_project_directory(self, path: &Path) -> Option<PathBuf> {
+    pub fn make_path_relative_if_in_project_directory(
+        self,
+        path: &Utf8Path,
+    ) -> Option<Utf8PathBuf> {
         let dir = self.directory()?;
         if path.starts_with(&dir) {
-            pathdiff::diff_paths(path, dir)
+            pathdiff::diff_paths(path, dir)?.try_into().ok()
         } else {
             Some(path.to_owned())
         }
