@@ -40,12 +40,12 @@ use crate::ptr_wrappers::require_hwnd_panic;
 use crate::util::{
     create_passing_c_str, with_buffer, with_string_buffer, with_string_buffer_prefilled,
 };
+use camino::{Utf8Path, Utf8PathBuf};
 use enumflags2::BitFlags;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 use std::num::NonZeroU32;
-use std::path::{Path, PathBuf};
 
 /// Represents a privilege to execute functions which are safe to execute from any thread.
 pub trait AnyThread: private::Sealed {}
@@ -282,10 +282,11 @@ impl<UsageScope> Reaper<UsageScope> {
                 });
             }
             let owned_string = reaper_string.into_string();
-            Some(EnumProjectsResult {
+            let res = EnumProjectsResult {
                 project,
-                file_path: Some(PathBuf::from(owned_string)),
-            })
+                file_path: Some(Utf8PathBuf::from(owned_string)),
+            };
+            Some(res)
         }
     }
 
@@ -476,12 +477,11 @@ impl<UsageScope> Reaper<UsageScope> {
     /// current project.
     ///
     /// This is also useful for debugging. Send "\n" for newline and "" to clear the console.
-    pub fn main_open_project(&self, file: &Path, behavior: OpenProjectBehavior)
+    pub fn main_open_project(&self, file: &Utf8Path, behavior: OpenProjectBehavior)
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let file_str = file.to_str().expect("file name is not valid UTF-8");
         let mut expression = String::new();
         if behavior.open_as_template {
             expression += "template:";
@@ -489,7 +489,7 @@ impl<UsageScope> Reaper<UsageScope> {
         if !behavior.prompt {
             expression += "noprompt:";
         }
-        expression += file_str;
+        expression += file.as_str();
         let expression_reaper_string = ReaperString::from_string(expression);
         unsafe {
             self.low.Main_openProject(expression_reaper_string.as_ptr());
@@ -520,7 +520,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// system temp path included non-ASCII characters. So one must be careful when interpreting the result.
     pub fn get_peak_file_name_ex_2<'a>(
         &self,
-        file_name: &Path,
+        file_name: &Utf8Path,
         buffer_size: u32,
         mode: PeakFileMode,
         peaks_file_extension: impl Into<ReaperStringArg<'a>>,
@@ -2209,7 +2209,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Panics if the given file name is not valid UTF-8.
     pub fn pcm_source_create_from_file_ex(
         &self,
-        file_name: &Path,
+        file_name: &Utf8Path,
         midi_import_behavior: MidiImportBehavior,
     ) -> ReaperFunctionResult<OwnedPcmSource>
     where
@@ -3311,7 +3311,7 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Grants temporary access to the "reaper.ini" full filename.
-    pub fn get_ini_file<R>(&self, use_ini_file: impl FnOnce(&Path) -> R) -> R
+    pub fn get_ini_file<R>(&self, use_ini_file: impl FnOnce(&Utf8Path) -> R) -> R
     where
         UsageScope: AnyThread,
     {
@@ -3320,7 +3320,7 @@ impl<UsageScope> Reaper<UsageScope> {
         let ptr = self.low.get_ini_file();
         let reaper_str =
             unsafe { create_passing_c_str(ptr).expect("should always return ini path") };
-        let path = Path::new(reaper_str.to_str());
+        let path = Utf8Path::new(reaper_str.to_str());
         use_ini_file(path)
     }
 
@@ -5593,7 +5593,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// # Panics
     ///
     /// Panics if the given buffer size is 0.
-    pub fn get_project_path_ex(&self, project: ProjectContext, buffer_size: u32) -> PathBuf
+    pub fn get_project_path_ex(&self, project: ProjectContext, buffer_size: u32) -> Utf8PathBuf
     where
         UsageScope: MainThreadOnly,
     {
@@ -5612,7 +5612,7 @@ impl<UsageScope> Reaper<UsageScope> {
         &self,
         project: ProjectContext,
         buffer_size: u32,
-    ) -> PathBuf
+    ) -> Utf8PathBuf
     where
         UsageScope: MainThreadOnly,
     {
@@ -5622,7 +5622,7 @@ impl<UsageScope> Reaper<UsageScope> {
                 .GetProjectPathEx(project.to_raw(), buffer, max_size)
         });
         let owned_string = reaper_string.into_string();
-        PathBuf::from(owned_string)
+        Utf8PathBuf::from(owned_string)
     }
 
     /// Returns the master tempo of the current project.
@@ -7458,14 +7458,14 @@ impl<UsageScope> Reaper<UsageScope> {
     ///
     /// This is the path to the directory where INI files are stored and other things in
     /// subdirectories.
-    pub fn get_resource_path<R>(&self, use_resource_path: impl FnOnce(&Path) -> R) -> R
+    pub fn get_resource_path<R>(&self, use_resource_path: impl FnOnce(&Utf8Path) -> R) -> R
     where
         UsageScope: AnyThread,
     {
         let ptr = self.low.GetResourcePath();
         let reaper_str =
             unsafe { create_passing_c_str(ptr).expect("should always return resource path") };
-        let path = Path::new(reaper_str.to_str());
+        let path = Utf8Path::new(reaper_str.to_str());
         use_resource_path(path)
     }
 
@@ -8116,7 +8116,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// play=true will play the file immediately (or toggle playback if mediafn was already open), =false will just select it.
     ///
     /// When in doubt, it returns 0.0 (center).
-    pub fn open_media_explorer(&self, file_name: &Path, mode: OpenMediaExplorerMode)
+    pub fn open_media_explorer(&self, file_name: &Utf8Path, mode: OpenMediaExplorerMode)
     where
         UsageScope: MainThreadOnly,
     {
@@ -8159,7 +8159,7 @@ impl<UsageScope> Reaper<UsageScope> {
         toolbar_flags: u32,
         label: impl Into<ReaperStringArg<'a>>,
         // "toolbar_*.png"
-        icon_file_name: Option<&Path>,
+        icon_file_name: Option<&Utf8Path>,
         // TODO-high This is a flag originally
         refresh_behavior: UiRefreshBehavior,
     ) -> ReaperFunctionResult<()>
@@ -8439,7 +8439,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Returns an error when inserting the file failed.
     pub fn insert_media(
         &self,
-        file: impl AsRef<Path>,
+        file: impl AsRef<Utf8Path>,
         mode: InsertMediaMode,
         flags: BitFlags<InsertMediaFlag>,
     ) -> ReaperFunctionResult<()>
@@ -8447,7 +8447,7 @@ impl<UsageScope> Reaper<UsageScope> {
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
-        let path_str_c = CString::new(file.as_ref().to_string_lossy().as_bytes()).unwrap();
+        let path_str_c = CString::new(file.as_ref().as_str().as_bytes()).unwrap();
         let result = unsafe {
             self.low
                 .InsertMedia(path_str_c.as_ptr(), mode.to_raw(flags))
@@ -8526,7 +8526,7 @@ pub struct EnumProjectsResult {
     /// Project pointer.
     pub project: ReaProject,
     /// Path to project file (only if project saved and path requested).
-    pub file_path: Option<PathBuf>,
+    pub file_path: Option<Utf8PathBuf>,
 }
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
@@ -8859,9 +8859,8 @@ const ZERO_GUID: GUID = GUID {
     Data4: [0; 8],
 };
 
-fn convert_path_to_reaper_string(path: &Path) -> ReaperString {
-    let path_str = path.to_str().expect("file name is not valid UTF-8");
-    ReaperString::from_str(path_str)
+fn convert_path_to_reaper_string(path: &Utf8Path) -> ReaperString {
+    ReaperString::from_str(path.as_str())
 }
 
 mod private {

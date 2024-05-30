@@ -38,6 +38,8 @@ csv = "1.1"
 base64 = "0.13.0"
 # For various things
 itertools = "0.10.5"
+# REAPER should expose all file paths as UTF-8. If not, it's a REAPER bug.
+camino = "1.1.7"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["psapi", "processthreadsapi"] }

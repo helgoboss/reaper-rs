@@ -6,6 +6,7 @@ use crate::{
 use std::fmt::Debug;
 use std::{iter, mem};
 
+use camino::{Utf8Path, Utf8PathBuf};
 use either::Either;
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
@@ -54,7 +55,7 @@ impl Project {
         self.track_by_index(0)
     }
 
-    pub fn file(self) -> Option<PathBuf> {
+    pub fn file(self) -> Option<Utf8PathBuf> {
         Reaper::get()
             .medium_reaper()
             .enum_projects(ProjectRef::Tab(self.index().ok()?), MAX_PATH_LENGTH)
@@ -445,7 +446,7 @@ impl Project {
             .find(|res| res.basic_info.id == id)
     }
 
-    pub fn directory(self) -> Option<PathBuf> {
+    pub fn directory(self) -> Option<Utf8PathBuf> {
         let file = self.file()?;
         let dir = file.parent()?;
         Some(dir.to_owned())
@@ -465,13 +466,13 @@ impl Project {
         }
     }
 
-    pub fn recording_path(self) -> PathBuf {
+    pub fn recording_path(self) -> Utf8PathBuf {
         Reaper::get()
             .medium_reaper
             .get_project_path_ex(self.context(), MAX_PATH_LENGTH)
     }
 
-    pub fn make_path_absolute(self, path: &Path) -> Option<PathBuf> {
+    pub fn make_path_absolute(self, path: &Utf8Path) -> Option<Utf8PathBuf> {
         if path.is_relative() {
             let dir = self.directory()?;
             Some(dir.join(path))

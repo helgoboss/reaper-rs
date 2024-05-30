@@ -1,4 +1,5 @@
 use crate::{Project, Reaper};
+use camino::{Utf8Path, Utf8PathBuf};
 use reaper_low::{
     copy_heap_buf_to_buf, create_heap_buf, load_pcm_source_state_from_buf,
     save_pcm_source_state_to_heap_buf,
@@ -10,7 +11,6 @@ use reaper_medium::{
 use ref_cast::RefCast;
 use std::borrow::Borrow;
 use std::ops::{Deref, DerefMut};
-use std::path::{Path, PathBuf};
 
 /// Pointer to a PCM source that's owned and managed by REAPER.
 ///
@@ -87,7 +87,7 @@ impl BorrowedSource {
         &self.0
     }
 
-    pub fn file_name(&self) -> Option<PathBuf> {
+    pub fn file_name(&self) -> Option<Utf8PathBuf> {
         self.0.get_file_name(|path| path.map(|p| p.to_owned()))
     }
 
@@ -137,7 +137,7 @@ impl BorrowedSource {
         self.0.ext_set_preview_tempo(tempo)
     }
 
-    pub fn export_to_file(&self, file: &Path) -> Result<(), ReaperFunctionError> {
+    pub fn export_to_file(&self, file: &Utf8Path) -> Result<(), ReaperFunctionError> {
         self.0.ext_export_to_file(file)
     }
 
@@ -202,7 +202,7 @@ impl OwnedSource {
     }
 
     pub fn from_file(
-        file: &Path,
+        file: &Utf8Path,
         import_behavior: MidiImportBehavior,
     ) -> Result<Self, &'static str> {
         let raw = Reaper::get()

@@ -1,6 +1,8 @@
-use crate::{DurationInBeats, DurationInSeconds, PositionInSeconds};
-use nutype::nutype;
 use std::ops::{Add, Neg};
+
+use nutype::nutype;
+
+use crate::DurationInBeats;
 
 /// This represents a position expressed as an amount of beats.
 ///

@@ -2269,11 +2269,7 @@ fn general() -> TestStep {
         let resource_path = reaper.resource_path();
         // Then
         assert!(resource_path.is_dir());
-        assert!(resource_path
-            .to_str()
-            .ok_or("invalid resource path")?
-            .to_lowercase()
-            .contains("reaper"));
+        assert!(resource_path.as_str().to_lowercase().contains("reaper"));
         Ok(())
     })
 }

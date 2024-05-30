@@ -9,6 +9,7 @@ use crate::{
     ExtendedArgs, Hwnd, Hz, MediaItemTake, PcmSource, PositionInSeconds, ReaperFunctionError,
     ReaperFunctionResult, ReaperStr, ReaperString,
 };
+use camino::Utf8Path;
 use reaper_low::raw::{PCM_source, PCM_source_peaktransfer_t, PCM_source_transfer_t, HWND__};
 use std::borrow::Borrow;
 use std::error::Error;
@@ -16,7 +17,6 @@ use std::fmt;
 use std::mem::MaybeUninit;
 use std::ops::{Deref, DerefMut};
 use std::os::raw::{c_char, c_void};
-use std::path::Path;
 use std::ptr::{null, null_mut, NonNull};
 
 /// PCM source transfer.
@@ -330,9 +330,9 @@ impl BorrowedPcmSource {
     ///
     /// `None` is a valid result. In that case it's not purely a file. Takes care of converting an
     /// empty path to `None`.
-    pub fn get_file_name<R>(&self, use_file: impl FnOnce(Option<&Path>) -> R) -> R {
+    pub fn get_file_name<R>(&self, use_file: impl FnOnce(Option<&Utf8Path>) -> R) -> R {
         let file_name = unsafe { self.get_file_name_unchecked() };
-        let path = file_name.map(|n| Path::new(n.to_str()));
+        let path = file_name.map(|n| Utf8Path::new(n.to_str()));
         use_file(path)
     }
 
@@ -351,10 +351,9 @@ impl BorrowedPcmSource {
     }
 
     /// Returns `true` if supported. Only call when offline.
-    pub fn set_file_name(&self, new_file_name: Option<&Path>) -> bool {
+    pub fn set_file_name(&self, new_file_name: Option<&Utf8Path>) -> bool {
         if let Some(p) = new_file_name {
-            let file_name_str = p.to_str().expect("file name is not valid UTF-8");
-            let file_name_reaper_string = ReaperString::from_str(file_name_str);
+            let file_name_reaper_string = ReaperString::from_str(p.as_str());
             unsafe { self.0.SetFileName(file_name_reaper_string.as_ptr()) }
         } else {
             unsafe { self.0.SetFileName(null()) }
@@ -568,9 +567,8 @@ impl BorrowedPcmSource {
     /// # Errors
     ///
     /// Returns an error if not supported.
-    pub fn ext_export_to_file(&self, file_name: &Path) -> ReaperFunctionResult<()> {
-        let file_name_str = file_name.to_str().expect("file name is not valid UTF-8");
-        let file_name_reaper_string = ReaperString::from_str(file_name_str);
+    pub fn ext_export_to_file(&self, file_name: &Utf8Path) -> ReaperFunctionResult<()> {
+        let file_name_reaper_string = ReaperString::from_str(file_name.as_str());
         let supported = unsafe {
             self.0.Extended(
                 raw::PCM_SOURCE_EXT_EXPORTTOFILE as _,
@@ -822,7 +820,7 @@ pub struct SetAvailableArgs {
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct SetFileNameArgs<'a> {
-    pub new_file_name: Option<&'a Path>,
+    pub new_file_name: Option<&'a Utf8Path>,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -914,7 +912,7 @@ impl<S: CustomPcmSource> reaper_low::PCM_source for PcmSourceAdapter<S> {
     fn SetFileName(&mut self, newfn: *const c_char) -> bool {
         let new_file_name = if let Some(reaper_str) = unsafe { create_passing_c_str(newfn) } {
             let s = reaper_str.to_str();
-            Some(Path::new(s))
+            Some(Utf8Path::new(s))
         } else {
             None
         };

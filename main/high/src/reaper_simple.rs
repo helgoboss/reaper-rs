@@ -5,6 +5,7 @@ use crate::{
     Action, Fx, FxChain, FxParameter, Guid, MidiInputDevice, MidiOutputDevice, Project, Reaper,
     Section,
 };
+use camino::Utf8PathBuf;
 use helgoboss_midi::ShortMessage;
 use reaper_medium::{
     AudioDeviceAttributeKey, CommandId, EnumPitchShiftModesResult, GetLastTouchedFxResult,
@@ -104,7 +105,7 @@ impl Reaper {
             })
     }
 
-    pub fn resource_path(&self) -> PathBuf {
+    pub fn resource_path(&self) -> Utf8PathBuf {
         self.medium_reaper.get_resource_path(|p| p.to_owned())
     }
 
