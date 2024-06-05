@@ -1,5 +1,6 @@
 use crate::{concat_reaper_strs, ReaperStr, ReaperStringArg};
 
+use crate::TrackAttributeKey::MidiInputChanMap;
 use std::borrow::Cow;
 
 // TODO-medium Consider migrating to newtypes around Cow<str> for this kind of enums.
@@ -123,6 +124,13 @@ pub enum TrackAttributeKey<'a> {
     /// - 7 → MIDI overdub
     /// - 8 → MIDI replace
     RecMode,
+    /// MIDI input channel mapping.
+    ///
+    /// `*mut i32`
+    ///
+    /// - -1 → source channel
+    /// - otherwise → maps to given MIDI channel
+    MidiInputChanMap,
     /// Record monitoring.
     ///
     /// `*mut i32`
@@ -446,6 +454,7 @@ impl<'a> TrackAttributeKey<'a> {
             RecArm => reaper_str!("I_RECARM").into(),
             RecInput => reaper_str!("I_RECINPUT").into(),
             RecMode => reaper_str!("I_RECMODE").into(),
+            MidiInputChanMap => reaper_str!("I_MIDI_INPUT_CHANMAP").into(),
             RecMon => reaper_str!("I_RECMON").into(),
             RecMonItems => reaper_str!("I_RECMONITEMS").into(),
             Selected => reaper_str!("I_SELECTED").into(),

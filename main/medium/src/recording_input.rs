@@ -31,41 +31,38 @@ impl RecordingInput {
     /// Fails if the given integer is not a valid recording input index.
     pub fn from_raw(rec_input_index: i32) -> Option<RecordingInput> {
         use RecordingInput::*;
-        if let Ok(v) = u32::try_from(rec_input_index) {
-            let res = match v {
-                0..=511 => Mono(v),
-                512..=1023 => MonoReaRoute(v - 512),
-                1024..=1535 => Stereo(v - 1024),
-                1536..=2047 => StereoReaRoute(v - 1536),
-                2048..=4095 => Unknown(Hidden(rec_input_index)),
-                4096..=6128 => {
-                    let midi_index = v - 4096;
-                    Midi {
-                        device_id: {
-                            let raw_device_id = midi_index / 32;
-                            if raw_device_id == ALL_MIDI_DEVICES_FACTOR {
-                                None
-                            } else {
-                                Some(MidiInputDeviceId::new(raw_device_id as u8))
-                            }
-                        },
-                        channel: {
-                            let channel_id = midi_index % 32;
-                            if channel_id == 0 {
-                                None
-                            } else {
-                                let ch = channel_id - 1;
-                                ch.try_into().ok()
-                            }
-                        },
-                    }
+        let v = u32::try_from(rec_input_index).ok()?;
+        let res = match v {
+            0..=511 => Mono(v),
+            512..=1023 => MonoReaRoute(v - 512),
+            1024..=1535 => Stereo(v - 1024),
+            1536..=2047 => StereoReaRoute(v - 1536),
+            2048..=4095 => Unknown(Hidden(rec_input_index)),
+            4096..=6128 => {
+                let midi_index = v - 4096;
+                Midi {
+                    device_id: {
+                        let raw_device_id = midi_index / 32;
+                        if raw_device_id == ALL_MIDI_DEVICES_FACTOR {
+                            None
+                        } else {
+                            Some(MidiInputDeviceId::new(raw_device_id as u8))
+                        }
+                    },
+                    channel: {
+                        let channel_id = midi_index % 32;
+                        if channel_id == 0 {
+                            None
+                        } else {
+                            let ch = channel_id - 1;
+                            ch.try_into().ok()
+                        }
+                    },
                 }
-                _ => Unknown(Hidden(rec_input_index)),
-            };
-            Some(res)
-        } else {
-            None
-        }
+            }
+            _ => Unknown(Hidden(rec_input_index)),
+        };
+        Some(res)
     }
 
     /// Converts this value to an integer as expected by the low-level API.

@@ -12,6 +12,7 @@ use crate::{
 use crate::error::ReaperResult;
 use either::Either;
 use enumflags2::BitFlags;
+use helgoboss_midi::Channel;
 use reaper_medium::NotificationBehavior::NotifyAll;
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::SendTarget::OtherTrack;
@@ -263,6 +264,33 @@ impl Track {
                 .medium_reaper()
                 .get_set_media_track_info_get_rec_input(self.raw_internal())
         }
+    }
+
+    pub fn midi_input_channel_mapping(&self) -> Option<Channel> {
+        self.load_if_necessary_or_err().ok()?;
+        let val = unsafe {
+            Reaper::get().medium_reaper().get_media_track_info_value(
+                self.raw_internal(),
+                TrackAttributeKey::MidiInputChanMap,
+            )
+        };
+        if val < 0.0 {
+            None
+        } else {
+            Some(Channel::new(val as u8))
+        }
+    }
+
+    pub fn set_midi_input_channel_mapping(&self, channel: Option<Channel>) -> ReaperResult<()> {
+        self.load_if_necessary_or_err()?;
+        unsafe {
+            Reaper::get().medium_reaper().set_media_track_info_value(
+                self.raw_internal(),
+                TrackAttributeKey::MidiInputChanMap,
+                channel.map(|ch| ch.get() as f64).unwrap_or(-1.0),
+            )?;
+        }
+        Ok(())
     }
 
     pub fn set_recording_input(&self, input: Option<RecordingInput>) {
