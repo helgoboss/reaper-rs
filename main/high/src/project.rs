@@ -10,11 +10,12 @@ use camino::{Utf8Path, Utf8PathBuf};
 use either::Either;
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
-    AutoSeekBehavior, BookmarkId, BookmarkRef, CountProjectMarkersResult, DurationInSeconds,
-    GetLastMarkerAndCurRegionResult, GetLoopTimeRange2Result, MasterTrackBehavior, PanMode,
-    PlayState, PositionInSeconds, ProjectContext, ProjectRef, ReaProject, ReaperString,
-    ReaperStringArg, SetEditCurPosOptions, TimeMap2TimeToBeatsResult, TimeMode, TimeModeOverride,
-    TimeRangeType, TimeSignature, TrackDefaultsBehavior, TrackLocation, UndoBehavior,
+    AutoSeekBehavior, BeatAttachMode, BookmarkId, BookmarkRef, CountProjectMarkersResult,
+    DurationInSeconds, GetLastMarkerAndCurRegionResult, GetLoopTimeRange2Result,
+    MasterTrackBehavior, PanMode, PlayState, PositionInSeconds, ProjectContext, ProjectRef,
+    ReaProject, ReaperString, ReaperStringArg, SetEditCurPosOptions, TimeMap2TimeToBeatsResult,
+    TimeMode, TimeModeOverride, TimeRangeType, TimeSignature, TrackDefaultsBehavior, TrackLocation,
+    UndoBehavior,
 };
 use std::path::PathBuf;
 
@@ -643,6 +644,14 @@ impl Project {
             .medium_reaper
             .set_edit_curs_pos_2(self.context(), time, options);
     }
+
+    // pub fn beat_attach_mode(self) -> BeatAttachMode {
+    //     let raw = unsafe {
+    //         self.get_project_config("itemtimelock")
+    //             .expect("couldn't get itemtimelock")
+    //     };
+    //     BeatAttachMode::from_raw(raw)
+    // }
 
     pub fn pan_mode(self) -> PanMode {
         let raw = unsafe {

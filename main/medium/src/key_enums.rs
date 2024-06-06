@@ -565,6 +565,8 @@ impl<'a> TakeAttributeKey<'a> {
 /// [`get_set_media_item_info()`]: struct.Reaper.html#method.get_set_media_item_info
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum ItemAttributeKey<'a> {
+    /// Track, read-only.
+    Track,
     /// Muted (item solo overrides). Setting this value will clear `MuteSolo`.
     Mute,
     /// Loop source.
@@ -643,6 +645,7 @@ impl<'a> ItemAttributeKey<'a> {
     pub(crate) fn into_raw(self) -> Cow<'a, ReaperStr> {
         use ItemAttributeKey::*;
         match self {
+            Track => reaper_str!("P_TRACK").into(),
             Position => reaper_str!("D_POSITION").into(),
             Length => reaper_str!("D_LENGTH").into(),
             Mute => reaper_str!("B_MUTE").into(),

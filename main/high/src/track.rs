@@ -19,7 +19,7 @@ use reaper_medium::SendTarget::OtherTrack;
 use reaper_medium::TrackAttributeKey::{RecArm, RecInput, RecMon, Selected, Solo};
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
-    AutomationMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
+    AutomationMode, BeatAttachMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, NativeColorValue, Progress, ReaProject, ReaperFunctionError,
     ReaperPanValue, ReaperString, ReaperStringArg, ReaperVolumeValue, ReaperWidthValue,
     RecordArmMode, RecordingInput, RecordingMode, RgbColor, SetTrackUiFlags, SoloMode, TrackArea,
@@ -654,6 +654,14 @@ impl Track {
                     .get_media_track_info_value(self.raw_internal(), RecArm)
             };
             recarm == 1.0
+        }
+    }
+
+    pub fn beat_attach_mode(&self) -> Option<BeatAttachMode> {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_track_info_get_beat_attach_mode(self.raw_internal())
         }
     }
 

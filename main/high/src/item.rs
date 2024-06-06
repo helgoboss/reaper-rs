@@ -1,4 +1,4 @@
-use crate::{Project, Reaper, Take};
+use crate::{Project, Reaper, Take, Track};
 use reaper_medium::{
     BeatAttachMode, DurationInSeconds, FadeCurvature, FadeShape, ItemAttributeKey, ItemGroupId,
     MediaItem, NativeColorValue, PositionInSeconds, ProjectContext, ReaperFunctionError,
@@ -26,6 +26,11 @@ impl Item {
                 .get_item_project_context(self.raw)?
         };
         Some(Project::new(raw_project))
+    }
+
+    pub fn track(self) -> Option<Track> {
+        let raw_track = unsafe { Reaper::get().medium_reaper.get_media_item_track(self.raw)? };
+        Some(Track::new(raw_track, None))
     }
 
     pub fn is_available(&self) -> bool {
@@ -105,6 +110,15 @@ impl Item {
                 ItemAttributeKey::Mute,
                 if mute { 1.0 } else { 0.0 },
             )
+        }
+    }
+
+    pub fn loop_source(&self) -> bool {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_media_item_info_value(self.raw, ItemAttributeKey::LoopSrc)
+                == 1.0
         }
     }
 

@@ -1,7 +1,8 @@
 use crate::{FxChain, OwnedSource, Reaper, ReaperSource, Track};
 use reaper_medium::{
-    FullPitchShiftMode, MediaItemTake, NativeColorValue, PlaybackSpeedFactor, PositionInSeconds,
-    ReaperFunctionError, ReaperStringArg, ReaperVolumeValue, RgbColor, TakeAttributeKey,
+    DurationInSeconds, FullPitchShiftMode, ItemAttributeKey, MediaItemTake, NativeColorValue,
+    PlaybackSpeedFactor, PositionInSeconds, ReaperFunctionError, ReaperStringArg,
+    ReaperVolumeValue, RgbColor, TakeAttributeKey,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -81,6 +82,15 @@ impl Take {
         }
     }
 
+    pub fn preserve_pitch(&self) -> bool {
+        let val = unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_media_item_take_info_value(self.raw, TakeAttributeKey::PPitch)
+        };
+        val > 0.0
+    }
+
     pub fn set_preserve_pitch(&self, value: bool) -> Result<(), ReaperFunctionError> {
         unsafe {
             Reaper::get().medium_reaper.set_media_item_take_info_value(
@@ -91,16 +101,16 @@ impl Take {
         }
     }
 
-    pub fn start_offset(&self) -> PositionInSeconds {
+    pub fn start_offset(&self) -> DurationInSeconds {
         let pos = unsafe {
             Reaper::get()
                 .medium_reaper
                 .get_media_item_take_info_value(self.raw, TakeAttributeKey::StartOffs)
         };
-        PositionInSeconds::new_panic(pos)
+        DurationInSeconds::new_panic(pos)
     }
 
-    pub fn set_start_offset(&self, length: PositionInSeconds) -> Result<(), ReaperFunctionError> {
+    pub fn set_start_offset(&self, length: DurationInSeconds) -> Result<(), ReaperFunctionError> {
         unsafe {
             Reaper::get().medium_reaper.set_media_item_take_info_value(
                 self.raw,
@@ -108,6 +118,15 @@ impl Take {
                 length.get(),
             )
         }
+    }
+
+    pub fn volume(&self) -> ReaperVolumeValue {
+        let val = unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_media_item_take_info_value(self.raw, TakeAttributeKey::Vol)
+        };
+        ReaperVolumeValue::new_panic(val)
     }
 
     pub fn set_volume(&self, volume: ReaperVolumeValue) -> Result<(), ReaperFunctionError> {

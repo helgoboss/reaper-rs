@@ -981,6 +981,28 @@ impl<UsageScope> Reaper<UsageScope> {
         }
     }
 
+    /// Convenience function which returns the track's beat attach mode (`C_BEATATTACHMODE`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn get_set_media_track_info_get_beat_attach_mode(
+        &self,
+        track: MediaTrack,
+    ) -> Option<BeatAttachMode>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr =
+            self.get_set_media_track_info(track, TrackAttributeKey::BeatAttachMode, null_mut());
+        let raw = deref_as::<i8>(ptr).expect("C_BEATATTACHMODE pointer is null");
+        match raw {
+            -1 => None,
+            x => Some(BeatAttachMode::from_raw(x)),
+        }
+    }
+
     /// Convenience function which sets the item's beat attach mode (`C_BEATATTACHMODE`).
     ///
     /// # Safety
@@ -6719,14 +6741,11 @@ impl<UsageScope> Reaper<UsageScope> {
         NonNull::new(ptr)
     }
 
-    /// Unstable!!!
-    ///
     /// Returns the project which contains this item.
     ///
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid item.
-    // TODO-high-unstable Can this EVER be None?
     pub unsafe fn get_item_project_context(&self, item: MediaItem) -> Option<ReaProject>
     where
         UsageScope: MainThreadOnly,
@@ -6734,6 +6753,20 @@ impl<UsageScope> Reaper<UsageScope> {
         self.require_main_thread();
         let ptr = self.low.GetItemProjectContext(item.as_ptr());
         ReaProject::new(ptr)
+    }
+
+    /// Returns the track which contains this item.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid item.
+    pub unsafe fn get_media_item_track(&self, item: MediaItem) -> Option<MediaTrack>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.low.GetMediaItem_Track(item.as_ptr());
+        MediaTrack::new(ptr)
     }
 
     /// Returns the active take in this item.
