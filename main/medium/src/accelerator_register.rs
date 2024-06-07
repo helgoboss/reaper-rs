@@ -196,12 +196,11 @@ extern "C" fn delegating_translate_accel<T: TranslateAccel>(
         let ctx = unsafe { NonNull::new_unchecked(ctx) };
         let callback_struct: &mut T = decode_user_data(unsafe { ctx.as_ref() }.user);
         let msg = AccelMsg::from_raw(unsafe { *msg });
-        callback_struct
-            .call(TranslateAccelArgs {
-                msg,
-                ctx: &AcceleratorRegister::new(ctx),
-            })
-            .to_raw()
+        let args = TranslateAccelArgs {
+            msg,
+            ctx: &AcceleratorRegister::new(ctx),
+        };
+        callback_struct.call(args).to_raw()
     })
     .unwrap_or(0)
 }

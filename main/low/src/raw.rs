@@ -23,6 +23,8 @@ pub use super::bindings::root::{
     UNDO_STATE_FREEZE, UNDO_STATE_FX, UNDO_STATE_ITEMS, UNDO_STATE_MISCCFG, UNDO_STATE_TRACKCFG,
 };
 
+pub use super::file_in_project_callback::file_in_project_ex2_t;
+
 /// Structs, types and constants defined by `swell.h` (on Linux and Mac OS X) and
 /// `windows.h` (on Windows).
 ///

@@ -356,6 +356,9 @@ pub use gaccel_register::*;
 mod accelerator_register;
 pub use accelerator_register::*;
 
+mod file_in_project_hook;
+pub use file_in_project_hook::*;
+
 mod preview_register;
 pub use preview_register::*;
 

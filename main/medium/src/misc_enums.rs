@@ -786,6 +786,8 @@ pub enum RegistrationObject<'a> {
     BackAccelerator(Handle<raw::accelerator_register_t>),
     /// A record which lets you get the first place in the keyboard processing queue.
     FrontAccelerator(Handle<raw::accelerator_register_t>),
+    /// Registers a used project file and receives callbacks associated with that project file.
+    FileInProjectCallback(Handle<raw::file_in_project_ex2_t>),
     /// A hidden control surface (useful for being notified by REAPER about events).
     ///
     /// Extract from `reaper_plugin.h`:
@@ -914,6 +916,10 @@ impl<'a> RegistrationObject<'a> {
             },
             FrontAccelerator(reg) => PluginRegistration {
                 key: reaper_str!("<accelerator").into(),
+                value: reg.as_ptr() as _,
+            },
+            FileInProjectCallback(reg) => PluginRegistration {
+                key: reaper_str!("file_in_project_ex2").into(),
                 value: reg.as_ptr() as _,
             },
             CsurfInst(inst) => PluginRegistration {

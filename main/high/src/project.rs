@@ -10,12 +10,11 @@ use camino::{Utf8Path, Utf8PathBuf};
 use either::Either;
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
-    AutoSeekBehavior, BeatAttachMode, BookmarkId, BookmarkRef, CountProjectMarkersResult,
-    DurationInSeconds, GetLastMarkerAndCurRegionResult, GetLoopTimeRange2Result,
-    MasterTrackBehavior, PanMode, PlayState, PositionInSeconds, ProjectContext, ProjectRef,
-    ReaProject, ReaperString, ReaperStringArg, SetEditCurPosOptions, TimeMap2TimeToBeatsResult,
-    TimeMode, TimeModeOverride, TimeRangeType, TimeSignature, TrackDefaultsBehavior, TrackLocation,
-    UndoBehavior,
+    AutoSeekBehavior, BookmarkId, BookmarkRef, CountProjectMarkersResult, DurationInSeconds,
+    GetLastMarkerAndCurRegionResult, GetLoopTimeRange2Result, MasterTrackBehavior, PanMode,
+    PlayState, PositionInSeconds, ProjectContext, ProjectRef, ReaProject, ReaperString,
+    ReaperStringArg, SetEditCurPosOptions, TimeMap2TimeToBeatsResult, TimeMode, TimeModeOverride,
+    TimeRangeType, TimeSignature, TrackDefaultsBehavior, TrackLocation, UndoBehavior,
 };
 use std::path::PathBuf;
 
