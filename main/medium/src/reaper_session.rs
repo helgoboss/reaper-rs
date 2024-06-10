@@ -673,7 +673,7 @@ impl ReaperSession {
         let (handle, hook) = self.file_in_project_hooks.keep(hook);
         // Important to call this *after* it has been added to the keeper (because only then it is at its final
         // place in memory and create the correct pointers).
-        let plugin_register_arg = hook.create_plugin_register_arg::<T>();
+        let plugin_register_arg = hook.create_plugin_register_arg();
         // Register the low-level hook at REAPER
         let reg = RegistrationObject::FileInProjectCallback(Handle::new(NonNull::from(
             &plugin_register_arg,
@@ -975,7 +975,7 @@ impl ReaperSession {
             .file_in_project_hooks
             .get(handle.key())
             .ok_or(ReaperFunctionError::new("hook not available anymore in reaper-rs, and therefore can't be registered anymore in REAPER as well"))?;
-        let plugin_register_arg = owned_hook.create_plugin_register_arg::<T>();
+        let plugin_register_arg = owned_hook.create_plugin_register_arg();
         // Unregister the low-level register from REAPER
         let result = unsafe {
             self.plugin_register_remove(RegistrationObject::FileInProjectCallback(Handle::new(

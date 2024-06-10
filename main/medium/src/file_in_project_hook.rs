@@ -68,20 +68,17 @@ impl OwnedFileInProjectHook {
     }
 
     /// This must be called when `self` is at its final place in memory!
-    pub fn create_plugin_register_arg<T>(&self) -> raw::file_in_project_ex2_t
-    where
-        T: FileInProjectCallback + 'static,
-    {
+    pub fn create_plugin_register_arg(&self) -> raw::file_in_project_ex2_t {
         raw::file_in_project_ex2_t {
             file_name: self.user_data.file_name.as_ptr() as *mut _,
             proj_ptr: self.project.as_ptr(),
             user_data_context: encode_user_data(&self.user_data),
-            file_in_project_callback: Some(delegating_callback::<T>),
+            file_in_project_callback: Some(delegating_callback),
         }
     }
 }
 
-extern "C" fn delegating_callback<T: FileInProjectCallback>(
+extern "C" fn delegating_callback(
     user_data: *mut c_void,
     msg: c_int,
     parm: *mut c_void,
