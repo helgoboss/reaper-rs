@@ -5,18 +5,18 @@ use reaper_low::{
     PluginContext,
 };
 
-use crate::keeper::{Keeper, SharedKeeper};
+use crate::keeper::{Keeper, SharedKeeper, SimpleKeeper};
 
 use crate::{
     concat_reaper_strs, delegating_hook_command, delegating_hook_command_2,
     delegating_hook_post_command, delegating_hook_post_command_2, delegating_toggle_action,
     AcceleratorPosition, BufferingBehavior, CommandId, ControlSurface, ControlSurfaceAdapter,
-    FileInProjectCallback, Handle, HookCommand, HookCommand2, HookCustomMenu, HookPostCommand,
-    HookPostCommand2, MainThreadScope, MeasureAlignment, OnAudioBuffer, OwnedAcceleratorRegister,
-    OwnedAudioHookRegister, OwnedGaccelRegister, OwnedPreviewRegister, PluginRegistration,
-    ProjectContext, ReaProject, RealTimeAudioThreadScope, Reaper, ReaperFunctionError,
-    ReaperFunctionResult, ReaperMutex, ReaperString, ReaperStringArg, RegistrationHandle,
-    RegistrationObject, ToggleAction, ToolbarIconMap, TranslateAccel,
+    FileInProjectCallback, GenericRegistrationHandle, Handle, HookCommand, HookCommand2,
+    HookCustomMenu, HookPostCommand, HookPostCommand2, MainThreadScope, MeasureAlignment,
+    OnAudioBuffer, OwnedAcceleratorRegister, OwnedAudioHookRegister, OwnedGaccelRegister,
+    OwnedPreviewRegister, PluginRegistration, ProjectContext, ReaProject, RealTimeAudioThreadScope,
+    Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperMutex, ReaperString, ReaperStringArg,
+    RegistrationHandle, RegistrationObject, ToggleAction, ToolbarIconMap, TranslateAccel,
 };
 use reaper_low::raw::audio_hook_register_t;
 
@@ -70,7 +70,7 @@ pub struct ReaperSession {
     /// Provides a safe place in memory for accelerator registers.
     accelerator_registers: Keeper<OwnedAcceleratorRegister, raw::accelerator_register_t>,
     /// Provides a safe place in memory for file-in-project hooks.
-    file_in_project_hooks: Keeper<OwnedFileInProjectHook, raw::file_in_project_ex2_t>,
+    file_in_project_hooks: SimpleKeeper<OwnedFileInProjectHook>,
     /// Provides a safe place in memory for currently playing preview registers.
     preview_registers: SharedKeeper<ReaperMutex<OwnedPreviewRegister>, raw::preview_register_t>,
     /// Provides a safe place in memory for command names used in command ID registrations.
@@ -655,7 +655,7 @@ impl ReaperSession {
         project: ReaProject,
         file_name: impl Into<ReaperStringArg<'a>>,
         callback: Box<T>,
-    ) -> ReaperFunctionResult<RegistrationHandle<T>>
+    ) -> ReaperFunctionResult<GenericRegistrationHandle<usize, T>>
     where
         T: FileInProjectCallback + 'static,
     {
@@ -663,17 +663,29 @@ impl ReaperSession {
         // restore the original callback later).
         let callback_thin_ptr: NonNull<T> = callback.as_ref().into();
         // Create hook and make it own the callback (as user data)
-        let file_name = file_name.into();
-        let register = OwnedFileInProjectHook::new(file_name.as_reaper_str(), project, callback);
+        let hook = OwnedFileInProjectHook::new(
+            project,
+            file_name.into().into_inner().to_reaper_string(),
+            callback,
+        );
         // Store it in memory.  Although we keep it here, conceptually it's owned by REAPER, so we
         // should not access it while being registered.
-        let reaper_ptr = self.file_in_project_hooks.keep(register);
+        let (handle, hook) = self.file_in_project_hooks.keep(hook);
+        // Important to call this *after* it has been added to the keeper (because only then it is at its final
+        // place in memory and create the correct pointers).
+        let plugin_register_arg = hook.create_plugin_register_arg::<T>();
         // Register the low-level hook at REAPER
-        let reg = RegistrationObject::FileInProjectCallback(reaper_ptr);
-        unsafe { self.plugin_register_add(reg)? };
+        let reg = RegistrationObject::FileInProjectCallback(Handle::new(NonNull::from(
+            &plugin_register_arg,
+        )));
+        let result = unsafe { self.plugin_register_add(reg)? };
+        tracing::debug!(
+            msg = "Added file-in-project callback",
+            result,
+            ?plugin_register_arg
+        );
         // Returns a handle which the consumer can use to unregister
-        let handle = RegistrationHandle::new(callback_thin_ptr, reaper_ptr.cast());
-        Ok(handle)
+        Ok(GenericRegistrationHandle::new(callback_thin_ptr, handle))
     }
 
     /// Plays a preview register.
@@ -933,12 +945,10 @@ impl ReaperSession {
         T: TranslateAccel,
     {
         // Unregister the low-level register from REAPER
-        let reaper_ptr = handle.reaper_handle().cast();
+        let reaper_ptr = handle.key().cast();
         unsafe { self.plugin_register_remove(RegistrationObject::BackAccelerator(reaper_ptr)) };
         // Take the owned register out of its storage
-        let owned_register = self
-            .accelerator_registers
-            .release(handle.reaper_handle().cast())?;
+        let owned_register = self.accelerator_registers.release(handle.key().cast())?;
         // Reconstruct the initial value for handing ownership back to the consumer
         let dyn_callback = owned_register.into_callback();
         // We are not interested in the fat pointer (Box<dyn TranslateAccel>) anymore.
@@ -952,33 +962,39 @@ impl ReaperSession {
         Some(callback)
     }
 
+    /// If unregistering successful, returns the number of remaining usages of that file.
     pub fn plugin_register_remove_file_in_project_callback<T>(
         &mut self,
-        handle: RegistrationHandle<T>,
-    ) -> Option<Box<T>>
+        handle: GenericRegistrationHandle<usize, T>,
+    ) -> ReaperFunctionResult<u32>
     where
-        T: FileInProjectCallback,
+        T: FileInProjectCallback + 'static,
     {
-        // Unregister the low-level register from REAPER
-        let reaper_ptr = handle.reaper_handle().cast();
-        unsafe {
-            self.plugin_register_remove(RegistrationObject::FileInProjectCallback(reaper_ptr))
-        };
         // Take the owned hook out of its storage
         let owned_hook = self
             .file_in_project_hooks
-            .release(handle.reaper_handle().cast())?;
-        // Reconstruct the initial value for handing ownership back to the consumer
-        let dyn_callback = owned_hook.into_callback();
-        // We are not interested in the fat pointer (Box<dyn TranslateAccel>) anymore.
-        // By calling leak(), we make the pointer go away but prevent Rust from
-        // dropping its content.
-        Box::leak(dyn_callback);
-        // Here we pick up the content again and treat it as a Box - but this
-        // time not a trait object box (Box<dyn TranslateAccel> = fat pointer) but a
-        // normal box (Box<T> = thin pointer) ... original type restored.
-        let callback = unsafe { handle.restore_original() };
-        Some(callback)
+            .get(handle.key())
+            .ok_or(ReaperFunctionError::new("hook not available anymore in reaper-rs, and therefore can't be registered anymore in REAPER as well"))?;
+        let plugin_register_arg = owned_hook.create_plugin_register_arg::<T>();
+        // Unregister the low-level register from REAPER
+        let result = unsafe {
+            self.plugin_register_remove(RegistrationObject::FileInProjectCallback(Handle::new(
+                NonNull::from(&plugin_register_arg),
+            )))
+        };
+        // Release *after* unregistering from REAPER
+        let _ = self.file_in_project_hooks.release(handle.key());
+        tracing::debug!(
+            msg = "Removed file-in-project callback",
+            result,
+            ?plugin_register_arg
+        );
+        if result < 256 {
+            return Err(ReaperFunctionError::new(
+                "project file combination was not registered anymore in REAPER",
+            ));
+        }
+        Ok(result as u32 - 256)
     }
 
     /// Registers a hidden control surface.
@@ -1033,8 +1049,7 @@ impl ReaperSession {
         // Store the low-level Rust control surface in memory. Although we keep it here,
         // conceptually it's owned by REAPER, so we should not access it while being registered.
         let handle = RegistrationHandle::new(control_surface_thin_ptr, cpp_cs.cast());
-        self.csurf_insts
-            .insert(handle.reaper_handle(), double_boxed_low_cs);
+        self.csurf_insts.insert(handle.key(), double_boxed_low_cs);
         // Register the C++ control surface at REAPER
         unsafe { self.plugin_register_add(RegistrationObject::CsurfInst(cpp_cs))? };
         // Return a handle which the consumer can use to unregister
@@ -1079,9 +1094,9 @@ impl ReaperSession {
         T: ControlSurface,
     {
         // Take the low-level Rust control surface out of its storage
-        let double_boxed_low_cs = self.csurf_insts.remove(&handle.reaper_handle())?;
+        let double_boxed_low_cs = self.csurf_insts.remove(&handle.key())?;
         // Unregister the C++ control surface from REAPER
-        let cpp_cs_ptr = handle.reaper_handle().cast();
+        let cpp_cs_ptr = handle.key().cast();
         self.plugin_register_remove(RegistrationObject::CsurfInst(cpp_cs_ptr));
         // Remove the C++ counterpart surface
         delete_cpp_control_surface(cpp_cs_ptr.get());
@@ -1251,12 +1266,10 @@ impl ReaperSession {
         T: OnAudioBuffer,
     {
         // Unregister the low-level audio hook register from REAPER
-        let reaper_ptr = handle.reaper_handle().cast();
+        let reaper_ptr = handle.key().cast();
         unsafe { self.audio_reg_hardware_hook_remove_unchecked(reaper_ptr) };
         // Take the owned audio hook register out of its storage
-        let owned_audio_hook_register = self
-            .audio_hook_registers
-            .release(handle.reaper_handle().cast())?;
+        let owned_audio_hook_register = self.audio_hook_registers.release(handle.key().cast())?;
         // Reconstruct the initial value for handing ownership back to the consumer
         let dyn_callback = owned_audio_hook_register.into_callback();
         // We are not interested in the fat pointer (Box<dyn OnAudioBuffer>) anymore.

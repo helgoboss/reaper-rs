@@ -16,7 +16,7 @@ use std::ptr::NonNull;
 ///
 /// Characteristics:
 ///
-/// - Carries enough information to be able to unregister the register thing (passed to the correct
+/// - Carries enough information to be able to unregister the registered thing (passed to the correct
 ///   function).
 /// - Carries type information so that this handle cannot just be passed to an "unregister" function
 ///   that's intended for unregistering a different type of thing.
@@ -86,12 +86,16 @@ impl<T> Debug for Handle<T> {
 unsafe impl<T> Send for Handle<T> {}
 unsafe impl<T> Sync for Handle<T> {}
 
+pub type RegistrationHandle<T> = GenericRegistrationHandle<Handle<c_void>, T>;
+
 /// A more advanced handle which is returned from some session functions that register something.
 ///
 /// This handle can be used to explicitly unregister the registered object and regain ownership of
 /// the struct which has been passed in originally.
 #[derive(Eq, PartialEq, Hash)]
-pub struct RegistrationHandle<T> {
+pub struct GenericRegistrationHandle<K, T> {
+    /// (Thin) pointer for unregistering the thing that has been passed to REAPER.
+    key: K,
     /// (Thin) pointer for restoring the value stored in the session as its original type.
     ///
     /// In theory the stored trait object itself (`Box<dyn ...>`>) plus the generic parameter `T`
@@ -100,39 +104,34 @@ pub struct RegistrationHandle<T> {
     /// back to a thin pointer, even we know the concrete type. That's why we also store the thin
     /// pointer here, which we have access to before casting to a trait object.
     medium_ptr: NonNull<T>,
-    /// (Thin) pointer for unregistering the thing that has been passed to REAPER.
-    reaper_ptr: Handle<c_void>,
 }
 
 // We might run into situations when it's necessary to promise Rust that passing handles to other
 // threads is okay. And it is because methods which dereference the pointers are either unsafe or
 // do a main thread check first.
-unsafe impl<T> Send for RegistrationHandle<T> {}
-unsafe impl<T> Sync for RegistrationHandle<T> {}
+unsafe impl<K, T> Send for GenericRegistrationHandle<K, T> {}
+unsafe impl<K, T> Sync for GenericRegistrationHandle<K, T> {}
 
-impl<T> Debug for RegistrationHandle<T> {
+impl<K: Debug, T> Debug for GenericRegistrationHandle<K, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("RegistrationHandle")
+        f.debug_struct("GenericRegistrationHandle")
             .field("medium_ptr", &self.medium_ptr)
-            .field("reaper_ptr", &self.reaper_ptr)
+            .field("key", &self.key)
             .finish()
     }
 }
 
-impl<T> Clone for RegistrationHandle<T> {
+impl<K: Copy, T> Clone for GenericRegistrationHandle<K, T> {
     fn clone(&self) -> Self {
         *self
     }
 }
 
-impl<T> Copy for RegistrationHandle<T> {}
+impl<K: Copy, T> Copy for GenericRegistrationHandle<K, T> {}
 
-impl<T> RegistrationHandle<T> {
-    pub(crate) fn new(medium_ptr: NonNull<T>, reaper_ptr: Handle<c_void>) -> RegistrationHandle<T> {
-        RegistrationHandle {
-            medium_ptr,
-            reaper_ptr,
-        }
+impl<K: Copy, T> GenericRegistrationHandle<K, T> {
+    pub(crate) fn new(medium_ptr: NonNull<T>, key: K) -> Self {
+        Self { medium_ptr, key }
     }
 
     /// Restores the value as its original type and makes it owned by putting it into a box.
@@ -143,8 +142,8 @@ impl<T> RegistrationHandle<T> {
         Box::from_raw(self.medium_ptr.as_ptr())
     }
 
-    pub(crate) fn reaper_handle(&self) -> Handle<c_void> {
-        self.reaper_ptr
+    pub(crate) fn key(&self) -> K {
+        self.key
     }
 }
 

@@ -7,6 +7,8 @@ use std::ffi::{c_char, c_int, c_void};
 /// It's documented as array but in accordance with all the other types we express it as struct with named fields.
 /// The important thing is that the memory layout is the same, which it is because each field in the struct
 /// is a pointer (with the same size).
+///
+/// **Keeping this particular field order is vital!**
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct file_in_project_ex2_t {

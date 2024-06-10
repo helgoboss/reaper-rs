@@ -1,4 +1,4 @@
-use crate::{decode_user_data, encode_user_data, ReaProject, ReaperStr};
+use crate::{decode_user_data, encode_user_data, ReaProject, ReaperStr, ReaperString};
 use reaper_low::raw::INT_PTR;
 use reaper_low::{firewall, raw};
 use std::ffi::c_void;
@@ -34,46 +34,50 @@ pub struct FileInProjectCallbackExtArgs {
 }
 
 pub(crate) struct OwnedFileInProjectHook {
-    inner: raw::file_in_project_ex2_t,
-    callback: Box<dyn FileInProjectCallback>,
+    project: ReaProject,
+    user_data: Box<UserData>,
 }
 
 impl Debug for OwnedFileInProjectHook {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         // FileInProjectCallback doesn't generally implement Debug.
         f.debug_struct("OwnedFileInProjectHook")
-            .field("inner", &self.inner)
             .field("callback", &"<omitted>")
             .finish()
     }
 }
 
+struct UserData {
+    file_name: ReaperString,
+    callback: Box<dyn FileInProjectCallback>,
+}
+
 impl OwnedFileInProjectHook {
-    pub fn new<T>(file_name: &ReaperStr, project: ReaProject, callback: Box<T>) -> Self
-    where
-        T: FileInProjectCallback + 'static,
-    {
+    pub fn new(
+        project: ReaProject,
+        file_name: ReaperString,
+        callback: Box<dyn FileInProjectCallback>,
+    ) -> Self {
         Self {
-            inner: raw::file_in_project_ex2_t {
-                // It's okay that this file name goes out of memory. It's explicitly documented that it
-                // only needs to be accessible at the time of registering the callback.
-                file_name: file_name.as_ptr() as *mut _,
-                proj_ptr: project.as_ptr(),
-                user_data_context: encode_user_data(&callback),
-                file_in_project_callback: Some(delegating_callback::<T>),
-            },
-            callback,
+            project,
+            user_data: Box::new(UserData {
+                file_name,
+                callback,
+            }),
         }
     }
 
-    pub fn into_callback(self) -> Box<dyn FileInProjectCallback> {
-        self.callback
-    }
-}
-
-impl AsRef<raw::file_in_project_ex2_t> for OwnedFileInProjectHook {
-    fn as_ref(&self) -> &raw::file_in_project_ex2_t {
-        &self.inner
+    /// This must be called when `self` is at its final place in memory!
+    pub fn create_plugin_register_arg<T>(&self) -> raw::file_in_project_ex2_t
+    where
+        T: FileInProjectCallback + 'static,
+    {
+        raw::file_in_project_ex2_t {
+            file_name: self.user_data.file_name.as_ptr() as *mut _,
+            proj_ptr: self.project.as_ptr(),
+            user_data_context: encode_user_data(&self.user_data),
+            file_in_project_callback: Some(delegating_callback::<T>),
+        }
     }
 }
 
@@ -83,23 +87,28 @@ extern "C" fn delegating_callback<T: FileInProjectCallback>(
     parm: *mut c_void,
 ) -> INT_PTR {
     firewall(|| {
-        let callback_struct: &mut T = decode_user_data(user_data);
+        let user_data: &mut UserData = decode_user_data(user_data);
         match msg {
             0x000 => {
                 if parm.is_null() {
                     return 0;
                 }
                 let new_name = unsafe { ReaperStr::from_ptr(parm as _) };
-                callback_struct.renamed(new_name);
+                // Update our own filename so that we can unregister correctly at a later point
+                // (project pointer, file name content and user data pointer must match when unregistering)
+                user_data.file_name = new_name.to_reaper_string();
+                // Inform the consumer via callback about the rename so that it can react as well
+                user_data.callback.renamed(new_name);
                 0
             }
-            0x100 => callback_struct
+            0x100 => user_data
+                .callback
                 .get_directory_name()
                 .map(|name| name.as_ptr() as _)
                 .unwrap_or(0),
             _ => {
                 let args = FileInProjectCallbackExtArgs { msg, parm };
-                callback_struct.ext(args)
+                user_data.callback.ext(args)
             }
         }
     })

@@ -2,8 +2,47 @@ use crate::Handle;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-// Some structs are not self-contained (completely owned). This container takes only
-// self-contained structs (T). Those self-contained structs expose the data (R).
+/// A very simple collection that keeps completely owned values in memory, identified by an auto-generated ID (handle)
+/// that can later be used to remove the value from the collection.
+#[derive(Debug)]
+pub(crate) struct SimpleKeeper<T> {
+    items: HashMap<usize, Box<T>>,
+    next_id: usize,
+}
+
+impl<T> Default for SimpleKeeper<T> {
+    fn default() -> Self {
+        Self {
+            items: Default::default(),
+            next_id: 0,
+        }
+    }
+}
+
+impl<T> SimpleKeeper<T> {
+    pub fn keep(&mut self, item: T) -> (usize, &T) {
+        let id = self.next_id;
+        self.items.insert(id, Box::new(item));
+        self.next_id += 1;
+        let added_item = self.get(id).unwrap();
+        (id, added_item)
+    }
+
+    pub fn get(&self, handle: usize) -> Option<&T> {
+        let boxed = self.items.get(&handle)?;
+        Some(boxed.as_ref())
+    }
+
+    pub fn release(&mut self, handle: usize) -> Option<T> {
+        let boxed = self.items.remove(&handle)?;
+        Some(*boxed)
+    }
+}
+
+/// Like [`SimpleKeeper`] but the handle is a pointer to a REAPER-specific struct, not just an arbitrary integer.
+///
+/// Some structs are not self-contained (completely owned). This container takes only
+/// self-contained structs (T). Those self-contained structs expose the data (R).
 #[derive(Debug)]
 pub(crate) struct Keeper<T, R> {
     // Maps from a pointer (used as sort of type-safe address/handle) to the struct R that's
@@ -36,6 +75,7 @@ impl<T: AsRef<R>, R> Keeper<T, R> {
     }
 }
 
+/// Like [`Keeper`] but allows for shared ownership between REAPER and the plug-in.
 #[derive(Debug)]
 pub(crate) struct SharedKeeper<T, R> {
     map: HashMap<Handle<R>, Arc<T>>,
