@@ -269,7 +269,7 @@ impl FullPitchShiftMode {
     pub fn to_raw(self) -> i32 {
         let mode = self.mode.get();
         let sub_mode = self.sub_mode.get();
-        ((mode << 2) | sub_mode) as i32
+        ((mode << 16) | sub_mode) as i32
     }
 }
 
