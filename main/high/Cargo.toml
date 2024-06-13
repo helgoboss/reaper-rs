@@ -19,9 +19,7 @@ reaper-medium = { path = '../medium' }
 reaper-low = { path = '../low' }
 helgoboss-midi = "0.4.0"
 regex = "1.3.4"
-slog = "2.5.2"
-slog-stdlog = "4.1.0"
-slog-term = "2.5.0"
+tracing.workspace = true
 num_enum = "0.4.2"
 futures = "0.3"
 serde = { version = "1.0", features = ["derive"], optional = true }

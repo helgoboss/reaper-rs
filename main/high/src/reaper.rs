@@ -8,9 +8,7 @@ use std::sync::{Arc, Weak};
 
 use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
-use crate::{
-    create_default_console_msg_formatter, create_reaper_panic_hook, create_std_logger, Project,
-};
+use crate::{create_default_console_msg_formatter, create_reaper_panic_hook, Project};
 use once_cell::sync::Lazy;
 use reaper_low::{raw, register_plugin_destroy_hook};
 
@@ -25,10 +23,10 @@ use reaper_medium::{
     ReaProject, RealTimeAudioThreadScope, ReaperSession, ReaperStr, ReaperString, ReaperStringArg,
     SectionContext, ToggleAction, ToggleActionResult, WindowContext,
 };
-use slog::{debug, Logger};
 use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
 use std::sync::Mutex;
+use tracing::debug;
 
 /// How many tasks to process at a maximum in one main loop iteration.
 pub const DEFAULT_MAIN_THREAD_TASK_BULK_SIZE: usize = 100;
@@ -51,7 +49,6 @@ static REAPER_GUARD: Lazy<Mutex<Weak<ReaperGuard>>> = Lazy::new(|| Mutex::new(We
 
 pub struct ReaperBuilder {
     medium: reaper_medium::ReaperSession,
-    logger: Option<slog::Logger>,
 }
 
 impl ReaperBuilder {
@@ -61,14 +58,7 @@ impl ReaperBuilder {
                 let low = reaper_low::Reaper::load(context);
                 reaper_medium::ReaperSession::new(low)
             },
-            logger: Default::default(),
         }
-    }
-
-    pub fn logger(mut self, logger: slog::Logger) -> ReaperBuilder {
-        self.require_main_thread();
-        self.logger = Some(logger);
-        self
     }
 
     /// This has an effect only if there isn't an instance already.
@@ -80,14 +70,12 @@ impl ReaperBuilder {
                 // At the moment this is just for logging to console when audio thread panics so
                 // we don't need it to be big.
                 let (helper_task_sender, helper_task_receiver) = crossbeam_channel::bounded(10);
-                let logger = self.logger.unwrap_or_else(create_std_logger);
                 let medium_reaper = self.medium.reaper().clone();
                 let medium_real_time_reaper = self.medium.create_real_time_reaper();
                 let reaper = Reaper {
                     medium_session: RefCell::new(self.medium),
                     medium_reaper,
                     medium_real_time_reaper,
-                    logger: logger.clone(),
                     command_by_id: RefCell::new(HashMap::new()),
                     action_value_change_history: RefCell::new(Default::default()),
                     undo_block_is_active: Cell::new(false),
@@ -120,7 +108,6 @@ pub struct Reaper {
     medium_session: RefCell<reaper_medium::ReaperSession>,
     pub(crate) medium_reaper: reaper_medium::Reaper,
     pub(crate) medium_real_time_reaper: reaper_medium::Reaper<RealTimeAudioThreadScope>,
-    logger: slog::Logger,
     // We take a mutable reference from this RefCell in order to add/remove commands.
     // TODO-low Adding an action in an action would panic because we have an immutable borrow of
     // the map  to obtain and execute the command, plus a mutable borrow of the map to add the
@@ -180,10 +167,7 @@ pub struct ReaperGuard {
 
 impl Drop for ReaperGuard {
     fn drop(&mut self) {
-        debug!(
-            Reaper::get().logger(),
-            "REAPER guard dropped. Going to sleep..."
-        );
+        debug!("REAPER guard dropped. Going to sleep...");
         (self.go_to_sleep.take().unwrap())();
         if self.manage_reaper_state {
             let _ = Reaper::get().go_to_sleep();
@@ -237,13 +221,12 @@ impl Reaper {
     }
 
     /// This has an effect only if there isn't an instance already.
-    pub fn setup_with_defaults(context: PluginContext, logger: Logger, crash_info: CrashInfo) {
+    pub fn setup_with_defaults(context: PluginContext, crash_info: CrashInfo) {
         require_main_thread(&context);
-        Reaper::load(context).logger(logger.clone()).setup();
-        std::panic::set_hook(create_reaper_panic_hook(
-            logger,
-            Some(create_default_console_msg_formatter(crash_info)),
-        ));
+        Reaper::load(context).setup();
+        std::panic::set_hook(create_reaper_panic_hook(Some(
+            create_default_console_msg_formatter(crash_info),
+        )));
     }
 
     /// May be called from any thread.
@@ -265,10 +248,6 @@ impl Reaper {
         }
     }
 
-    pub fn logger(&self) -> &slog::Logger {
-        &self.logger
-    }
-
     /// This wakes reaper-rs up.
     ///
     /// In particular, it does the following:
@@ -283,7 +262,7 @@ impl Reaper {
         if matches!(session_status.deref(), SessionStatus::Awake(_)) {
             return Err("Session is already awake");
         }
-        debug!(self.logger(), "Waking up...");
+        debug!("Waking up...");
         // Functions
         let mut medium = self.medium_session();
         medium
@@ -310,7 +289,7 @@ impl Reaper {
                 })
                 .collect(),
         });
-        debug!(self.logger(), "Woke up");
+        debug!("Woke up");
         Ok(())
     }
 
@@ -321,7 +300,7 @@ impl Reaper {
             SessionStatus::Sleeping => return Err("Session is already sleeping"),
             SessionStatus::Awake(s) => s,
         };
-        debug!(self.logger(), "Going to sleep...");
+        debug!("Going to sleep...");
         let mut medium = self.medium_session();
         // Unregister actions
         for reg in awake_state.action_regs.values() {
@@ -342,7 +321,7 @@ impl Reaper {
         medium.plugin_register_remove_toggle_action::<HighLevelToggleAction>();
         medium.plugin_register_remove_hook_command::<HighLevelHookCommand>();
         *session_status = SessionStatus::Sleeping;
-        debug!(self.logger(), "Sleeping");
+        debug!("Sleeping");
         Ok(())
     }
 

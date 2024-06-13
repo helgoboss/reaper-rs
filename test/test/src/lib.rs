@@ -16,10 +16,10 @@ use std::collections::VecDeque;
 
 use reaper_medium::RegistrationHandle;
 use reaper_rx::{ActionRxHookPostCommand, ActionRxHookPostCommand2, ControlSurfaceRxMiddleware};
-use slog::info;
 use std::error::Error;
 use std::fmt::Display;
 use std::panic::AssertUnwindSafe;
+use tracing::info;
 
 /// Executes the complete integration test.
 ///
@@ -53,7 +53,6 @@ impl TestControlSurfaceMiddleware {
             change_detection_middleware: ChangeDetectionMiddleware::new(),
             rx_middleware: ControlSurfaceRxMiddleware::new(Test::control_surface_rx().clone()),
             main_task_middleware: MainTaskMiddleware::new(
-                Reaper::get().logger().clone(),
                 Test::get().task_sender.clone(),
                 Test::get().task_receiver.clone(),
             ),
@@ -190,6 +189,6 @@ fn log_step(step_index: usize, name: &str) {
 fn log(msg: impl Into<String>) {
     let msg = msg.into();
     let reaper = Reaper::get();
-    info!(reaper.logger(), "{}", &msg);
+    info!("{msg}");
     reaper.show_console_msg(msg)
 }

@@ -1,9 +1,9 @@
 use reaper_high::{ActionKind, Reaper};
 
 use reaper_macros::reaper_extension_plugin;
-use slog::debug;
 use std::error::Error;
 use std::process;
+use tracing::debug;
 
 #[reaper_extension_plugin(
     name = "reaper-rs test extension plug-in",
@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     let reaper = Reaper::get();
     reaper.wake_up()?;
-    debug!(reaper.logger(), "Loaded reaper-rs integration test plugin");
+    debug!("Loaded reaper-rs integration test plugin");
     if run_integration_test {
         println!("From REAPER: Entering reaper-rs integration test...");
         reaper_test::execute_integration_test(|result| {

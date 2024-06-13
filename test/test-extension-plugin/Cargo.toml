@@ -19,7 +19,7 @@ reaper-low = { path = "../../main/low" }
 reaper-test = { path = "../test" }
 reaper-macros = { path = "../../main/macros" }
 c_str_macro = "1.0.2"
-slog = "2.5.2"
+tracing.workspace = true
 
 [dev-dependencies]
 reqwest = { version = "0.10", features = ["blocking"] }

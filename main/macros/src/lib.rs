@@ -110,7 +110,7 @@ fn generate_high_level_plugin_code(
                 plugin_version: #plugin_version.to_string(),
                 support_email_address: #support_email_address.to_string(),
             };
-            ::reaper_high::Reaper::setup_with_defaults(context, ::reaper_high::create_terminal_logger(), crash_info);
+            ::reaper_high::Reaper::setup_with_defaults(context, crash_info);
             #main_function_name()
         }
 

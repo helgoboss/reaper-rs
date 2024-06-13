@@ -13,3 +13,6 @@ members = [
     "test/test-extension-plugin",
     "test/test-vst-plugin"
 ]
+
+[workspace.dependencies]
+tracing = "0.1.40"

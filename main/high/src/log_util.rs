@@ -1,55 +1,21 @@
-use std::io;
-use std::io::{LineWriter, Stdout};
 use std::panic::PanicInfo;
 
 use backtrace::Backtrace;
-use slog::{error, o, Drain, Fuse};
-use slog_term::{FullFormat, PlainSyncDecorator};
 
 use crate::Reaper;
-
-pub fn create_std_logger() -> slog::Logger {
-    slog::Logger::root(slog_stdlog::StdLog.fuse(), o!())
-}
-
-pub fn create_reaper_console_logger() -> slog::Logger {
-    slog::Logger::root(create_reaper_console_drain(), o!())
-}
-
-// TODO-low Async logging: https://github.com/gabime/spdlog/wiki/6.-Asynchronous-logging
-// TODO-low Log to file in user home instead of or in addition to console (for the latter we just
-//  need to create a struct that contains both drains and implements the Drain trait by delegating
-//  to both).
-pub fn create_terminal_logger() -> slog::Logger {
-    slog::Logger::root(create_stdout_drain(), o!())
-}
-
-fn create_stdout_drain() -> Fuse<FullFormat<PlainSyncDecorator<Stdout>>> {
-    let sink = io::stdout();
-    let plain = slog_term::PlainSyncDecorator::new(sink);
-    slog_term::FullFormat::new(plain).build().fuse()
-}
-
-fn create_reaper_console_drain(
-) -> Fuse<FullFormat<PlainSyncDecorator<LineWriter<ReaperConsoleSink>>>> {
-    let sink = io::LineWriter::new(ReaperConsoleSink::new());
-    let plain = slog_term::PlainSyncDecorator::new(sink);
-    slog_term::FullFormat::new(plain).build().fuse()
-}
 
 /// Creates a panic hook which logs the error both to the logging system and optionally to REAPER
 /// console. This is just a convenience function. You can easily write your own panic hook if you
 /// need further customization. Have a look at the existing implementation and used helper
 /// functions.
 pub fn create_reaper_panic_hook(
-    logger: slog::Logger,
     console_msg_formatter: Option<
         impl Fn(&PanicInfo, &Backtrace) -> String + 'static + Sync + Send,
     >,
 ) -> Box<dyn Fn(&PanicInfo<'_>) + 'static + Sync + Send> {
     Box::new(move |panic_info| {
         let backtrace = Backtrace::new();
-        log_panic(&logger, panic_info, &backtrace);
+        log_panic(panic_info, &backtrace);
         if let Some(formatter) = &console_msg_formatter {
             let msg = formatter(panic_info, &backtrace);
             Reaper::get().show_console_msg_thread_safe(msg);
@@ -130,33 +96,11 @@ Message: {panic_message}
     }
 }
 
-pub fn log_panic(logger: &slog::Logger, panic_info: &PanicInfo, backtrace: &Backtrace) {
-    error!(logger, "Plugin panicked";
-        "message" => extract_panic_message(panic_info),
-        "backtrace" => format!("{backtrace:#?}")
+pub fn log_panic(panic_info: &PanicInfo, backtrace: &Backtrace) {
+    tracing::error!(
+        message = extract_panic_message(panic_info),
+        backtrace = format!("{backtrace:#?}")
     );
-}
-
-struct ReaperConsoleSink {}
-
-impl ReaperConsoleSink {
-    fn new() -> ReaperConsoleSink {
-        ReaperConsoleSink {}
-    }
-}
-
-impl std::io::Write for ReaperConsoleSink {
-    fn write(&mut self, buf: &[u8]) -> Result<usize, std::io::Error> {
-        let str_slice =
-            std::str::from_utf8(buf).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        // TODO-medium If the panic happens in audio thread, this won't work!
-        Reaper::get().medium_reaper().show_console_msg(str_slice);
-        Ok(buf.len())
-    }
-
-    fn flush(&mut self) -> Result<(), std::io::Error> {
-        Ok(())
-    }
 }
 
 pub(crate) struct ModuleInfo {

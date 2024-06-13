@@ -1,15 +1,16 @@
 use crate::{local_run_loop_executor, run_loop_executor, Reaper};
 use std::error::Error;
+use tracing::warn;
 
 pub struct FutureSupport {
-    main_thread_future_spawner: crate::run_loop_executor::Spawner,
-    local_main_thread_future_spawner: crate::local_run_loop_executor::Spawner,
+    main_thread_future_spawner: run_loop_executor::Spawner,
+    local_main_thread_future_spawner: local_run_loop_executor::Spawner,
 }
 
 impl FutureSupport {
     pub fn new(
-        main_thread_future_spawner: crate::run_loop_executor::Spawner,
-        local_main_thread_future_spawner: crate::local_run_loop_executor::Spawner,
+        main_thread_future_spawner: run_loop_executor::Spawner,
+        local_main_thread_future_spawner: local_run_loop_executor::Spawner,
     ) -> FutureSupport {
         FutureSupport {
             main_thread_future_spawner,
@@ -42,19 +43,16 @@ impl FutureSupport {
 
 #[derive(Debug)]
 pub struct FutureMiddleware {
-    logger: slog::Logger,
     main_thread_executor: run_loop_executor::RunLoopExecutor,
     local_main_thread_executor: local_run_loop_executor::RunLoopExecutor,
 }
 
 impl FutureMiddleware {
     pub fn new(
-        logger: slog::Logger,
         executor: run_loop_executor::RunLoopExecutor,
         local_executor: local_run_loop_executor::RunLoopExecutor,
     ) -> FutureMiddleware {
         FutureMiddleware {
-            logger: logger.clone(),
             main_thread_executor: executor,
             local_main_thread_executor: local_executor,
         }
@@ -69,8 +67,9 @@ impl FutureMiddleware {
         let local_task_count = self.local_main_thread_executor.discard_tasks();
         let total_task_count = shared_task_count + local_task_count;
         if total_task_count > 0 {
-            slog::warn!(self.logger, "Discarded future tasks on reactivation";
-                "task_count" => total_task_count,
+            warn!(
+                msg = "Discarded future tasks on reactivation",
+                total_task_count,
             );
         }
     }

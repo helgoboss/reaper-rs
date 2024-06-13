@@ -3,6 +3,7 @@ use crossbeam_channel::{Receiver, Sender};
 use crate::{Reaper, DEFAULT_MAIN_THREAD_TASK_BULK_SIZE};
 use futures::channel::oneshot;
 use std::time::{Duration, SystemTime};
+use tracing::warn;
 
 pub struct TaskSupport {
     sender: Sender<MainThreadTask>,
@@ -133,19 +134,16 @@ impl TaskSupport {
 
 #[derive(Debug)]
 pub struct MainTaskMiddleware {
-    logger: slog::Logger,
     main_thread_task_sender: Sender<MainThreadTask>,
     main_thread_task_receiver: Receiver<MainThreadTask>,
 }
 
 impl MainTaskMiddleware {
     pub fn new(
-        logger: slog::Logger,
         main_thread_task_sender: Sender<MainThreadTask>,
         main_thread_task_receiver: Receiver<MainThreadTask>,
     ) -> MainTaskMiddleware {
         MainTaskMiddleware {
-            logger,
             main_thread_task_sender,
             main_thread_task_receiver,
         }
@@ -158,8 +156,9 @@ impl MainTaskMiddleware {
     fn discard_tasks(&self) {
         let task_count = self.main_thread_task_receiver.try_iter().count();
         if task_count > 0 {
-            slog::warn!(self.logger, "Discarded main thread tasks on reactivation";
-                "task_count" => task_count,
+            warn!(
+                msg = "Discarded main thread tasks on reactivation",
+                task_count,
             );
         }
     }
@@ -174,7 +173,7 @@ impl MainTaskMiddleware {
             match task.desired_execution_time {
                 None => (task.op)(),
                 Some(t) => {
-                    if std::time::SystemTime::now() < t {
+                    if SystemTime::now() < t {
                         self.main_thread_task_sender
                             .send(task)
                             .expect("couldn't reschedule main thread task");
@@ -190,15 +189,12 @@ impl MainTaskMiddleware {
 type MainThreadTaskOp = Box<dyn FnOnce() + 'static>;
 
 pub struct MainThreadTask {
-    pub desired_execution_time: Option<std::time::SystemTime>,
+    pub desired_execution_time: Option<SystemTime>,
     pub op: MainThreadTaskOp,
 }
 
 impl MainThreadTask {
-    pub fn new(
-        op: MainThreadTaskOp,
-        desired_execution_time: Option<std::time::SystemTime>,
-    ) -> MainThreadTask {
+    pub fn new(op: MainThreadTaskOp, desired_execution_time: Option<SystemTime>) -> MainThreadTask {
         MainThreadTask {
             desired_execution_time,
             op,

@@ -1,17 +1,17 @@
 use futures_timer::Delay;
 use reaper_high::{
-    create_terminal_logger, ActionKind, CrashInfo, FutureMiddleware, FutureSupport, Reaper,
-    ReaperGuard, DEFAULT_MAIN_THREAD_TASK_BULK_SIZE,
+    ActionKind, CrashInfo, FutureMiddleware, FutureSupport, Reaper, ReaperGuard,
+    DEFAULT_MAIN_THREAD_TASK_BULK_SIZE,
 };
 use reaper_low::{reaper_vst_plugin, static_plugin_context, PluginContext};
 use reaper_medium::{CommandId, ControlSurface, HookPostCommand, OnAudioBuffer, OnAudioBufferArgs};
 use reaper_rx::{ControlSurfaceRx, ControlSurfaceRxMiddleware};
 use rxrust::prelude::*;
-use slog::debug;
 use std::error::Error;
 use std::sync::mpsc::{channel, Receiver};
 use std::sync::Arc;
 use std::time::Duration;
+use tracing::debug;
 #[allow(deprecated)]
 use vst::plugin::{HostCallback, Info, Plugin};
 use vst::plugin_main;
@@ -129,7 +129,6 @@ impl TestVstPlugin {
                     PluginContext::from_vst_plugin(&self.host, static_plugin_context()).unwrap();
                 Reaper::setup_with_defaults(
                     context,
-                    create_terminal_logger(),
                     CrashInfo {
                         plugin_name: "reaper-rs test VST plug-in".to_string(),
                         plugin_version: env!("CARGO_PKG_VERSION").to_string(),
@@ -138,10 +137,7 @@ impl TestVstPlugin {
                 );
                 let reaper = Reaper::get();
                 reaper.wake_up().unwrap();
-                debug!(
-                    reaper.logger(),
-                    "Loaded reaper-rs integration test VST plugin"
-                );
+                debug!("Loaded reaper-rs integration test VST plugin");
                 reaper.register_action(
                     "reaperRsVstIntegrationTests",
                     "reaper-rs VST integration tests",
@@ -188,7 +184,7 @@ impl TestVstPlugin {
         let future_support = FutureSupport::new(spawner, local_spawner);
         let control_surface = CustomControlSurface::new(
             ControlSurfaceRxMiddleware::new(control_surface_rx.clone()),
-            FutureMiddleware::new(Reaper::get().logger().clone(), executor, local_executor),
+            FutureMiddleware::new(executor, local_executor),
         );
         let reaper = Reaper::get();
         // TODO-medium This should be unregistered when VST plug-in removed.
