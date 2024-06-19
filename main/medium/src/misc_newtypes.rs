@@ -845,9 +845,27 @@ impl<'a> ReaperVersion<'a> {
         ReaperVersion(expression.into().into_inner())
     }
 
+    pub fn revision(&self) -> &str {
+        let str = self.0.to_str();
+        str.split_once('/')
+            .map(|(revision, _)| revision)
+            .unwrap_or(str)
+    }
+
+    pub fn os_and_architecture(&self) -> Option<&str> {
+        let (_, os_and_arch) = self.0.to_str().split_once('/')?;
+        Some(os_and_arch)
+    }
+
     /// Consumes this version and spits out the contained cow.
     pub fn into_inner(self) -> Cow<'a, ReaperStr> {
         self.0
+    }
+}
+
+impl<'a> AsRef<str> for ReaperVersion<'a> {
+    fn as_ref(&self) -> &str {
+        self.0.to_str()
     }
 }
 

@@ -2267,9 +2267,19 @@ fn general() -> TestStep {
         // Given
         // When
         let resource_path = reaper.resource_path();
+        let version = reaper.version();
+        let rev = version.revision();
+        let os_and_arch = version
+            .os_and_architecture()
+            .ok_or("REAPER version number doesn't contain os-and-architecture info")?;
         // Then
         assert!(resource_path.is_dir());
         assert!(resource_path.as_str().to_lowercase().contains("reaper"));
+        assert!(!rev.contains("/"));
+        assert!(!os_and_arch.contains("/"));
+        reaper.show_console_msg(format!(
+            "REAPER version = {version} (revision = {rev}, os/arch = {os_and_arch})\n"
+        ));
         Ok(())
     })
 }
