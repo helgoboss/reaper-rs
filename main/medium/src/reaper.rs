@@ -516,7 +516,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// you want to store/read other metadata. E.g. the MP3 side uses ".reapindex" for the MP3
     /// seeking index file.
     ///
-    /// This returns a [`ReaperString`] instead of a [`PathBuf`] because REAPER versions < v7.15+dev0509 had
+    /// This returns a [`CString`] instead of a [`Utf8PathBuf`] because REAPER versions < v7.15+dev0509 had
     /// a bug that could cause the resulting string to not be proper UTF-8 if the
     /// system temp path included non-ASCII characters. So one must be careful when interpreting the result.
     pub fn get_peak_file_name_ex_2<'a>(

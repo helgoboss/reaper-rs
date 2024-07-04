@@ -8,7 +8,7 @@ use std::os::raw::c_int;
 /// Consumers need to implement this trait in order to be called back if REAPER does something with a registered project
 /// file.
 ///
-/// See [`ReaperSession::plugin_register_add_file_in_project_ex2`].
+/// See [`crate::ReaperSession::plugin_register_add_file_in_project_callback`].
 pub trait FileInProjectCallback {
     /// This is called before REAPER renames files and allows you to determine in which subdirectory the
     /// file should go. Return `None` if you don't need the file to be in a subdirectory.

@@ -90,7 +90,17 @@ impl Swell {
                 hinst as _,
                 resid as _,
                 par as _,
-                std::mem::transmute(dlgproc),
+                std::mem::transmute::<
+                    Option<unsafe extern "C" fn(root::HWND, u32, usize, isize) -> isize>,
+                    Option<
+                        unsafe extern "system" fn(
+                            *mut winapi::shared::windef::HWND__,
+                            u32,
+                            usize,
+                            isize,
+                        ) -> isize,
+                    >,
+                >(dlgproc),
                 param,
             ) as _
         }
