@@ -119,8 +119,6 @@ pub use middleware_control_surface::*;
 mod change_detection_middleware;
 pub use change_detection_middleware::*;
 
-mod option_util;
-
 mod bookmark;
 pub use bookmark::*;
 

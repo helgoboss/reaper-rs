@@ -212,7 +212,12 @@ pub fn with_custom_project_state_context<C: CustomProjectStateContext, U>(
     // We need to send 2 things down the call stack: The medium-level callback function
     // and the medium-level user data (which will be passed to that callback function).
     let mut low_level_user_data = LowLevelUserData {
-        medium_level_fn_pointer: unsafe { mem::transmute(use_context) },
+        medium_level_fn_pointer: unsafe {
+            mem::transmute::<
+                for<'a, 'b> fn(&'a BorrowedProjectStateContext, &'b mut U),
+                for<'a, 'b> fn(&'a BorrowedProjectStateContext, &'b mut c_void),
+            >(use_context)
+        },
         medium_level_user_data: user_data as *mut U as *mut c_void,
     };
     unsafe {

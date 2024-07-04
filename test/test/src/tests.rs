@@ -2275,8 +2275,8 @@ fn general() -> TestStep {
         // Then
         assert!(resource_path.is_dir());
         assert!(resource_path.as_str().to_lowercase().contains("reaper"));
-        assert!(!rev.contains("/"));
-        assert!(!os_and_arch.contains("/"));
+        assert!(!rev.contains('/'));
+        assert!(!os_and_arch.contains('/'));
         reaper.show_console_msg(format!(
             "REAPER version = {version} (revision = {rev}, os/arch = {os_and_arch})\n"
         ));
@@ -2340,11 +2340,11 @@ fn volume_types() -> TestStep {
             12.0,
             20.0,
             100_000.0,
-            std::f64::NAN,
+            f64::NAN,
             // std::f64::MIN,
-            std::f64::MAX,
-            std::f64::EPSILON,
-            std::f64::INFINITY,
+            f64::MAX,
+            f64::EPSILON,
+            f64::INFINITY,
             /* std::f64::MIN_POSITIVE,
              * std::f64::NEG_INFINITY, */
         ]

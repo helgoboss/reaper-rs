@@ -182,7 +182,7 @@ impl ChunkRegion {
     }
 
     pub fn is_valid(&self) -> bool {
-        self.length != usize::max_value()
+        self.length != usize::MAX
             && self.start_pos + self.length <= self.parent_chunk.content.borrow().len()
     }
 
@@ -494,11 +494,7 @@ impl ChunkRegion {
     }
 
     fn create_invalid_region(&self) -> ChunkRegion {
-        ChunkRegion::new(
-            self.parent_chunk.clone(),
-            self.start_pos,
-            usize::max_value(),
-        )
+        ChunkRegion::new(self.parent_chunk.clone(), self.start_pos, usize::MAX)
     }
 
     fn create_region_from_relative_start_pos(
