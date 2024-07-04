@@ -6,6 +6,7 @@ use crate::{
 use crate::util::concat_reaper_strs;
 use enumflags2::BitFlags;
 use helgoboss_midi::{U14, U7};
+use reaper_common_types::PositionInSeconds;
 use reaper_low::raw;
 use std::borrow::Cow;
 use std::convert::{TryFrom, TryInto};
@@ -74,6 +75,13 @@ pub enum MasterTrackBehavior {
     ExcludeMasterTrack,
     /// With master track.
     IncludeMasterTrack,
+}
+
+/// Marker or region position.
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum MarkerOrRegionPosition {
+    Marker(PositionInSeconds),
+    Region(PositionInSeconds, PositionInSeconds),
 }
 
 /// Something which refers to a certain marker or region.

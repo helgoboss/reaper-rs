@@ -12,25 +12,26 @@ use crate::{
     FadeShape, FullPitchShiftMode, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
     FxShowInstruction, GangBehavior, GetThemeColorFlags, GlobalAutomationModeOverride, HelpMode,
     Hidden, Hwnd, InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode,
-    ItemAttributeKey, ItemGroupId, KbdSectionInfo, MasterTrackBehavior, MeasureMode, MediaItem,
-    MediaItemTake, MediaTrack, MenuOrToolbarItem, MessageBoxResult, MessageBoxType,
-    MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor,
-    NormalizedPlayRate, NotificationBehavior, OpenMediaExplorerMode, OpenProjectBehavior,
-    OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource,
-    PeakFileMode, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
-    PositionDescriptor, PositionInBeats, PositionInPulsesPerQuarterNote, PositionInQuarterNotes,
-    PositionInSeconds, Progress, ProjectContext, ProjectInfoAttributeKey, ProjectRef,
-    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
-    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
-    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
-    RecordArmMode, RecordingInput, RecordingMode, ReorderTracksBehavior, RequiredViewMode,
-    ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
-    StuffMidiMessageTarget, SubMenuStart, TakeAttributeKey, TimeModeOverride, TimeRangeType,
-    TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
-    TrackFxLocation, TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity,
-    TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory,
-    TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior,
-    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    ItemAttributeKey, ItemGroupId, KbdSectionInfo, MarkerOrRegionPosition, MasterTrackBehavior,
+    MeasureMode, MediaItem, MediaItemTake, MediaTrack, MenuOrToolbarItem, MessageBoxResult,
+    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
+    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior,
+    OpenMediaExplorerMode, OpenProjectBehavior, OwnedPcmSource, OwnedReaperPitchShift,
+    OwnedReaperResample, PanMode, ParamId, PcmSource, PeakFileMode, PitchShiftMode,
+    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionDescriptor, PositionInBeats,
+    PositionInPulsesPerQuarterNote, PositionInQuarterNotes, PositionInSeconds, Progress,
+    ProjectContext, ProjectInfoAttributeKey, ProjectRef, PromptForActionResult, ReaProject,
+    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
+    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
+    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RecordingMode,
+    ReorderTracksBehavior, RequiredViewMode, ResampleMode, SectionContext, SectionId, SendTarget,
+    SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, SubMenuStart, TakeAttributeKey,
+    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
+    TrackMuteState, TrackPolarity, TrackPolarityOperation, TrackRecArmOperation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
+    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -5645,6 +5646,66 @@ impl<UsageScope> Reaper<UsageScope> {
         });
         let owned_string = reaper_string.into_string();
         Utf8PathBuf::from(owned_string)
+    }
+
+    /// Creates a marker or region.
+    ///
+    /// Returns the index of the created marker/region.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn add_project_marker_2<'a>(
+        &self,
+        project: ProjectContext,
+        pos: MarkerOrRegionPosition,
+        name: impl Into<ReaperStringArg<'a>>,
+        at_index: Option<u32>,
+        color: Option<NativeColor>,
+    ) -> ReaperFunctionResult<u32>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.add_project_marker_2_unchecked(project, pos, name, at_index, color) }
+    }
+
+    /// Like [`add_project_marker_2()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`add_project_marker_2()`]: #method.add_project_marker_2
+    pub unsafe fn add_project_marker_2_unchecked<'a>(
+        &self,
+        project: ProjectContext,
+        pos: MarkerOrRegionPosition,
+        name: impl Into<ReaperStringArg<'a>>,
+        at_index: Option<u32>,
+        color: Option<NativeColor>,
+    ) -> ReaperFunctionResult<u32>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let (is_region, start, end) = match pos {
+            MarkerOrRegionPosition::Marker(p) => (false, p.get(), 0.0),
+            MarkerOrRegionPosition::Region(s, e) => (true, s.get(), e.get()),
+        };
+        let index = self.low.AddProjectMarker2(
+            project.to_raw(),
+            is_region,
+            start,
+            end,
+            name.into().as_ptr(),
+            at_index.map(|i| i as i32).unwrap_or(-1),
+            color.map(|c| c.to_raw()).unwrap_or(0),
+        );
+        if index < 0 {
+            return Err(ReaperFunctionError::new("failed to add project marker"));
+        }
+        Ok(index as u32)
     }
 
     /// Returns the master tempo of the current project.
