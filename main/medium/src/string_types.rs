@@ -148,7 +148,8 @@ impl ReaperString {
         ReaperString(inner)
     }
 
-    // Don't make this public!
+    // Don't make this public! If we do, we need to mark it as unsafe (it's like saying "I vow that the given CString
+    // is valid UTF-8").
     pub(crate) fn new(inner: CString) -> ReaperString {
         ReaperString(inner)
     }

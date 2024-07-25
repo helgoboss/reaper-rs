@@ -39,7 +39,8 @@ use reaper_low::raw::GUID;
 
 use crate::ptr_wrappers::require_hwnd_panic;
 use crate::util::{
-    create_passing_c_str, with_buffer, with_string_buffer, with_string_buffer_prefilled,
+    create_passing_c_str, with_buffer, with_string_buffer, with_string_buffer_cstring,
+    with_string_buffer_prefilled,
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use enumflags2::BitFlags;
@@ -3738,10 +3739,11 @@ impl<UsageScope> Reaper<UsageScope> {
                 name: None,
             }
         } else {
-            let (name, is_present) = with_string_buffer(buffer_size, |buffer, max_size| unsafe {
-                self.low
-                    .GetMIDIInputName(device_id.to_raw(), buffer, max_size)
-            });
+            let (name, is_present) =
+                with_string_buffer_cstring(buffer_size, |buffer, max_size| unsafe {
+                    self.low
+                        .GetMIDIInputName(device_id.to_raw(), buffer, max_size)
+                });
             if name.is_empty() {
                 return GetMidiDevNameResult {
                     is_present,
@@ -3778,10 +3780,11 @@ impl<UsageScope> Reaper<UsageScope> {
                 name: None,
             }
         } else {
-            let (name, is_present) = with_string_buffer(buffer_size, |buffer, max_size| unsafe {
-                self.low
-                    .GetMIDIOutputName(device_id.to_raw(), buffer, max_size)
-            });
+            let (name, is_present) =
+                with_string_buffer_cstring(buffer_size, |buffer, max_size| unsafe {
+                    self.low
+                        .GetMIDIOutputName(device_id.to_raw(), buffer, max_size)
+                });
             if name.is_empty() {
                 return GetMidiDevNameResult {
                     is_present,
@@ -8628,7 +8631,11 @@ pub struct GetMidiDevNameResult {
     /// Whether the device is currently connected.
     pub is_present: bool,
     /// Name of the device (only if name requested and device known).
-    pub name: Option<ReaperString>,
+    ///
+    /// This is a [`CString`] instead of a [`ReaperString`] because REAPER versions at least up to < v7.19 have
+    /// a bug that can cause the resulting string to not be proper UTF-8 if the MIDI device contains non-ASCII
+    /// characters. So one must be careful when interpreting the result.
+    pub name: Option<CString>,
 }
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]

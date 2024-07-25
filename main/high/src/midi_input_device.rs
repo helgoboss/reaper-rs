@@ -1,7 +1,8 @@
 use crate::Reaper;
-use reaper_medium::{MidiInput, MidiInputDeviceId, ReaperString};
+use reaper_medium::{MidiInput, MidiInputDeviceId};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+use std::ffi::CString;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(transparent))]
@@ -18,7 +19,7 @@ impl MidiInputDevice {
         self.id
     }
 
-    pub fn name(self) -> Option<ReaperString> {
+    pub fn name(self) -> Option<CString> {
         Reaper::get()
             .medium_reaper()
             .get_midi_input_name(self.id, 64)
