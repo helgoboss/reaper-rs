@@ -3659,6 +3659,48 @@ impl<UsageScope> Reaper<UsageScope> {
     }
 
     /// Creates a new track at the given index.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn insert_track_in_project(
+        &self,
+        project: ProjectContext,
+        index: u32,
+        defaults_behavior: TrackDefaultsBehavior,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe {
+            self.insert_track_in_project_unchecked(project, index, defaults_behavior);
+        }
+    }
+
+    /// Like [`insert_track_in_project_unchecked()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`insert_track_in_project_unchecked()`]: #method.insert_track_in_project_unchecked
+    pub unsafe fn insert_track_in_project_unchecked(
+        &self,
+        project: ProjectContext,
+        index: u32,
+        defaults_behavior: TrackDefaultsBehavior,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.InsertTrackInProject(
+            project.to_raw(),
+            index as i32,
+            (defaults_behavior == TrackDefaultsBehavior::AddDefaultEnvAndFx).into(),
+        );
+    }
+
+    /// Creates a new track at the given index.
     pub fn insert_track_at_index(&self, index: u32, defaults_behavior: TrackDefaultsBehavior)
     where
         UsageScope: MainThreadOnly,

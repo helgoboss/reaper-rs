@@ -1280,6 +1280,9 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(GetSetRepeatEx)).as_ptr()),
                 ),
+                GetSetTempoTimeSigMarkerFlag: std::mem::transmute(plugin_context.GetFunc(
+                    c_str_macro::c_str!(stringify!(GetSetTempoTimeSigMarkerFlag)).as_ptr(),
+                )),
                 GetSetTrackGroupMembership: std::mem::transmute(
                     plugin_context.GetFunc(
                         c_str_macro::c_str!(stringify!(GetSetTrackGroupMembership)).as_ptr(),
@@ -1568,6 +1571,10 @@ impl Reaper {
                 InsertTrackAtIndex: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(InsertTrackAtIndex)).as_ptr()),
+                ),
+                InsertTrackInProject: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(InsertTrackInProject)).as_ptr()),
                 ),
                 IsInRealTimeAudio: std::mem::transmute(
                     plugin_context
@@ -2066,6 +2073,10 @@ impl Reaper {
                 MIDI_InsertTextSysexEvt: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(MIDI_InsertTextSysexEvt)).as_ptr()),
+                ),
+                MIDI_RefreshEditors: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(MIDI_RefreshEditors)).as_ptr()),
                 ),
                 midi_reinit: std::mem::transmute(
                     plugin_context.GetFunc(c_str_macro::c_str!(stringify!(midi_reinit)).as_ptr()),
@@ -4325,6 +4336,9 @@ impl Reaper {
         if pointers.GetSetRepeatEx.is_some() {
             loaded_count += 1;
         }
+        if pointers.GetSetTempoTimeSigMarkerFlag.is_some() {
+            loaded_count += 1;
+        }
         if pointers.GetSetTrackGroupMembership.is_some() {
             loaded_count += 1;
         }
@@ -4554,6 +4568,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.InsertTrackAtIndex.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.InsertTrackInProject.is_some() {
             loaded_count += 1;
         }
         if pointers.IsInRealTimeAudio.is_some() {
@@ -4947,6 +4964,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.MIDI_InsertTextSysexEvt.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.MIDI_RefreshEditors.is_some() {
             loaded_count += 1;
         }
         if pointers.midi_reinit.is_some() {
@@ -10713,6 +10733,24 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetSetTempoTimeSigMarkerFlag(
+        &self,
+        project: *mut root::ReaProject,
+        point_index: ::std::os::raw::c_int,
+        flag: ::std::os::raw::c_int,
+        is_set: bool,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.GetSetTempoTimeSigMarkerFlag {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetSetTempoTimeSigMarkerFlag)
+            ),
+            Some(f) => f(project, point_index, flag, is_set),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetSetTrackGroupMembership(
         &self,
         tr: *mut root::MediaTrack,
@@ -11999,6 +12037,23 @@ impl Reaper {
                 stringify!(InsertTrackAtIndex)
             ),
             Some(f) => f(idx, wantDefaults),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn InsertTrackInProject(
+        &self,
+        proj: *mut root::ReaProject,
+        idx: ::std::os::raw::c_int,
+        flags: ::std::os::raw::c_int,
+    ) {
+        match self.pointers.InsertTrackInProject {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(InsertTrackInProject)
+            ),
+            Some(f) => f(proj, idx, flags),
         }
     }
     pub fn IsInRealTimeAudio(&self) -> ::std::os::raw::c_int {
@@ -14343,6 +14398,18 @@ impl Reaper {
                 stringify!(MIDI_InsertTextSysexEvt)
             ),
             Some(f) => f(take, selected, muted, ppqpos, type_, bytestr, bytestr_sz),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn MIDI_RefreshEditors(&self, tk: *mut root::MediaItem_Take) {
+        match self.pointers.MIDI_RefreshEditors {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(MIDI_RefreshEditors)
+            ),
+            Some(f) => f(tk),
         }
     }
     pub fn midi_reinit(&self) {
@@ -21284,6 +21351,14 @@ pub struct ReaperFunctionPointers {
             val: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
+    pub GetSetTempoTimeSigMarkerFlag: Option<
+        unsafe extern "C" fn(
+            project: *mut root::ReaProject,
+            point_index: ::std::os::raw::c_int,
+            flag: ::std::os::raw::c_int,
+            is_set: bool,
+        ) -> ::std::os::raw::c_int,
+    >,
     pub GetSetTrackGroupMembership: Option<
         unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
@@ -21768,6 +21843,13 @@ pub struct ReaperFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub InsertTrackAtIndex: Option<extern "C" fn(idx: ::std::os::raw::c_int, wantDefaults: bool)>,
+    pub InsertTrackInProject: Option<
+        unsafe extern "C" fn(
+            proj: *mut root::ReaProject,
+            idx: ::std::os::raw::c_int,
+            flags: ::std::os::raw::c_int,
+        ),
+    >,
     pub IsInRealTimeAudio: Option<extern "C" fn() -> ::std::os::raw::c_int>,
     pub IsItemTakeActiveForPlayback: Option<
         unsafe extern "C" fn(item: *mut root::MediaItem, take: *mut root::MediaItem_Take) -> bool,
@@ -22684,6 +22766,7 @@ pub struct ReaperFunctionPointers {
             bytestr_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
+    pub MIDI_RefreshEditors: Option<unsafe extern "C" fn(tk: *mut root::MediaItem_Take)>,
     pub midi_reinit: Option<extern "C" fn()>,
     pub MIDI_SelectAll: Option<unsafe extern "C" fn(take: *mut root::MediaItem_Take, select: bool)>,
     pub MIDI_SetAllEvts: Option<
@@ -24563,5 +24646,5 @@ pub struct ReaperFunctionPointers {
     >,
 }
 impl ReaperFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 859u32;
+    pub(crate) const TOTAL_COUNT: u32 = 862u32;
 }

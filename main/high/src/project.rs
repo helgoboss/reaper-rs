@@ -256,9 +256,14 @@ impl Project {
     // TODO-low Introduce variant that doesn't notify ControlSurface
     pub fn insert_track_at(self, index: u32) -> ReaperResult<Track> {
         self.complain_if_not_available()?;
-        // TODO-low reaper::InsertTrackAtIndex unfortunately doesn't allow to specify ReaProject :(
         let reaper = Reaper::get().medium_reaper();
-        reaper.insert_track_at_index(index, TrackDefaultsBehavior::OmitDefaultEnvAndFx);
+        let behavior = TrackDefaultsBehavior::OmitDefaultEnvAndFx;
+        if reaper.low().pointers().InsertTrackInProject.is_some() {
+            reaper.insert_track_in_project(self.context(), index, behavior);
+        } else {
+            // Old REAPER versions only supported the currently active project
+            reaper.insert_track_at_index(index, behavior);
+        }
         reaper.track_list_update_all_external_surfaces();
         let media_track = reaper.get_track(Proj(self.rea_project), index).unwrap();
         Ok(Track::new(media_track, Some(self.rea_project)))

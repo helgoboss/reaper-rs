@@ -3988,6 +3988,17 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions28GetSetTempoTimeSigMarkerFlagE"]
+            pub static mut GetSetTempoTimeSigMarkerFlag: ::std::option::Option<
+                unsafe extern "C" fn(
+                    project: *mut root::ReaProject,
+                    point_index: ::std::os::raw::c_int,
+                    flag: ::std::os::raw::c_int,
+                    is_set: bool,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions26GetSetTrackGroupMembershipE"]
             pub static mut GetSetTrackGroupMembership: ::std::option::Option<
                 unsafe extern "C" fn(
@@ -4725,6 +4736,16 @@ pub mod root {
             #[link_name = "\u{1}_ZN16reaper_functions18InsertTrackAtIndexE"]
             pub static mut InsertTrackAtIndex: ::std::option::Option<
                 unsafe extern "C" fn(idx: ::std::os::raw::c_int, wantDefaults: bool),
+            >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions20InsertTrackInProjectE"]
+            pub static mut InsertTrackInProject: ::std::option::Option<
+                unsafe extern "C" fn(
+                    proj: *mut root::ReaProject,
+                    idx: ::std::os::raw::c_int,
+                    flags: ::std::os::raw::c_int,
+                ),
             >;
         }
         extern "C" {
@@ -6086,6 +6107,11 @@ pub mod root {
                     bytestr_sz: ::std::os::raw::c_int,
                 ) -> bool,
             >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions19MIDI_RefreshEditorsE"]
+            pub static mut MIDI_RefreshEditors:
+                ::std::option::Option<unsafe extern "C" fn(tk: *mut root::MediaItem_Take)>;
         }
         extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions11midi_reinitE"]
