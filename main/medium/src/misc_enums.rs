@@ -164,6 +164,34 @@ pub enum UndoBehavior {
     AddUndoPoint,
 }
 
+/// Possible things that REAPER wants to know when calling the `hwnd_info` function.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum HwndInfoType {
+    /// REAPER queries if the window should be treated as a text-field for purposes of global hotkeys.
+    ///
+    /// - Return 1 if text field
+    /// - Return -1 if not a text field
+    IsTextField,
+    /// REAPER queries if global hotkeys should be processed for this context (6.60+).
+    ///
+    /// - Return 1 if global hotkey should be skipped (and default accelerator processing used instead)
+    /// - Return -1 if global hotkey should be forced
+    ShouldProcessGlobalHotkeys,
+    /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
+    /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
+    Unknown(Hidden<isize>),
+}
+
+impl HwndInfoType {
+    pub(crate) fn from_raw(value: isize) -> Self {
+        match value {
+            0 => Self::IsTextField,
+            1 => Self::ShouldProcessGlobalHotkeys,
+            x => Self::Unknown(Hidden(x)),
+        }
+    }
+}
+
 /// Determines whether to refresh the UI.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum UiRefreshBehavior {
@@ -746,6 +774,8 @@ pub enum RegistrationObject<'a> {
     HookPostCommand(raw::HookPostCommand),
     /// A hook post command 2.
     HookPostCommand2(raw::HookPostCommand2),
+    /// Function that REAPER calls in order to query information about a window.
+    HwndInfo(raw::HwndInfo),
     /// A timer.
     Timer(raw::TimerFunction),
     /// A toggle action.
@@ -888,6 +918,10 @@ impl<'a> RegistrationObject<'a> {
             },
             HookCustomMenu(func) => PluginRegistration {
                 key: reaper_str!("hookcustommenu").into(),
+                value: func as _,
+            },
+            HwndInfo(func) => PluginRegistration {
+                key: reaper_str!("hwnd_info").into(),
                 value: func as _,
             },
             Timer(func) => PluginRegistration {

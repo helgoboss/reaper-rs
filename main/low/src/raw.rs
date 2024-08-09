@@ -213,5 +213,8 @@ pub type HookPostCommand2 = extern "C" fn(
     proj: *mut ReaProject,
 );
 
+/// Function pointer type that REAPER uses for querying information about a window.
+pub type HwndInfo = extern "C" fn(hwnd: HWND, info_type: INT_PTR) -> c_int;
+
 /// Function pointer type for exposing custom API functions to ReaScript.
 pub type ApiVararg = unsafe extern "C" fn(*mut *mut c_void, c_int) -> *mut c_void;

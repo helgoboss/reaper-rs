@@ -1,7 +1,8 @@
 use crate::{
-    ActionValueChange, CommandId, Hmenu, KbdSectionInfo, MenuHookFlag, ReaProject, ReaperStr,
-    SectionContext, WindowContext,
+    ActionValueChange, CommandId, Hmenu, Hwnd, HwndInfoType, KbdSectionInfo, MenuHookFlag,
+    ReaProject, ReaperStr, SectionContext, WindowContext,
 };
+use reaper_low::raw::{HWND, INT_PTR};
 use reaper_low::{firewall, raw};
 use std::ffi::c_char;
 use std::os::raw::c_int;
@@ -63,6 +64,26 @@ pub(crate) extern "C" fn delegating_hook_command_2<T: HookCommand2>(
         )
     })
     .unwrap_or(false)
+}
+/// Consumers need to implement this trait in order to define what should happen when REAPER wants to know something
+/// about a specific window.
+pub trait HwndInfo {
+    /// The actual callback function invoked by REAPER whenever it needs to know something about a window.
+    ///
+    /// Return 0 if not a known window, or if `info_type` is unknown.
+    fn call(window: Hwnd, info_type: HwndInfoType) -> i32;
+}
+
+pub(crate) extern "C" fn delegating_hwnd_info<T: HwndInfo>(
+    hwnd: HWND,
+    info_type: INT_PTR,
+) -> c_int {
+    firewall(|| {
+        let window = Hwnd::new(hwnd).expect("REAPER hwnd_info hwnd pointer was null");
+        let info_type = HwndInfoType::from_raw(info_type);
+        T::call(window, info_type)
+    })
+    .unwrap_or(0)
 }
 
 /// Consumers need to implement this trait in order to define what should happen when a custom menu is initialized or

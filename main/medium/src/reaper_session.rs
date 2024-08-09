@@ -12,7 +12,7 @@ use crate::{
     delegating_hook_post_command, delegating_hook_post_command_2, delegating_toggle_action,
     AcceleratorPosition, BufferingBehavior, CommandId, ControlSurface, ControlSurfaceAdapter,
     FileInProjectCallback, GenericRegistrationHandle, Handle, HookCommand, HookCommand2,
-    HookCustomMenu, HookPostCommand, HookPostCommand2, MainThreadScope, MeasureAlignment,
+    HookCustomMenu, HookPostCommand, HookPostCommand2, HwndInfo, MainThreadScope, MeasureAlignment,
     OnAudioBuffer, OwnedAcceleratorRegister, OwnedAudioHookRegister, OwnedGaccelRegister,
     OwnedPreviewRegister, PluginRegistration, ProjectContext, ReaProject, RealTimeAudioThreadScope,
     Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperMutex, ReaperString, ReaperStringArg,
@@ -21,7 +21,9 @@ use crate::{
 use reaper_low::raw::audio_hook_register_t;
 
 use crate::file_in_project_hook::OwnedFileInProjectHook;
-use crate::fn_traits::{delegating_hook_custom_menu, delegating_toolbar_icon_map};
+use crate::fn_traits::{
+    delegating_hook_custom_menu, delegating_hwnd_info, delegating_toolbar_icon_map,
+};
 use enumflags2::BitFlags;
 use std::collections::{HashMap, HashSet};
 use std::os::raw::{c_char, c_void};
@@ -315,6 +317,25 @@ impl ReaperSession {
             self.plugin_register_remove(RegistrationObject::HookCommand2(
                 delegating_hook_command_2::<T>,
             ));
+        }
+    }
+
+    /// Registers a function that REAPER calls in order to query information about a window (REAPER 6.29+).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    pub fn plugin_register_add_hwnd_info<T: HwndInfo>(&mut self) -> ReaperFunctionResult<()> {
+        unsafe {
+            self.plugin_register_add(RegistrationObject::HwndInfo(delegating_hwnd_info::<T>))?;
+        }
+        Ok(())
+    }
+
+    /// Unregisters a `hwnd_info` function.
+    pub fn plugin_register_remove_hwnd_info<T: HwndInfo>(&mut self) {
+        unsafe {
+            self.plugin_register_remove(RegistrationObject::HwndInfo(delegating_hwnd_info::<T>));
         }
     }
 
