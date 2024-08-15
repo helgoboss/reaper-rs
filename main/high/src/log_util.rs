@@ -1,8 +1,10 @@
+use std::ffi::CString;
+use std::os::raw::c_char;
 use std::panic::PanicInfo;
 
-use backtrace::Backtrace;
-
 use crate::Reaper;
+use backtrace::Backtrace;
+use reaper_low::Swell;
 
 /// Creates a panic hook which logs the error both to the logging system and optionally to REAPER
 /// console. This is just a convenience function. You can easily write your own panic hook if you
@@ -45,9 +47,10 @@ pub fn create_default_console_msg_formatter(
 ) -> impl Fn(&PanicInfo, &Backtrace) -> String {
     move |panic_info, backtrace| {
         let module_info = determine_module_info();
-        let (module_base_address_label, module_size_label) = match module_info {
-            None => (hyphen(), hyphen()),
-            Some(mi) => (
+        let (module_path, module_base_address_label, module_size_label) = match module_info {
+            Err(_) => (hyphen(), hyphen(), hyphen()),
+            Ok(mi) => (
+                mi.path,
                 format_as_hex(mi.base_address),
                 mi.size.map(format_as_hex).unwrap_or_else(hyphen),
             ),
@@ -75,6 +78,7 @@ Thank you for your support!
 REAPER version:      {reaper_version}
 Module name:         {plugin_name}
 Module version:      {plugin_version}
+Module path:         {module_path}
 Module base address: {module_base_address_label}
 Module size:         {module_size_label}
 
@@ -103,28 +107,59 @@ pub fn log_panic(panic_info: &PanicInfo, backtrace: &Backtrace) {
     );
 }
 
+#[derive(Default)]
 pub(crate) struct ModuleInfo {
     pub base_address: usize,
     pub size: Option<usize>,
+    pub path: String,
 }
 
-pub(crate) fn determine_module_info() -> Option<ModuleInfo> {
+pub(crate) fn determine_module_info() -> Result<ModuleInfo, &'static str> {
+    let hinstance = Reaper::get()
+        .medium_reaper()
+        .plugin_context()
+        .h_instance()
+        .ok_or("couldn't obtain HINSTANCE/HMODULE")?;
     #[cfg(target_family = "windows")]
     {
-        let hinstance = Reaper::get()
-            .medium_reaper()
-            .plugin_context()
-            .h_instance()?;
         let info = ModuleInfo {
             base_address: hinstance.as_ptr() as usize,
             size: determine_module_size(hinstance),
+            path: determine_module_path(hinstance),
         };
-        Some(info)
+        Ok(info)
     }
     #[cfg(not(target_family = "windows"))]
     {
-        None
+        let info = ModuleInfo {
+            base_address: 0,
+            size: None,
+            path: determine_module_path(hinstance),
+        };
+        Ok(info)
     }
+}
+
+fn determine_module_path(hinstance: reaper_medium::Hinstance) -> String {
+    let (cstring, size) = with_string_buffer(1000, |buf, max_size| unsafe {
+        Swell::get().GetModuleFileName(hinstance.as_ptr(), buf, max_size as _)
+    });
+    if size == 0 {
+        return String::new();
+    }
+    cstring.to_string_lossy().to_string()
+}
+
+fn with_string_buffer<T>(
+    max_size: u32,
+    fill_buffer: impl FnOnce(*mut c_char, i32) -> T,
+) -> (CString, T) {
+    let vec: Vec<u8> = vec![1; max_size as usize];
+    let c_string = unsafe { CString::from_vec_unchecked(vec) };
+    let raw = c_string.into_raw();
+    let result = fill_buffer(raw, max_size as i32);
+    let string = unsafe { CString::from_raw(raw) };
+    (string, result)
 }
 
 #[cfg(target_family = "windows")]

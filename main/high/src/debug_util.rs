@@ -58,8 +58,7 @@ fn resolve_multiple_symbols(
         ",
         addresses.len()
     ));
-    let our_module_info = determine_module_info()
-        .ok_or("Couldn't get own module info ... maybe we are not on Windows?")?;
+    let our_module_info = determine_module_info()?;
     if let Some(our_module_size) = our_module_info.size {
         if our_module_size != their_module_size {
             warn(format!(
