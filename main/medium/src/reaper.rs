@@ -854,6 +854,38 @@ impl<UsageScope> Reaper<UsageScope> {
         self.get_set_media_item_take_info(take, TakeAttributeKey::PitchMode, &raw as *const _ as _);
     }
 
+    /// Convenience function which returns the take's pitch adjustment (`D_PITCH`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn get_set_media_item_take_info_get_pitch(&self, take: MediaItemTake) -> Semitones
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_item_take_info(take, TakeAttributeKey::Pitch, null_mut());
+        let raw = deref_as::<f64>(ptr).expect("I_PITCH pointer is null");
+        Semitones::new_panic(raw)
+    }
+
+    /// Convenience function which sets the take's pitch adjustment (`D_PITCH`).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid take.
+    pub unsafe fn get_set_media_item_take_info_set_pitch(
+        &self,
+        take: MediaItemTake,
+        value: Semitones,
+    ) where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let raw = value.get();
+        self.get_set_media_item_take_info(take, TakeAttributeKey::Pitch, &raw as *const _ as _);
+    }
+
     /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
     ///
     /// # Safety
@@ -8927,6 +8959,7 @@ pub enum GetFocusedFxResult {
 }
 
 pub use reaper_common_types::RgbColor;
+use reaper_common_types::Semitones;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct NativeColorValue {

@@ -19,6 +19,7 @@ pub use reaper_common_types::PositionInBeats;
 pub use reaper_common_types::PositionInPulsesPerQuarterNote;
 pub use reaper_common_types::PositionInQuarterNotes;
 pub use reaper_common_types::PositionInSeconds;
+pub use reaper_common_types::Semitones;
 
 /// A command ID.
 ///

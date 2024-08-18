@@ -17,6 +17,7 @@ mod position_in_pulses_per_quarter_note;
 mod position_in_quarter_notes;
 mod position_in_seconds;
 mod rgb_color;
+mod semitones;
 
 pub use bpm::*;
 pub use db::*;
@@ -30,3 +31,4 @@ pub use position_in_pulses_per_quarter_note::*;
 pub use position_in_quarter_notes::*;
 pub use position_in_seconds::*;
 pub use rgb_color::*;
+pub use semitones::*;

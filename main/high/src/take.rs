@@ -1,7 +1,7 @@
 use crate::{FxChain, OwnedSource, Reaper, ReaperSource, Track};
 use reaper_medium::{
     DurationInSeconds, FullPitchShiftMode, MediaItemTake, NativeColorValue, PlaybackSpeedFactor,
-    ReaperFunctionError, ReaperStringArg, ReaperVolumeValue, RgbColor, TakeAttributeKey,
+    ReaperFunctionError, ReaperStringArg, ReaperVolumeValue, RgbColor, Semitones, TakeAttributeKey,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -136,6 +136,22 @@ impl Take {
                 TakeAttributeKey::Vol,
                 volume.get(),
             )
+        }
+    }
+
+    pub fn pitch(&self) -> Semitones {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_take_info_get_pitch(self.raw)
+        }
+    }
+
+    pub fn set_pitch(&self, pitch: Semitones) {
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .get_set_media_item_take_info_set_pitch(self.raw, pitch);
         }
     }
 
