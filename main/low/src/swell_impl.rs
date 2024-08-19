@@ -46,6 +46,11 @@ impl Swell {
         }
     }
 
+    /// Returns whether SWELL has been made available globally already.
+    pub fn is_available_globally() -> bool {
+        unsafe { INSTANCE.is_some() }
+    }
+
     /// Gives access to the SWELL function pointers.
     pub fn pointers(&self) -> &SwellFunctionPointers {
         &self.pointers

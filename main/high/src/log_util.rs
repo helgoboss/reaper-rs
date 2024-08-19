@@ -141,6 +141,9 @@ pub(crate) fn determine_module_info() -> Result<ModuleInfo, &'static str> {
 }
 
 fn determine_module_path(hinstance: reaper_medium::Hinstance) -> String {
+    if !Swell::is_available_globally() {
+        return String::new();
+    }
     let (cstring, size) = with_string_buffer(1000, |buf, max_size| unsafe {
         Swell::get().GetModuleFileName(hinstance.as_ptr(), buf, max_size as _)
     });
