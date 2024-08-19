@@ -45,4 +45,13 @@ impl PanValue {
     pub const MAX: PanValue = PanValue::RIGHT;
 
     nutype_additions!(f64);
+
+    /// Constructs a new value of this type, clamping to the minimum or maximum if the given raw value is invalid.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given raw value is `NaN`.
+    pub fn new_clamped(raw_value: f64) -> Self {
+        Self::new_panic(raw_value.clamp(-1.0, 1.0))
+    }
 }

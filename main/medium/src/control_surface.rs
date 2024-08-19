@@ -763,7 +763,11 @@ impl reaper_low::IReaperControlSurface for ControlSurfaceAdapter {
     fn SetSurfacePan(&self, trackid: *mut raw::MediaTrack, pan: f64) {
         self.delegate.set_surface_pan(SetSurfacePanArgs {
             track: require_media_track_panic(trackid),
-            pan: ReaperPanValue::new_panic(pan),
+            // It can happen that the incoming pan value is out-of-range:
+            // https://github.com/helgoboss/helgobox/issues/1113
+            // Clamping seems to make the most sense here. We still panic if `NaN` is incoming, which didn't happen
+            // so far.
+            pan: ReaperPanValue::new_clamped(pan),
         })
     }
 
