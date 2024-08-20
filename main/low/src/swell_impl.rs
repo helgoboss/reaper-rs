@@ -542,6 +542,21 @@ impl Swell {
         result as _
     }
 
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn GetModuleFileName(
+        &self,
+        hInst: root::HINSTANCE,
+        fn_: *mut ::std::os::raw::c_char,
+        nSize: root::DWORD,
+    ) -> root::DWORD {
+        let len = with_utf16_to_8(fn_, nSize as _, |buffer, max_size| {
+            winapi::um::libloaderapi::GetModuleFileNameW(hInst as _, buffer, nSize) as _
+        });
+        len as _
+    }
+
     /// On Windows this is a constant but in SWELL this is a macro which translates to a function
     /// call.
     pub fn CF_TEXT(&self) -> root::UINT {
