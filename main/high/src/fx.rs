@@ -546,7 +546,23 @@ impl Fx {
     }
 
     pub fn show_in_floating_window(&self) {
-        self.load_if_necessary_or_complain();
+        #[cfg(windows)]
+        {
+            if let Some(window) = self.floating_window() {
+                unsafe {
+                    winapi::um::winuser::SetFocus(window.as_ptr() as _);
+                }
+            } else {
+                self.show_in_floating_window_internal();
+            }
+        }
+        #[cfg(not(windows))]
+        {
+            self.show_in_floating_window_internal();
+        }
+    }
+
+    fn show_in_floating_window_internal(&self) {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {

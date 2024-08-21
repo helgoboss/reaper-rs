@@ -40,4 +40,4 @@ itertools = "0.10.5"
 camino = "1.1.7"
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", features = ["psapi", "processthreadsapi"] }
+winapi = { version = "0.3", features = ["psapi", "processthreadsapi", "winuser"] }
