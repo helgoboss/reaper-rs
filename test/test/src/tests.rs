@@ -473,7 +473,7 @@ fn register_and_unregister_toggle_action() -> TestStep {
             assert!(action.is_available());
             assert_eq!(mock.invocation_count(), 0);
             assert_eq!(action.is_on()?, Some(false));
-            action.invoke_as_trigger(None)?;
+            action.invoke_as_trigger(None, None)?;
             assert_eq!(mock.invocation_count(), 1);
             assert_eq!(mock.last_arg(), 43);
             assert_eq!(action.is_on()?, Some(true));
@@ -511,7 +511,7 @@ fn register_and_unregister_action() -> TestStep {
             // Then
             assert!(action.is_available());
             assert_eq!(mock.invocation_count(), 0);
-            action.invoke_as_trigger(None)?;
+            action.invoke_as_trigger(None, None)?;
             assert_eq!(mock.invocation_count(), 1);
             assert_eq!(mock.last_arg(), 42);
             assert_eq!(action.character()?, ActionCharacter::Trigger);
@@ -710,7 +710,7 @@ fn invoke_action() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        action.invoke_as_trigger(None)?;
+        action.invoke_as_trigger(None, None)?;
         // Then
         assert_eq!(action.is_on()?, Some(true));
         assert!(track.is_muted());

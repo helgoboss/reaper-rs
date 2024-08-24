@@ -3077,6 +3077,32 @@ impl<UsageScope> Reaper<UsageScope> {
         Ok(())
     }
 
+    /// Sends an action command to the given MIDI editor.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the supplied MIDI editor pointer is not valid (not an open MIDI editor).
+    pub fn midi_editor_on_command(
+        &self,
+        midi_editor: Hwnd,
+        command_id: CommandId,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let successful = unsafe {
+            self.low
+                .MIDIEditor_OnCommand(midi_editor.as_ptr(), command_id.to_raw())
+        };
+        if !successful {
+            return Err(ReaperFunctionError::new(
+                "given window is not an open MIDI editor",
+            ));
+        }
+        Ok(())
+    }
+
     /// Informs control surfaces that the given track's mute state has changed.
     ///
     /// Doesn't actually change the mute state.
@@ -8287,16 +8313,21 @@ impl<UsageScope> Reaper<UsageScope> {
     /// play=true will play the file immediately (or toggle playback if mediafn was already open), =false will just select it.
     ///
     /// When in doubt, it returns 0.0 (center).
-    pub fn open_media_explorer(&self, file_name: &Utf8Path, mode: OpenMediaExplorerMode)
+    pub fn open_media_explorer(
+        &self,
+        file_name: &Utf8Path,
+        mode: OpenMediaExplorerMode,
+    ) -> Option<Hwnd>
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
         let file_name_reaper_string = convert_path_to_reaper_string(file_name);
-        unsafe {
+        let ptr = unsafe {
             self.low
-                .OpenMediaExplorer(file_name_reaper_string.as_ptr(), mode.to_raw());
-        }
+                .OpenMediaExplorer(file_name_reaper_string.as_ptr(), mode.to_raw())
+        };
+        Hwnd::new(ptr)
     }
 
     // TODO-high document

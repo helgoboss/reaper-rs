@@ -55,7 +55,11 @@ impl Reaper {
     }
 
     pub fn main_section(&self) -> Section {
-        Section::new(SectionId::new(0))
+        self.section_by_id(SectionId::new(0))
+    }
+
+    pub fn section_by_id(&self, id: SectionId) -> Section {
+        Section::new(id)
     }
 
     pub fn monitoring_fx_chain(&self) -> FxChain {
@@ -344,7 +348,7 @@ impl Reaper {
     pub fn create_empty_project_in_new_tab(&self) -> Project {
         self.main_section()
             .action_by_command_id(CommandId::new(41929))
-            .invoke_as_trigger(None)
+            .invoke_as_trigger(None, None)
             .expect("built-in action for creating empty project must exist");
         self.current_project()
     }

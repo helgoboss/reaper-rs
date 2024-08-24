@@ -1,18 +1,18 @@
 use crate::{ActionCharacter, Project, Reaper, ReaperError, ReaperResult, Section};
 use c_str_macro::c_str;
 use reaper_medium::{
-    AcceleratorBehavior, AcceleratorKeyCode, ActionValueChange, CommandId, ProjectContext,
+    AcceleratorBehavior, AcceleratorKeyCode, ActionValueChange, CommandId, Hwnd, ProjectContext,
     ReaperStr, ReaperString, SectionContext, WindowContext,
 };
 
 use helgoboss_midi::{U14, U7};
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::SectionContext::Sec;
-use reaper_medium::WindowContext::Win;
 use std::borrow::Cow;
 use std::cell::{Ref, RefCell};
 
 use enumflags2::BitFlags;
+use reaper_low::{raw, Swell};
 use std::ffi::CString;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -209,11 +209,20 @@ impl Action {
         Ok(name)
     }
 
-    pub fn invoke_as_trigger(&self, project: Option<Project>) -> ReaperResult<()> {
-        self.invoke_absolute(1.0, project, false)
+    pub fn invoke_as_trigger(
+        &self,
+        project: Option<Project>,
+        window: Option<Hwnd>,
+    ) -> ReaperResult<()> {
+        self.invoke_absolute(1.0, project, false, window)
     }
 
-    pub fn invoke_relative(&self, amount: i32, project: Option<Project>) -> ReaperResult<()> {
+    pub fn invoke_relative(
+        &self,
+        amount: i32,
+        project: Option<Project>,
+        window: Option<Hwnd>,
+    ) -> ReaperResult<()> {
         let relative_value = 64 + amount;
         let cropped_relative_value =
             unsafe { U7::new_unchecked(relative_value.clamp(0, 127) as u8) };
@@ -221,7 +230,7 @@ impl Action {
         // &valhw, &relmode, reaper::GetMainHwnd());
         self.invoke_directly(
             ActionValueChange::Relative2(cropped_relative_value),
-            Win(Reaper::get().medium_reaper().get_main_hwnd()),
+            window,
             match project {
                 None => CurrentProject,
                 Some(p) => Proj(p.raw()),
@@ -234,6 +243,7 @@ impl Action {
         normalized_value: f64,
         project: Option<Project>,
         enforce_7_bit_control: bool,
+        window: Option<Hwnd>,
     ) -> ReaperResult<()> {
         // TODO-low I have no idea how to launch an action in a specific section. The first function
         // doesn't seem to launch the action :(
@@ -255,7 +265,7 @@ impl Action {
         };
         self.invoke_directly(
             value_change,
-            Win(Reaper::get().medium_reaper().get_main_hwnd()),
+            window,
             match project {
                 None => CurrentProject,
                 Some(p) => Proj(p.raw()),
@@ -269,18 +279,41 @@ impl Action {
     pub fn invoke_directly(
         &self,
         value_change: ActionValueChange,
-        window: WindowContext,
+        window: Option<Hwnd>,
         project: ProjectContext,
     ) -> ReaperResult<()> {
         let rd = self.load_if_necessary_or_complain()?;
         let action_command_id = rd.command_id;
-        unsafe {
-            Reaper::get().medium_reaper.kbd_on_main_action_ex(
-                action_command_id,
-                value_change,
-                window,
-                project,
-            );
+        let window_context = window
+            .map(WindowContext::Win)
+            .unwrap_or(WindowContext::NoWindow);
+        let reaper = &Reaper::get().medium_reaper;
+        match rd.section.id().get() {
+            32060 | 32061 => {
+                // MIDI editor
+                let hwnd = window.ok_or("no MIDI editor window available")?;
+                reaper.midi_editor_on_command(hwnd, action_command_id)?
+            }
+            32063 => {
+                // Media explorer
+                let hwnd = window.ok_or("no media explorer window available")?;
+                unsafe {
+                    Swell::get().PostMessage(
+                        hwnd.as_ptr(),
+                        raw::WM_COMMAND,
+                        action_command_id.get() as _,
+                        0,
+                    );
+                }
+            }
+            _ => unsafe {
+                reaper.kbd_on_main_action_ex(
+                    action_command_id,
+                    value_change,
+                    window_context,
+                    project,
+                );
+            },
         }
         Ok(())
     }
