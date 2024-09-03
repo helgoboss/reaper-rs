@@ -38,12 +38,14 @@ impl RecordingInput {
             1024..=1535 => Stereo(v - 1024),
             1536..=2047 => StereoReaRoute(v - 1536),
             2048..=4095 => Unknown(Hidden(rec_input_index)),
-            4096..=6128 => {
+            // Up to 4096 + MAX_MIDI_DEVICE_ID (= 129) * 32 + 16 = 8240 (was previously lower because REAPER used to
+            // have a MAX_MIDI_DEVICE_ID of 63).
+            4096..=8255 => {
                 let midi_index = v - 4096;
                 Midi {
                     device_id: {
                         let raw_device_id = midi_index / 32;
-                        if raw_device_id == ALL_MIDI_DEVICES_FACTOR {
+                        if raw_device_id == ALL_MIDI_DEVICES_ID {
                             None
                         } else {
                             Some(MidiInputDeviceId::new(raw_device_id as u8))
@@ -75,7 +77,7 @@ impl RecordingInput {
             StereoReaRoute(i) => 1536 + i,
             Midi { device_id, channel } => {
                 let device_high = match device_id {
-                    None => ALL_MIDI_DEVICES_FACTOR,
+                    None => ALL_MIDI_DEVICES_ID,
                     Some(id) => id.get() as u32,
                 };
                 let channel_low = match channel {
@@ -90,4 +92,4 @@ impl RecordingInput {
     }
 }
 
-const ALL_MIDI_DEVICES_FACTOR: u32 = 63;
+const ALL_MIDI_DEVICES_ID: u32 = 63;
