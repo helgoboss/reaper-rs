@@ -369,7 +369,7 @@ DOCKED 0
 
     pub fn hide_all_floating_windows(&self) {
         for fx in self.fxs() {
-            fx.hide_floating_window();
+            let _ = fx.hide_floating_window();
         }
     }
 

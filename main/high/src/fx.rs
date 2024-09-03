@@ -9,11 +9,13 @@ use crate::fx_chain::FxChain;
 use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
 use crate::{ChunkRegion, FxChainContext, Project, Reaper, Track};
+use either::Either;
 use reaper_medium::{
     FxPresetRef, FxShowInstruction, Hwnd, ParamId, ReaperFunctionError, ReaperString,
     ReaperStringArg, TrackFxGetPresetIndexResult, TrackFxLocation,
 };
 use std::hash::{Hash, Hasher};
+use std::iter;
 
 #[derive(Clone, Eq, Debug)]
 pub struct Fx {
@@ -85,7 +87,9 @@ impl Fx {
     }
 
     pub fn name(&self) -> ReaperString {
-        self.load_if_necessary_or_complain();
+        if self.load_if_necessary_or_err().is_err() {
+            return Default::default();
+        }
         let buffer_size = 256;
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
@@ -109,8 +113,8 @@ impl Fx {
         self.chain.fx_by_index(index)
     }
 
-    pub fn chunk(&self) -> Result<ChunkRegion, &'static str> {
-        self.load_if_necessary_or_complain();
+    pub fn chunk(&self) -> ReaperResult<ChunkRegion> {
+        self.load_if_necessary_or_err()?;
         let res = self
             .chain()
             .chunk()?
@@ -127,9 +131,9 @@ impl Fx {
         Ok(get_fx_id_line(&self.guid().ok_or("couldn't get GUID")?))
     }
 
-    pub fn tag_chunk(&self) -> Result<ChunkRegion, &'static str> {
-        self.load_if_necessary_or_complain();
-        self.tag_chunk_internal()
+    pub fn tag_chunk(&self) -> ReaperResult<ChunkRegion> {
+        self.load_if_necessary_or_err()?;
+        Ok(self.tag_chunk_internal()?)
     }
 
     fn tag_chunk_internal(&self) -> Result<ChunkRegion, &'static str> {
@@ -154,8 +158,8 @@ impl Fx {
     }
 
     // Attention: Currently implemented by parsing chunk
-    pub fn info(&self) -> Result<FxInfo, &'static str> {
-        self.load_if_necessary_or_complain();
+    pub fn info(&self) -> ReaperResult<FxInfo> {
+        self.load_if_necessary_or_err()?;
         let loc = self.track_and_location();
         let fx_type = self.get_named_config_param_as_string_internal("fx_type", 10, &loc);
         let fx_ident = self.get_named_config_param_as_string_internal("fx_ident", 1000, &loc);
@@ -204,12 +208,17 @@ impl Fx {
             Ok(info)
         } else {
             // This must be REAPER < 6.37. Parse FX info from chunk.
-            FxInfo::from_first_line_of_tag_chunk(&self.tag_chunk_internal()?.first_line().content())
+            let fx_info = FxInfo::from_first_line_of_tag_chunk(
+                &self.tag_chunk_internal()?.first_line().content(),
+            )?;
+            Ok(fx_info)
         }
     }
 
     pub fn parameter_count(&self) -> u32 {
-        self.load_if_necessary_or_complain();
+        if self.load_if_necessary_or_err().is_err() {
+            return 0;
+        }
         self.parameter_count_internal()
     }
 
@@ -316,8 +325,10 @@ impl Fx {
     }
 
     pub fn parameters(&self) -> impl ExactSizeIterator<Item = FxParameter> + '_ {
-        self.load_if_necessary_or_complain();
-        (0..self.parameter_count()).map(move |i| self.parameter_by_index(i))
+        if self.load_if_necessary_or_err().is_err() {
+            return Either::Left(iter::empty());
+        }
+        Either::Right((0..self.parameter_count()).map(move |i| self.parameter_by_index(i)))
     }
 
     /// Returns the GUID of this FX *only* if it has been created in a GUID-based way,
@@ -346,7 +357,7 @@ impl Fx {
 
     /// Falls back to convention if REAPER is too old to support `TrackFX_GetParamFromIdent`.
     pub fn parameter_by_id(&self, id: ParamId) -> Option<FxParameter> {
-        self.load_if_necessary_or_complain();
+        self.load_if_necessary_or_err().ok()?;
         if Reaper::get()
             .medium_reaper()
             .low()
@@ -399,10 +410,11 @@ impl Fx {
         self.index.get().expect("FX index could not be determined")
     }
 
-    fn load_if_necessary_or_complain(&self) {
+    fn load_if_necessary_or_err(&self) -> Result<(), &'static str> {
         if !self.is_loaded_and_at_correct_index() && !self.load_by_guid() {
-            panic!("FX not loadable")
+            return Err("FX not loadable");
         }
+        Ok(())
     }
 
     fn is_loaded_and_at_correct_index(&self) -> bool {
@@ -470,22 +482,23 @@ impl Fx {
     }
 
     // TODO-low Supports track FX only
-    pub fn set_tag_chunk(&self, chunk: &str) -> Result<(), &'static str> {
-        self.replace_track_chunk_region(self.tag_chunk()?, chunk)
+    pub fn set_tag_chunk(&self, chunk: &str) -> ReaperResult<()> {
+        Ok(self.replace_track_chunk_region(self.tag_chunk()?, chunk)?)
     }
 
     // TODO-low Supports track FX only
-    pub fn set_state_chunk(&self, chunk: &str) -> Result<(), &'static str> {
-        self.replace_track_chunk_region(self.state_chunk()?, chunk)
+    pub fn set_state_chunk(&self, chunk: &str) -> ReaperResult<()> {
+        Ok(self.replace_track_chunk_region(self.state_chunk()?, chunk)?)
     }
 
-    pub fn set_vst_chunk(&self, bytes: &[u8]) -> Result<(), &'static str> {
+    pub fn set_vst_chunk(&self, bytes: &[u8]) -> ReaperResult<()> {
         let encoded = base64::encode(bytes);
-        self.set_vst_chunk_encoded(encoded)
+        self.set_vst_chunk_encoded(encoded)?;
+        Ok(())
     }
 
-    pub fn set_vst_chunk_encoded(&self, encoded: String) -> Result<(), &'static str> {
-        self.load_if_necessary_or_complain();
+    pub fn set_vst_chunk_encoded(&self, encoded: String) -> ReaperResult<()> {
+        self.load_if_necessary_or_err()?;
         let c_string =
             CString::new(encoded).map_err(|_| "base64-encoded VST chunk contains nul byte")?;
         unsafe {
@@ -502,15 +515,15 @@ impl Fx {
         base64::decode(encoded_vst_chunk.to_str().as_bytes()).map_err(|_| "couldn't decode bytes")
     }
 
-    pub fn vst_chunk_encoded(&self) -> Result<ReaperString, &'static str> {
-        self.load_if_necessary_or_complain();
+    pub fn vst_chunk_encoded(&self) -> ReaperResult<ReaperString> {
+        self.load_if_necessary_or_err()?;
         let loc = self.track_and_location();
         let encoded = self.get_named_config_param_as_string_internal("vst_chunk", 100_000, &loc)?;
         Ok(encoded)
     }
 
     pub fn floating_window(&self) -> Option<Hwnd> {
-        self.load_if_necessary_or_complain();
+        self.load_if_necessary_or_err().ok()?;
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
@@ -577,8 +590,8 @@ impl Fx {
         }
     }
 
-    pub fn hide_floating_window(&self) {
-        self.load_if_necessary_or_complain();
+    pub fn hide_floating_window(&self) -> ReaperResult<()> {
+        self.load_if_necessary_or_err()?;
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
@@ -591,10 +604,11 @@ impl Fx {
                 }
             }
         }
+        Ok(())
     }
 
-    pub fn show_in_chain(&self) {
-        self.load_if_necessary_or_complain();
+    pub fn show_in_chain(&self) -> ReaperResult<()> {
+        self.load_if_necessary_or_err()?;
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
@@ -606,6 +620,7 @@ impl Fx {
                 }
             }
         }
+        Ok(())
     }
 
     // TODO-low Supports track FX only
@@ -691,7 +706,12 @@ impl Fx {
     }
 
     pub fn preset_index_and_count(&self) -> TrackFxGetPresetIndexResult {
-        self.load_if_necessary_or_complain();
+        if self.load_if_necessary_or_err().is_err() {
+            return TrackFxGetPresetIndexResult {
+                index: None,
+                count: 0,
+            };
+        }
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
@@ -706,7 +726,7 @@ impl Fx {
     }
 
     pub fn activate_preset(&self, preset: FxPresetRef) -> ReaperResult<()> {
-        self.load_if_necessary_or_complain();
+        self.load_if_necessary_or_err()?;
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
@@ -727,7 +747,7 @@ impl Fx {
         &self,
         name: impl Into<ReaperStringArg<'a>>,
     ) -> ReaperResult<()> {
-        self.load_if_necessary_or_complain();
+        self.load_if_necessary_or_err()?;
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
@@ -745,7 +765,9 @@ impl Fx {
     }
 
     pub fn preset_is_dirty(&self) -> bool {
-        self.load_if_necessary_or_complain();
+        if self.load_if_necessary_or_err().is_err() {
+            return false;
+        }
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
@@ -761,7 +783,7 @@ impl Fx {
     }
 
     pub fn preset_name(&self) -> Option<ReaperString> {
-        self.load_if_necessary_or_complain();
+        self.load_if_necessary_or_err().ok()?;
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {

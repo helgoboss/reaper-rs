@@ -2847,7 +2847,7 @@ fn query_fx_floating_window(get_fx_chain: GetFxChain) -> TestStep {
             // Given
             let fx_chain = get_fx_chain()?;
             let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
-            fx.hide_floating_window();
+            fx.hide_floating_window()?;
             // When
             // Then
             assert!(fx.floating_window().is_none());
