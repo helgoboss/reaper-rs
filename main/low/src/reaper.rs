@@ -1288,6 +1288,9 @@ impl Reaper {
                         c_str_macro::c_str!(stringify!(GetSetTrackGroupMembership)).as_ptr(),
                     ),
                 ),
+                GetSetTrackGroupMembershipEx: std::mem::transmute(plugin_context.GetFunc(
+                    c_str_macro::c_str!(stringify!(GetSetTrackGroupMembershipEx)).as_ptr(),
+                )),
                 GetSetTrackGroupMembershipHigh: std::mem::transmute(plugin_context.GetFunc(
                     c_str_macro::c_str!(stringify!(GetSetTrackGroupMembershipHigh)).as_ptr(),
                 )),
@@ -1605,6 +1608,10 @@ impl Reaper {
                 IsTrackVisible: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(IsTrackVisible)).as_ptr()),
+                ),
+                IsWindowTextField: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(IsWindowTextField)).as_ptr()),
                 ),
                 joystick_create: std::mem::transmute(
                     plugin_context
@@ -3349,6 +3356,14 @@ impl Reaper {
                         c_str_macro::c_str!(stringify!(GetCustomMenuOrToolbarItem)).as_ptr(),
                     ),
                 ),
+                AdvancePlaybackPosition: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(AdvancePlaybackPosition)).as_ptr()),
+                ),
+                GetPlayLoopCnt: std::mem::transmute(
+                    plugin_context
+                        .GetFunc(c_str_macro::c_str!(stringify!(GetPlayLoopCnt)).as_ptr()),
+                ),
                 InitializeCoolSB: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(InitializeCoolSB)).as_ptr()),
@@ -4342,6 +4357,9 @@ impl Reaper {
         if pointers.GetSetTrackGroupMembership.is_some() {
             loaded_count += 1;
         }
+        if pointers.GetSetTrackGroupMembershipEx.is_some() {
+            loaded_count += 1;
+        }
         if pointers.GetSetTrackGroupMembershipHigh.is_some() {
             loaded_count += 1;
         }
@@ -4595,6 +4613,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.IsTrackVisible.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.IsWindowTextField.is_some() {
             loaded_count += 1;
         }
         if pointers.joystick_create.is_some() {
@@ -5945,6 +5966,12 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.GetCustomMenuOrToolbarItem.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.AdvancePlaybackPosition.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.GetPlayLoopCnt.is_some() {
             loaded_count += 1;
         }
         if pointers.InitializeCoolSB.is_some() {
@@ -10769,6 +10796,25 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetSetTrackGroupMembershipEx(
+        &self,
+        tr: *mut root::MediaTrack,
+        groupname: *const ::std::os::raw::c_char,
+        offset: ::std::os::raw::c_int,
+        setmask: ::std::os::raw::c_uint,
+        setvalue: ::std::os::raw::c_uint,
+    ) -> ::std::os::raw::c_uint {
+        match self.pointers.GetSetTrackGroupMembershipEx {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetSetTrackGroupMembershipEx)
+            ),
+            Some(f) => f(tr, groupname, offset, setmask, setvalue),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn GetSetTrackGroupMembershipHigh(
         &self,
         tr: *mut root::MediaTrack,
@@ -12152,6 +12198,18 @@ impl Reaper {
                 stringify!(IsTrackVisible)
             ),
             Some(f) => f(track, mixer),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn IsWindowTextField(&self, hwnd: root::HWND) -> bool {
+        match self.pointers.IsWindowTextField {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(IsWindowTextField)
+            ),
+            Some(f) => f(hwnd),
         }
     }
     #[doc = r" # Safety"]
@@ -19719,6 +19777,43 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn AdvancePlaybackPosition(
+        &self,
+        __proj: *mut root::ReaProject,
+        opos: f64,
+        npos: *mut f64,
+        loopcnt: *mut ::std::os::raw::c_longlong,
+        srate: f64,
+        max_spls: *mut ::std::os::raw::c_int,
+        sf: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int {
+        match self.pointers.AdvancePlaybackPosition {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(AdvancePlaybackPosition)
+            ),
+            Some(f) => f(__proj, opos, npos, loopcnt, srate, max_spls, sf),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
+    pub unsafe fn GetPlayLoopCnt(
+        &self,
+        __proj: *mut root::ReaProject,
+        something: *mut ::std::os::raw::c_void,
+    ) -> ::std::os::raw::c_longlong {
+        match self.pointers.GetPlayLoopCnt {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GetPlayLoopCnt)
+            ),
+            Some(f) => f(__proj, something),
+        }
+    }
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn InitializeCoolSB(&self, hwnd: root::HWND) -> root::BOOL {
         match self.pointers.InitializeCoolSB {
             None => panic!(
@@ -21367,6 +21462,15 @@ pub struct ReaperFunctionPointers {
             setvalue: ::std::os::raw::c_uint,
         ) -> ::std::os::raw::c_uint,
     >,
+    pub GetSetTrackGroupMembershipEx: Option<
+        unsafe extern "C" fn(
+            tr: *mut root::MediaTrack,
+            groupname: *const ::std::os::raw::c_char,
+            offset: ::std::os::raw::c_int,
+            setmask: ::std::os::raw::c_uint,
+            setvalue: ::std::os::raw::c_uint,
+        ) -> ::std::os::raw::c_uint,
+    >,
     pub GetSetTrackGroupMembershipHigh: Option<
         unsafe extern "C" fn(
             tr: *mut root::MediaTrack,
@@ -21863,6 +21967,7 @@ pub struct ReaperFunctionPointers {
     pub IsTrackSelected: Option<unsafe extern "C" fn(track: *mut root::MediaTrack) -> bool>,
     pub IsTrackVisible:
         Option<unsafe extern "C" fn(track: *mut root::MediaTrack, mixer: bool) -> bool>,
+    pub IsWindowTextField: Option<unsafe extern "C" fn(hwnd: root::HWND) -> bool>,
     pub joystick_create: Option<
         unsafe extern "C" fn(
             guid: *const root::GUID,
@@ -24591,6 +24696,23 @@ pub struct ReaperFunctionPointers {
             iconFnOutOptional: *mut *const ::std::os::raw::c_char,
         ) -> bool,
     >,
+    pub AdvancePlaybackPosition: Option<
+        unsafe extern "C" fn(
+            __proj: *mut root::ReaProject,
+            opos: f64,
+            npos: *mut f64,
+            loopcnt: *mut ::std::os::raw::c_longlong,
+            srate: f64,
+            max_spls: *mut ::std::os::raw::c_int,
+            sf: *mut ::std::os::raw::c_int,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub GetPlayLoopCnt: Option<
+        unsafe extern "C" fn(
+            __proj: *mut root::ReaProject,
+            something: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_longlong,
+    >,
     pub InitializeCoolSB: Option<unsafe extern "system" fn(hwnd: root::HWND) -> root::BOOL>,
     pub UninitializeCoolSB: Option<unsafe extern "system" fn(hwnd: root::HWND) -> root::HRESULT>,
     pub CoolSB_SetMinThumbSize: Option<
@@ -24646,5 +24768,5 @@ pub struct ReaperFunctionPointers {
     >,
 }
 impl ReaperFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 862u32;
+    pub(crate) const TOTAL_COUNT: u32 = 866u32;
 }

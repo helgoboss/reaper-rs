@@ -102,6 +102,18 @@ pub enum InsertMediaFlag {
     Reverse = 8192,
 }
 
+/// Possible events in `advance_playback_position`.
+#[enumflags2::bitflags]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[repr(u32)]
+pub enum AdvancePlaybackPositionEvent {
+    LoopedSelection = 1,
+    LoopedProject = 2,
+    LoopEndSkip = 4,
+    SmoothSeek = 8,
+    FadeAudition = 16,
+}
+
 /// Defines which track grouping behaviors to prevent when using the `set_track_ui_*` functions.
 #[enumflags2::bitflags]
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]

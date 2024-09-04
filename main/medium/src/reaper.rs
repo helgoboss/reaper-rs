@@ -6,32 +6,32 @@ use reaper_low::{raw, register_plugin_destroy_hook};
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
-    require_media_track_panic, Accel, ActionValueChange, AddFxBehavior, AudioDeviceAttributeKey,
-    AutoSeekBehavior, AutomationMode, BeatAttachMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint,
-    CommandId, CommandItem, Db, DurationInSeconds, EditMode, EnvChunkName, FadeCurvature,
-    FadeShape, FullPitchShiftMode, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
-    FxShowInstruction, GangBehavior, GetThemeColorFlags, GlobalAutomationModeOverride, HelpMode,
-    Hidden, Hwnd, InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode,
-    ItemAttributeKey, ItemGroupId, KbdSectionInfo, MarkerOrRegionPosition, MasterTrackBehavior,
-    MeasureMode, MediaItem, MediaItemTake, MediaTrack, MenuOrToolbarItem, MessageBoxResult,
-    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
-    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior,
-    OpenMediaExplorerMode, OpenProjectBehavior, OwnedPcmSource, OwnedReaperPitchShift,
-    OwnedReaperResample, PanMode, ParamId, PcmSource, PeakFileMode, PitchShiftMode,
-    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionDescriptor, PositionInBeats,
-    PositionInPulsesPerQuarterNote, PositionInQuarterNotes, PositionInSeconds, Progress,
-    ProjectContext, ProjectInfoAttributeKey, ProjectRef, PromptForActionResult, ReaProject,
-    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
-    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RecordingMode,
-    ReorderTracksBehavior, RequiredViewMode, ResampleMode, SectionContext, SectionId, SendTarget,
-    SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, SubMenuStart, TakeAttributeKey,
-    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
-    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
-    TrackMuteState, TrackPolarity, TrackPolarityOperation, TrackRecArmOperation,
-    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
-    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
-    WindowContext,
+    require_media_track_panic, Accel, ActionValueChange, AddFxBehavior,
+    AdvancePlaybackPositionEvent, AudioDeviceAttributeKey, AutoSeekBehavior, AutomationMode,
+    BeatAttachMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, CommandItem, Db,
+    DurationInSeconds, EditMode, EnvChunkName, FadeCurvature, FadeShape, FullPitchShiftMode,
+    FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior,
+    GetThemeColorFlags, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd, InitialAction,
+    InputMonitoringMode, InsertMediaFlag, InsertMediaMode, ItemAttributeKey, ItemGroupId,
+    KbdSectionInfo, MarkerOrRegionPosition, MasterTrackBehavior, MeasureMode, MediaItem,
+    MediaItemTake, MediaTrack, MenuOrToolbarItem, MessageBoxResult, MessageBoxType,
+    MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor,
+    NormalizedPlayRate, NotificationBehavior, OpenMediaExplorerMode, OpenProjectBehavior,
+    OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource,
+    PeakFileMode, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
+    PositionDescriptor, PositionInBeats, PositionInPulsesPerQuarterNote, PositionInQuarterNotes,
+    PositionInSeconds, Progress, ProjectContext, ProjectInfoAttributeKey, ProjectRef,
+    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
+    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
+    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
+    RecordArmMode, RecordingInput, RecordingMode, ReorderTracksBehavior, RequiredViewMode,
+    ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
+    StuffMidiMessageTarget, SubMenuStart, TakeAttributeKey, TimeModeOverride, TimeRangeType,
+    TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
+    TrackFxLocation, TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity,
+    TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory,
+    TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior,
+    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
 
 use helgoboss_midi::ShortMessage;
@@ -311,7 +311,6 @@ impl<UsageScope> Reaper<UsageScope> {
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
         self.require_valid_project(project);
         unsafe { self.get_track_unchecked(project, track_index) }
     }
@@ -8449,6 +8448,93 @@ impl<UsageScope> Reaper<UsageScope> {
         Ok(())
     }
 
+    /// Returns the current play loop count.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn get_play_loop_cnt(&self, project: ProjectContext) -> i64
+    where
+        UsageScope: AnyThread,
+    {
+        self.require_valid_project(project);
+        unsafe { self.get_play_loop_cnt_unchecked(project) }
+    }
+
+    /// Like [`get_play_loop_cnt()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`get_play_loop_cnt()`]: #method.get_play_loop_cnt
+    pub unsafe fn get_play_loop_cnt_unchecked(&self, project: ProjectContext) -> i64
+    where
+        UsageScope: AnyThread,
+    {
+        self.low.GetPlayLoopCnt(project.to_raw(), null_mut())
+    }
+
+    /// You can use this to step through times ahead of the current playback time, loopcnt will get updated on a loop or autoseek etc.
+    ///
+    /// double nextpos = old_pos;
+    /// INT64 lc = GetPlayLoopCnt(proj, NULL);
+    /// int ret = AdvancePlaybackPosition(proj, old_pos, &next_pos, &lc, 0.0 /* or srate */, NULL, NULL);
+    /// ret 1 if looped sel, 2 if looped project, 4 if loopendskip, 8 if smoothseek, 16 if fade audition (all during this block)
+    /// next_pos and lc updated so you can call again to look farther ahead
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    pub unsafe fn advance_playback_position_unchecked(
+        &self,
+        project: ProjectContext,
+        old_pos: PositionInSeconds,
+        loop_count: i64,
+        sample_rate: Option<Hz>,
+    ) -> ReaperFunctionResult<AdvancePlaybackPositionResult>
+    where
+        UsageScope: AnyThread,
+    {
+        let mut next_pos = old_pos.get();
+        let mut new_loop_count = loop_count;
+        // Don't know what those two are about
+        let max_spls = null_mut();
+        let sf = null_mut();
+        let ret = self.low.AdvancePlaybackPosition(
+            project.to_raw(),
+            old_pos.get(),
+            &mut next_pos,
+            &mut new_loop_count,
+            sample_rate.map(|sr| sr.get()).unwrap_or(0.0),
+            max_spls,
+            sf,
+        );
+        if ret < 0 {
+            return Err("AdvancePlaybackPosition failed".into());
+        }
+        let res = AdvancePlaybackPositionResult {
+            events: BitFlags::from_bits_truncate(ret as u32),
+            next_pos: PositionInSeconds::new_panic(next_pos),
+            loop_count: new_loop_count,
+        };
+        Ok(res)
+    }
+
+    /// Returns `true` if the given window is a text field or should behave as such (JSFX editor, hooked via
+    /// `hwnd_info`, etc.).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid window handle.
+    pub unsafe fn is_window_text_field(&self, window: Hwnd) -> bool
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        self.low.IsWindowTextField(window.as_ptr())
+    }
+
     // TODO-high document
     pub fn get_custom_menu_or_toolbar_item<'a, R>(
         &self,
@@ -8989,8 +9075,15 @@ pub enum GetFocusedFxResult {
     Unknown(Hidden<i32>),
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub struct AdvancePlaybackPositionResult {
+    pub events: BitFlags<AdvancePlaybackPositionEvent>,
+    pub next_pos: PositionInSeconds,
+    pub loop_count: i64,
+}
+
 pub use reaper_common_types::RgbColor;
-use reaper_common_types::Semitones;
+use reaper_common_types::{Hz, Semitones};
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct NativeColorValue {

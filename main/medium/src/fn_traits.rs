@@ -1,8 +1,8 @@
 use crate::{
-    ActionValueChange, CommandId, Hmenu, Hwnd, HwndInfoType, KbdSectionInfo, MenuHookFlag,
-    ReaProject, ReaperStr, SectionContext, WindowContext,
+    AccelMsg, ActionValueChange, CommandId, Hmenu, Hwnd, HwndInfoType, KbdSectionInfo,
+    MenuHookFlag, ReaProject, ReaperStr, SectionContext, WindowContext,
 };
-use reaper_low::raw::{HWND, INT_PTR};
+use reaper_low::raw::{HWND, INT_PTR, MSG};
 use reaper_low::{firewall, raw};
 use std::ffi::c_char;
 use std::os::raw::c_int;
@@ -70,8 +70,10 @@ pub(crate) extern "C" fn delegating_hook_command_2<T: HookCommand2>(
 pub trait HwndInfo {
     /// The actual callback function invoked by REAPER whenever it needs to know something about a window.
     ///
+    /// `msg` is only available in REAPER v7.23+.
+    ///
     /// Return 0 if not a known window, or if `info_type` is unknown.
-    fn call(window: Hwnd, info_type: HwndInfoType) -> i32;
+    fn call(window: Hwnd, info_type: HwndInfoType, msg: Option<AccelMsg>) -> i32;
 }
 
 pub(crate) extern "C" fn delegating_hwnd_info<T: HwndInfo>(
@@ -81,7 +83,26 @@ pub(crate) extern "C" fn delegating_hwnd_info<T: HwndInfo>(
     firewall(|| {
         let window = Hwnd::new(hwnd).expect("REAPER hwnd_info hwnd pointer was null");
         let info_type = HwndInfoType::from_raw(info_type);
-        T::call(window, info_type)
+        T::call(window, info_type, None)
+    })
+    .unwrap_or(0)
+}
+
+pub(crate) extern "C" fn delegating_hwnd_info_since_723<T: HwndInfo>(
+    hwnd: HWND,
+    info_type: INT_PTR,
+    msg: *const MSG,
+) -> c_int {
+    firewall(|| {
+        let window = Hwnd::new(hwnd).expect("REAPER hwnd_info hwnd pointer was null");
+        let info_type = HwndInfoType::from_raw(info_type);
+        let msg = if msg.is_null() {
+            None
+        } else {
+            let msg = unsafe { *msg };
+            Some(AccelMsg::from_raw(msg))
+        };
+        T::call(window, info_type, msg)
     })
     .unwrap_or(0)
 }

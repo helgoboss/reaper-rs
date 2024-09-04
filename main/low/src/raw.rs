@@ -17,7 +17,7 @@ pub use super::bindings::root::{
     CSURF_EXT_SETLASTTOUCHEDFX, CSURF_EXT_SETPAN_EX, CSURF_EXT_SETPROJECTMARKERCHANGE,
     CSURF_EXT_SETRECVPAN, CSURF_EXT_SETRECVVOLUME, CSURF_EXT_SETSENDPAN, CSURF_EXT_SETSENDVOLUME,
     CSURF_EXT_SUPPORTS_EXTENDED_TOUCH, CSURF_EXT_TRACKFX_PRESET_CHANGED, LN10_OVER_TWENTY,
-    PCM_SOURCE_EXT_EXPORTTOFILE, PCM_SOURCE_EXT_GETMIDIDATAHASH, PCM_SOURCE_EXT_GETPOOLEDMIDIID,
+    PCM_SOURCE_EXT_EXPORTTOFILE, PCM_SOURCE_EXT_GETHASH, PCM_SOURCE_EXT_GETPOOLEDMIDIID,
     PCM_SOURCE_EXT_OPENEDITOR, PCM_SOURCE_EXT_SETPREVIEWTEMPO, REAPER_PITCHSHIFT_API_VER,
     REAPER_PLUGIN_VERSION, RESAMPLE_EXT_SETRSMODE, TWENTY_OVER_LN10, UNDO_STATE_ALL,
     UNDO_STATE_FREEZE, UNDO_STATE_FX, UNDO_STATE_ITEMS, UNDO_STATE_MISCCFG, UNDO_STATE_TRACKCFG,
@@ -214,7 +214,17 @@ pub type HookPostCommand2 = extern "C" fn(
 );
 
 /// Function pointer type that REAPER uses for querying information about a window.
+///
+/// For REAPER versions v7.22-.
 pub type HwndInfo = extern "C" fn(hwnd: HWND, info_type: INT_PTR) -> c_int;
+
+/// Function pointer type that REAPER uses for querying information about a window.
+///
+/// For REAPER versions v7.23+.
+///
+/// -- note, for v7.23+ ( -- check with GetAppVersion() -- ), you may also use a function with this prototype:
+///      int (*callback)(HWND hwnd, INT_PTR info_type, const MSG *msg); // if msg is non-NULL, it will have information about the currently-processing event.
+pub type HwndInfoSince723 = extern "C" fn(hwnd: HWND, info_type: INT_PTR, msg: *const MSG) -> c_int;
 
 /// Function pointer type for exposing custom API functions to ReaScript.
 pub type ApiVararg = unsafe extern "C" fn(*mut *mut c_void, c_int) -> *mut c_void;

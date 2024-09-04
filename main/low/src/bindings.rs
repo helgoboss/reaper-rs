@@ -405,14 +405,24 @@ pub mod root {
     pub const PCM_SOURCE_EXT_SEND_EDITOR_MSG: i32 = 65546;
     pub const PCM_SOURCE_EXT_SETSECONDARYSOURCELIST: i32 = 65547;
     pub const PCM_SOURCE_EXT_ISOPENEDITOR: i32 = 65548;
+    pub const PCM_SOURCE_EXT_SETEDITORGRID: i32 = 65549;
     pub const PCM_SOURCE_EXT_GETITEMCONTEXT: i32 = 65552;
+    pub const PCM_SOURCE_EXT_GETALLMETADATA_DEPRECATED: i32 = 65553;
+    pub const PCM_SOURCE_EXT_GETBITRATE: i32 = 65554;
+    pub const PCM_SOURCE_EXT_ENUMMETADATA: i32 = 65555;
+    pub const PCM_SOURCE_EXT_GETINFOSTRING: i32 = 65556;
     pub const PCM_SOURCE_EXT_CONFIGISFILENAME: i32 = 131072;
+    pub const PCM_SOURCE_EXT_WRITEMETADATA_DEPRECATED: i32 = 131079;
+    pub const PCM_SOURCE_EXT_WRITE_METADATA: i32 = 131080;
     pub const PCM_SOURCE_EXT_GETBPMANDINFO: i32 = 262144;
     pub const PCM_SOURCE_EXT_GETNTRACKS: i32 = 524288;
     pub const PCM_SOURCE_EXT_GETTITLE: i32 = 524289;
-    pub const PCM_SOURCE_EXT_GETTEMPOMAP: i32 = 524290;
+    pub const PCM_SOURCE_EXT_ENUMTEMPOMAP: i32 = 524290;
     pub const PCM_SOURCE_EXT_WANTOLDBEATSTYLE: i32 = 524291;
-    pub const PCM_SOURCE_EXT_WANTTRIM: i32 = 589826;
+    pub const PCM_SOURCE_EXT_GETNOTATIONSETTINGS: i32 = 524292;
+    pub const PCM_SOURCE_EXT_RELOADTRACKDATA: i32 = 524293;
+    pub const PCM_SOURCE_EXT_WANT_TRIM: i32 = 589825;
+    pub const PCM_SOURCE_EXT_WANTTRIM_DEPRECATED: i32 = 589826;
     pub const PCM_SOURCE_EXT_TRIMITEM: i32 = 589827;
     pub const PCM_SOURCE_EXT_EXPORTTOFILE: i32 = 589828;
     pub const PCM_SOURCE_EXT_ENUMCUES: i32 = 589829;
@@ -428,7 +438,7 @@ pub mod root {
     pub const PCM_SOURCE_EXT_ISABNORMALAUDIO: i32 = 589838;
     pub const PCM_SOURCE_EXT_GETPOOLEDMIDIID: i32 = 589839;
     pub const PCM_SOURCE_EXT_REMOVEFROMMIDIPOOL: i32 = 589840;
-    pub const PCM_SOURCE_EXT_GETMIDIDATAHASH: i32 = 589841;
+    pub const PCM_SOURCE_EXT_GETHASH: i32 = 589841;
     pub const PCM_SOURCE_EXT_GETIMAGE: i32 = 589842;
     pub const PCM_SOURCE_EXT_NOAUDIO: i32 = 589843;
     pub const PCM_SOURCE_EXT_HASMIDI: i32 = 589844;
@@ -440,6 +450,18 @@ pub mod root {
     pub const PCM_SOURCE_EXT_COUNTMIDIEVTS: i32 = 589857;
     pub const PCM_SOURCE_EXT_GETSETMIDIEVT: i32 = 589858;
     pub const PCM_SOURCE_EXT_GETSUGGESTEDTEXT: i32 = 589859;
+    pub const PCM_SOURCE_EXT_GETSCALE: i32 = 589860;
+    pub const PCM_SOURCE_EXT_SELECTCONTENT: i32 = 589861;
+    pub const PCM_SOURCE_EXT_GETGRIDINFO: i32 = 589862;
+    pub const PCM_SOURCE_EXT_SORTMIDIEVTS: i32 = 36903;
+    pub const PCM_SOURCE_EXT_MIDI_COMPACTPHRASES: i32 = 589864;
+    pub const PCM_SOURCE_EXT_GETSETALLMIDI: i32 = 589865;
+    pub const PCM_SOURCE_EXT_DISABLESORTMIDIEVTS: i32 = 589872;
+    pub const PCM_SOURCE_EXT_GETPOOLEDMIDIID2: i32 = 589873;
+    pub const PCM_SOURCE_EXT_GETSETMIDICHANFILTER: i32 = 589874;
+    pub const PCM_SOURCE_EXT_REFRESH_EDITORS: i32 = 589875;
+    pub const PCM_SOURCE_EXT_GETLAPPING: i32 = 786688;
+    pub const PCM_SOURCE_EXT_SET_PREVIEW_POS_OVERRIDE: i32 = 786689;
     pub const PCM_SINK_EXT_CREATESOURCE: i32 = 524288;
     pub const PCM_SINK_EXT_DONE: i32 = 524289;
     pub const PCM_SINK_EXT_VERIFYFMT: i32 = 524290;
@@ -448,6 +470,7 @@ pub mod root {
     pub const PCM_SINK_EXT_GETBITDEPTH: i32 = 524293;
     pub const PCM_SINK_EXT_ADDCUE: i32 = 524294;
     pub const PCM_SINK_EXT_SETCURBLOCKTIME: i32 = 524295;
+    pub const PCM_SINK_EXT_IS_VIDEO: i32 = 524296;
     pub const RESAMPLE_EXT_SETRSMODE: i32 = 4096;
     pub const RESAMPLE_EXT_SETFEEDMODE: i32 = 4097;
     pub const RESAMPLE_EXT_RESETWITHFRACPOS: i32 = 24576;
@@ -461,11 +484,12 @@ pub mod root {
     pub const CSURF_EXT_SETSENDPAN: i32 = 65542;
     pub const CSURF_EXT_SETFXENABLED: i32 = 65543;
     pub const CSURF_EXT_SETFXPARAM: i32 = 65544;
+    pub const CSURF_EXT_SETFXPARAM_RECFX: i32 = 65560;
+    pub const CSURF_EXT_SETBPMANDPLAYRATE: i32 = 65545;
     pub const CSURF_EXT_SETLASTTOUCHEDFX: i32 = 65546;
     pub const CSURF_EXT_SETFOCUSEDFX: i32 = 65547;
     pub const CSURF_EXT_SETLASTTOUCHEDTRACK: i32 = 65548;
     pub const CSURF_EXT_SETMIXERSCROLL: i32 = 65549;
-    pub const CSURF_EXT_SETBPMANDPLAYRATE: i32 = 65545;
     pub const CSURF_EXT_SETPAN_EX: i32 = 65550;
     pub const CSURF_EXT_SETRECVVOLUME: i32 = 65552;
     pub const CSURF_EXT_SETRECVPAN: i32 = 65553;
@@ -473,14 +497,17 @@ pub mod root {
     pub const CSURF_EXT_SETFXCHANGE: i32 = 65555;
     pub const CSURF_EXT_SETPROJECTMARKERCHANGE: i32 = 65556;
     pub const CSURF_EXT_TRACKFX_PRESET_CHANGED: i32 = 65557;
-    pub const CSURF_EXT_SETFXPARAM_RECFX: i32 = 65560;
     pub const CSURF_EXT_SUPPORTS_EXTENDED_TOUCH: i32 = 524289;
+    pub const CSURF_EXT_MIDI_DEVICE_REMAP: i32 = 65689;
     pub const UNDO_STATE_ALL: u32 = 4294967295;
     pub const UNDO_STATE_TRACKCFG: u32 = 1;
     pub const UNDO_STATE_FX: u32 = 2;
     pub const UNDO_STATE_ITEMS: u32 = 4;
     pub const UNDO_STATE_MISCCFG: u32 = 8;
     pub const UNDO_STATE_FREEZE: u32 = 16;
+    pub const UNDO_STATE_TRACKENV: u32 = 32;
+    pub const UNDO_STATE_FXENV: u32 = 64;
+    pub const UNDO_STATE_POOLEDENVS: u32 = 128;
     pub const TWENTY_OVER_LN10: f64 = 8.685889638065037;
     pub const LN10_OVER_TWENTY: f64 = 0.11512925464970228;
     pub type ReaSample = f64;
@@ -1004,6 +1031,10 @@ pub mod root {
         pub size: ::std::os::raw::c_int,
         pub midi_message: [::std::os::raw::c_uchar; 4usize],
     }
+    pub const MIDI_event_t_CC_ALL_SOUND_OFF: root::MIDI_event_t__bindgen_ty_1 = 120;
+    pub const MIDI_event_t_CC_ALL_NOTES_OFF: root::MIDI_event_t__bindgen_ty_1 = 123;
+    pub const MIDI_event_t_CC_EOF_INDICATOR: root::MIDI_event_t__bindgen_ty_1 = 123;
+    pub type MIDI_event_t__bindgen_ty_1 = u32;
     #[repr(C)]
     pub struct MIDI_eventlist__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
@@ -1019,7 +1050,7 @@ pub mod root {
     #[doc = " PCM source API"]
     #[repr(C)]
     #[derive(Debug, Copy, Clone, PartialEq)]
-    pub struct PCM_source_transfer_t {
+    pub struct _PCM_source_transfer_t {
         pub time_s: f64,
         pub samplerate: f64,
         pub nch: ::std::os::raw::c_int,
@@ -1031,14 +1062,16 @@ pub mod root {
         pub absolute_time_s: f64,
         pub force_bpm: f64,
     }
-    impl Default for PCM_source_transfer_t {
+    impl Default for _PCM_source_transfer_t {
         fn default() -> Self {
             unsafe { ::std::mem::zeroed() }
         }
     }
+    #[doc = " PCM source API"]
+    pub type PCM_source_transfer_t = root::_PCM_source_transfer_t;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, PartialEq)]
-    pub struct PCM_source_peaktransfer_t {
+    pub struct _PCM_source_peaktransfer_t {
         pub start_time: f64,
         pub peakrate: f64,
         pub numpeak_points: ::std::os::raw::c_int,
@@ -1050,27 +1083,43 @@ pub mod root {
         pub peaks_minvals: *mut root::ReaSample,
         pub peaks_minvals_used: ::std::os::raw::c_int,
         pub samplerate: f64,
-        pub exp: [*mut ::std::os::raw::c_int; 30usize],
+        pub extra_requested_data_type: ::std::os::raw::c_int,
+        pub extra_requested_data_out: ::std::os::raw::c_int,
+        pub extra_requested_data: *mut ::std::os::raw::c_void,
+        pub __peakgetter: *mut root::REAPER_PeakGet_Interface,
+        pub exp: [*mut ::std::os::raw::c_int; 27usize],
     }
-    pub const PCM_source_peaktransfer_t_PEAKTRANSFER_PEAKS_MODE:
-        root::PCM_source_peaktransfer_t__bindgen_ty_1 = 0;
-    pub const PCM_source_peaktransfer_t_PEAKTRANSFER_WAVEFORM_MODE:
-        root::PCM_source_peaktransfer_t__bindgen_ty_1 = 1;
-    pub const PCM_source_peaktransfer_t_PEAKTRANSFER_MIDI_NOTE_MODE:
-        root::PCM_source_peaktransfer_t__bindgen_ty_1 = 2;
-    pub const PCM_source_peaktransfer_t_PEAKTRANSFER_MIDI_DRUM_MODE:
-        root::PCM_source_peaktransfer_t__bindgen_ty_1 = 3;
-    pub const PCM_source_peaktransfer_t_PEAKTRANSFER_MIDI_DRUM_TRIANGLE_MODE:
-        root::PCM_source_peaktransfer_t__bindgen_ty_1 = 4;
-    pub type PCM_source_peaktransfer_t__bindgen_ty_1 = u32;
-    impl Default for PCM_source_peaktransfer_t {
+    pub const _PCM_source_peaktransfer_t_PEAKTRANSFER_PEAKS_MODE:
+        root::_PCM_source_peaktransfer_t__bindgen_ty_1 = 0;
+    pub const _PCM_source_peaktransfer_t_PEAKTRANSFER_WAVEFORM_MODE:
+        root::_PCM_source_peaktransfer_t__bindgen_ty_1 = 1;
+    pub const _PCM_source_peaktransfer_t_PEAKTRANSFER_MIDI_NOTE_MODE:
+        root::_PCM_source_peaktransfer_t__bindgen_ty_1 = 2;
+    pub const _PCM_source_peaktransfer_t_PEAKTRANSFER_MIDI_DRUM_MODE:
+        root::_PCM_source_peaktransfer_t__bindgen_ty_1 = 3;
+    pub const _PCM_source_peaktransfer_t_PEAKTRANSFER_MIDI_DRUM_TRIANGLE_MODE:
+        root::_PCM_source_peaktransfer_t__bindgen_ty_1 = 4;
+    pub type _PCM_source_peaktransfer_t__bindgen_ty_1 = u32;
+    pub const _PCM_source_peaktransfer_t_SPECTROGRAM1_BLOCKSIZE_BYTES:
+        root::_PCM_source_peaktransfer_t__bindgen_ty_2 = 192;
+    pub const _PCM_source_peaktransfer_t_SPECTRAL1_BYTES:
+        root::_PCM_source_peaktransfer_t__bindgen_ty_2 = 4;
+    pub const _PCM_source_peaktransfer_t_MIDITEXT_BYTES:
+        root::_PCM_source_peaktransfer_t__bindgen_ty_2 = 1;
+    pub const _PCM_source_peaktransfer_t_LOUDNESS_DEPRECATED_BYTES:
+        root::_PCM_source_peaktransfer_t__bindgen_ty_2 = 4;
+    pub const _PCM_source_peaktransfer_t_LOUDNESS_RAW_BYTES:
+        root::_PCM_source_peaktransfer_t__bindgen_ty_2 = 8;
+    pub type _PCM_source_peaktransfer_t__bindgen_ty_2 = u32;
+    impl Default for _PCM_source_peaktransfer_t {
         fn default() -> Self {
             unsafe { ::std::mem::zeroed() }
         }
     }
+    pub type PCM_source_peaktransfer_t = root::_PCM_source_peaktransfer_t;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, PartialEq)]
-    pub struct midi_realtime_write_struct_t {
+    pub struct _REAPER_midi_realtime_write_struct_t {
         pub global_time: f64,
         pub global_item_time: f64,
         pub srate: f64,
@@ -1080,12 +1129,14 @@ pub mod root {
         pub item_playrate: f64,
         pub latency: f64,
         pub overwrite_actives: *mut ::std::os::raw::c_uint,
+        pub do_not_quantize_past_sec: f64,
     }
-    impl Default for midi_realtime_write_struct_t {
+    impl Default for _REAPER_midi_realtime_write_struct_t {
         fn default() -> Self {
             unsafe { ::std::mem::zeroed() }
         }
     }
+    pub type midi_realtime_write_struct_t = root::_REAPER_midi_realtime_write_struct_t;
     #[repr(C)]
     pub struct PCM_source__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
@@ -1113,7 +1164,7 @@ pub mod root {
     #[doc = " PCM sink API"]
     #[repr(C)]
     #[derive(Debug, Default, Copy, Clone, PartialEq)]
-    pub struct midi_quantize_mode_t {
+    pub struct _REAPER_midi_quantize_mode_t {
         pub doquant: bool,
         pub movemode: ::std::os::raw::c_char,
         pub sizemode: ::std::os::raw::c_char,
@@ -1123,6 +1174,8 @@ pub mod root {
         pub range_min: ::std::os::raw::c_char,
         pub range_max: ::std::os::raw::c_char,
     }
+    #[doc = " PCM sink API"]
+    pub type midi_quantize_mode_t = root::_REAPER_midi_quantize_mode_t;
     #[repr(C)]
     pub struct PCM_sink__bindgen_vtable(::std::os::raw::c_void);
     #[repr(C)]
@@ -1212,15 +1265,16 @@ pub mod root {
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct gaccel_register_t {
+    pub struct _REAPER_gaccel_register_t {
         pub accel: root::ACCEL,
         pub desc: *const ::std::os::raw::c_char,
     }
-    impl Default for gaccel_register_t {
+    impl Default for _REAPER_gaccel_register_t {
         fn default() -> Self {
             unsafe { ::std::mem::zeroed() }
         }
     }
+    pub type gaccel_register_t = root::_REAPER_gaccel_register_t;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct audio_hook_register_t {
@@ -1250,30 +1304,32 @@ pub mod root {
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct KbdCmd {
+    pub struct _REAPER_KbdCmd {
         pub cmd: root::DWORD,
         pub text: *const ::std::os::raw::c_char,
     }
-    impl Default for KbdCmd {
+    impl Default for _REAPER_KbdCmd {
         fn default() -> Self {
             unsafe { ::std::mem::zeroed() }
         }
     }
+    pub type KbdCmd = root::_REAPER_KbdCmd;
     #[repr(C)]
     #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct KbdKeyBindingInfo {
+    pub struct _REAPER_KbdKeyBindingInfo {
         pub key: ::std::os::raw::c_int,
         pub cmd: ::std::os::raw::c_int,
         pub flags: ::std::os::raw::c_int,
     }
+    pub type KbdKeyBindingInfo = root::_REAPER_KbdKeyBindingInfo;
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-    pub struct KbdSectionInfo {
+    pub struct _REAPER_KbdSectionInfo {
         pub uniqueID: ::std::os::raw::c_int,
         pub name: *const ::std::os::raw::c_char,
         pub action_list: *mut root::KbdCmd,
         pub action_list_cnt: ::std::os::raw::c_int,
-        pub def_keys: *mut root::KbdKeyBindingInfo,
+        pub def_keys: *const root::KbdKeyBindingInfo,
         pub def_keys_cnt: ::std::os::raw::c_int,
         pub onAction: ::std::option::Option<
             unsafe extern "C" fn(
@@ -1288,7 +1344,25 @@ pub mod root {
         pub recent_cmds: *mut ::std::os::raw::c_void,
         pub extended_data: [*mut ::std::os::raw::c_void; 32usize],
     }
-    impl Default for KbdSectionInfo {
+    impl Default for _REAPER_KbdSectionInfo {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
+    pub type KbdSectionInfo = root::_REAPER_KbdSectionInfo;
+    #[repr(C)]
+    #[derive(Copy, Clone)]
+    pub struct _REAPER_preview_register_t {
+        pub mutex: root::pthread_mutex_t,
+        pub src: *mut root::PCM_source,
+        pub m_out_chan: ::std::os::raw::c_int,
+        pub curpos: f64,
+        pub loop_: bool,
+        pub volume: f64,
+        pub peakvol: [f64; 2usize],
+        pub preview_track: *mut ::std::os::raw::c_void,
+    }
+    impl Default for _REAPER_preview_register_t {
         fn default() -> Self {
             unsafe { ::std::mem::zeroed() }
         }
@@ -4010,6 +4084,18 @@ pub mod root {
             >;
         }
         extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions28GetSetTrackGroupMembershipExE"]
+            pub static mut GetSetTrackGroupMembershipEx: ::std::option::Option<
+                unsafe extern "C" fn(
+                    tr: *mut root::MediaTrack,
+                    groupname: *const ::std::os::raw::c_char,
+                    offset: ::std::os::raw::c_int,
+                    setmask: ::std::os::raw::c_uint,
+                    setvalue: ::std::os::raw::c_uint,
+                ) -> ::std::os::raw::c_uint,
+            >;
+        }
+        extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions30GetSetTrackGroupMembershipHighE"]
             pub static mut GetSetTrackGroupMembershipHigh: ::std::option::Option<
                 unsafe extern "C" fn(
@@ -4793,6 +4879,11 @@ pub mod root {
             pub static mut IsTrackVisible: ::std::option::Option<
                 unsafe extern "C" fn(track: *mut root::MediaTrack, mixer: bool) -> bool,
             >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions17IsWindowTextFieldE"]
+            pub static mut IsWindowTextField:
+                ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND) -> bool>;
         }
         extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions15joystick_createE"]
@@ -9106,6 +9197,29 @@ pub mod root {
                     strOutOptional: *mut *const ::std::os::raw::c_char,
                     iconFnOutOptional: *mut *const ::std::os::raw::c_char,
                 ) -> bool,
+            >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions23AdvancePlaybackPositionE"]
+            pub static mut AdvancePlaybackPosition: ::std::option::Option<
+                unsafe extern "C" fn(
+                    __proj: *mut root::ReaProject,
+                    opos: f64,
+                    npos: *mut f64,
+                    loopcnt: *mut ::std::os::raw::c_longlong,
+                    srate: f64,
+                    max_spls: *mut ::std::os::raw::c_int,
+                    sf: *mut ::std::os::raw::c_int,
+                ) -> ::std::os::raw::c_int,
+            >;
+        }
+        extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions14GetPlayLoopCntE"]
+            pub static mut GetPlayLoopCnt: ::std::option::Option<
+                unsafe extern "C" fn(
+                    __proj: *mut root::ReaProject,
+                    something: *mut ::std::os::raw::c_void,
+                ) -> ::std::os::raw::c_longlong,
             >;
         }
         extern "C" {

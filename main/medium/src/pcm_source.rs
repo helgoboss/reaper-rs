@@ -541,11 +541,11 @@ impl BorrowedPcmSource {
     /// # Errors
     ///
     /// Returns an error if not supported.
-    pub fn ext_get_midi_data_hash(&self) -> ReaperFunctionResult<u64> {
+    pub fn ext_get_hash(&self) -> ReaperFunctionResult<u64> {
         let mut hash: MaybeUninit<u64> = MaybeUninit::zeroed();
         let supported = unsafe {
             self.0.Extended(
-                raw::PCM_SOURCE_EXT_GETMIDIDATAHASH as _,
+                raw::PCM_SOURCE_EXT_GETHASH as _,
                 hash.as_mut_ptr() as _,
                 null_mut(),
                 null_mut(),

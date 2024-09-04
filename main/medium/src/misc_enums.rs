@@ -776,6 +776,10 @@ pub enum RegistrationObject<'a> {
     HookPostCommand2(raw::HookPostCommand2),
     /// Function that REAPER calls in order to query information about a window.
     HwndInfo(raw::HwndInfo),
+    /// Function that REAPER calls in order to query information about a window.
+    ///
+    /// Supported for REAPER 7.23+ only.
+    HwndInfoSince723(raw::HwndInfoSince723),
     /// A timer.
     Timer(raw::TimerFunction),
     /// A toggle action.
@@ -921,6 +925,10 @@ impl<'a> RegistrationObject<'a> {
                 value: func as _,
             },
             HwndInfo(func) => PluginRegistration {
+                key: reaper_str!("hwnd_info").into(),
+                value: func as _,
+            },
+            HwndInfoSince723(func) => PluginRegistration {
                 key: reaper_str!("hwnd_info").into(),
                 value: func as _,
             },

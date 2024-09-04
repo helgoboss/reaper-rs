@@ -22,7 +22,8 @@ use reaper_low::raw::audio_hook_register_t;
 
 use crate::file_in_project_hook::OwnedFileInProjectHook;
 use crate::fn_traits::{
-    delegating_hook_custom_menu, delegating_hwnd_info, delegating_toolbar_icon_map,
+    delegating_hook_custom_menu, delegating_hwnd_info, delegating_hwnd_info_since_723,
+    delegating_toolbar_icon_map,
 };
 use enumflags2::BitFlags;
 use std::collections::{HashMap, HashSet};
@@ -326,16 +327,27 @@ impl ReaperSession {
     ///
     /// Returns an error if the registration failed.
     pub fn plugin_register_add_hwnd_info<T: HwndInfo>(&mut self) -> ReaperFunctionResult<()> {
+        let object = self.get_hwnd_info_reg_object::<T>();
         unsafe {
-            self.plugin_register_add(RegistrationObject::HwndInfo(delegating_hwnd_info::<T>))?;
+            self.plugin_register_add(object)?;
         }
         Ok(())
     }
 
     /// Unregisters a `hwnd_info` function.
     pub fn plugin_register_remove_hwnd_info<T: HwndInfo>(&mut self) {
+        let object = self.get_hwnd_info_reg_object::<T>();
         unsafe {
-            self.plugin_register_remove(RegistrationObject::HwndInfo(delegating_hwnd_info::<T>));
+            self.plugin_register_remove(object);
+        }
+    }
+
+    fn get_hwnd_info_reg_object<T: HwndInfo>(&self) -> RegistrationObject<'static> {
+        let app_version = self.reaper.get_app_version();
+        if app_version.revision() >= "7.23" {
+            RegistrationObject::HwndInfoSince723(delegating_hwnd_info_since_723::<T>)
+        } else {
+            RegistrationObject::HwndInfo(delegating_hwnd_info::<T>)
         }
     }
 
