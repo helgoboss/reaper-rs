@@ -133,6 +133,7 @@ impl TestVstPlugin {
                         plugin_name: "reaper-rs test VST plug-in".to_string(),
                         plugin_version: env!("CARGO_PKG_VERSION").to_string(),
                         support_email_address: "info@helgoboss.org".to_string(),
+                        update_url: "https://www.helgoboss.org/projects/helgobox".to_string(),
                     },
                 );
                 let reaper = Reaper::get();

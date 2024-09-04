@@ -101,6 +101,7 @@ fn generate_high_level_plugin_code(
     let support_email_address = args
         .support_email_address
         .expect("support_email_address missing");
+    let update_url = args.update_url.expect("update_url missing");
     let main_function_name = &main_function.sig.ident;
     let tokens = quote! {
         #[::reaper_macros::reaper_extension_plugin]
@@ -109,6 +110,7 @@ fn generate_high_level_plugin_code(
                 plugin_name: #plugin_name.to_string(),
                 plugin_version: #plugin_version.to_string(),
                 support_email_address: #support_email_address.to_string(),
+                update_url: #update_url.to_string(),
             };
             ::reaper_high::Reaper::setup_with_defaults(context, crash_info);
             #main_function_name()
@@ -133,6 +135,11 @@ struct ReaperExtensionPluginMacroArgs {
     ///
     /// Necessary for high-level plug-in.
     support_email_address: Option<String>,
+    /// URL that will be shown in error reports in order to animate the user to first try
+    /// again with the latest update.
+    ///
+    /// Necessary for high-level plug-in.
+    update_url: Option<String>,
 }
 
 #[cfg(doctest)]

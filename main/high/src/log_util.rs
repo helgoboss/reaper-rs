@@ -40,6 +40,7 @@ pub struct CrashInfo {
     pub plugin_name: String,
     pub plugin_version: String,
     pub support_email_address: String,
+    pub update_url: String,
 }
 
 pub fn create_default_console_msg_formatter(
@@ -62,7 +63,9 @@ pub fn create_default_console_msg_formatter(
 
 Sorry, an unknown error occurred in REAPER plug-in {plugin_name}. REAPER should continue to work but {plugin_name} might show unexpected behavior until restarting REAPER. If you feel like saving your project file at this point, better save it as a new file because this error could have messed up the plug-in state. 
 
-In any case, please report this error:
+Are you running the latest version of {plugin_name}? Please check for updates at \"{update_url}\". If an update is available, please install it and try again.
+
+If this happens even with the latest version, please report this error:
 
 1. Prepare an e-mail containing:
     - The error information further below (IMPORTANT)
@@ -89,6 +92,7 @@ Message: {panic_message}
 
 ",
                 reaper_version = reaper_version,
+                update_url = crash_info.update_url,
                 plugin_name = crash_info.plugin_name,
                 plugin_version = crash_info.plugin_version,
                 module_base_address_label = module_base_address_label,

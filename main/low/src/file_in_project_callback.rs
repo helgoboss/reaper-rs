@@ -1,7 +1,7 @@
 use crate::raw::{ReaProject, INT_PTR};
 use std::ffi::{c_char, c_int, c_void};
 
-/// This structure is only documented, in https://github.com/justinfrankel/reaper-sdk/blob/main/sdk/reaper_plugin.h
+/// This structure is only documented, in <https://github.com/justinfrankel/reaper-sdk/blob/main/sdk/reaper_plugin.h>
 /// (see "file_in_project_ex2").
 ///
 /// It's documented as array but in accordance with all the other types we express it as struct with named fields.

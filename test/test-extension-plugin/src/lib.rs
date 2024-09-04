@@ -7,7 +7,8 @@ use tracing::debug;
 
 #[reaper_extension_plugin(
     name = "reaper-rs test extension plug-in",
-    support_email_address = "info@helgoboss.org"
+    support_email_address = "info@helgoboss.org",
+    update_url = "https://www.helgoboss.org/projects/helgobox"
 )]
 fn main() -> Result<(), Box<dyn Error>> {
     let run_integration_test = std::env::var("RUN_REAPER_RS_INTEGRATION_TEST").is_ok();
