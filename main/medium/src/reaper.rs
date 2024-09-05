@@ -8477,48 +8477,49 @@ impl<UsageScope> Reaper<UsageScope> {
 
     /// You can use this to step through times ahead of the current playback time, loopcnt will get updated on a loop or autoseek etc.
     ///
-    /// double nextpos = old_pos;
+    /// ```ignore
+    /// int asflags = 0; // running internal state for AdvancePlaybackPosition
     /// INT64 lc = GetPlayLoopCnt(proj, NULL);
-    /// int ret = AdvancePlaybackPosition(proj, old_pos, &next_pos, &lc, 0.0 /* or srate */, NULL, NULL);
-    /// ret 1 if looped sel, 2 if looped project, 4 if loopendskip, 8 if smoothseek, 16 if fade audition (all during this block)
-    /// next_pos and lc updated so you can call again to look farther ahead
+    ///
+    /// loop:
+    ///   double nextpos = old_pos + len / srate;
+    ///   int thislen = len;
+    ///   int ret = AdvancePlaybackPosition(proj, old_pos, &nextpos, &lc, srate, &thislen, &asflags);
+    ///   // ret 1 if looped sel, 2 if looped project, 4 if loopendskip, 8 if smoothseek, 16 if fade audition (all during this block)
+    ///   // thislen may be decreased if partial block
+    ///   oldpos = nextpos;
+    /// goto loop
+    /// ```
     ///
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid project.
+    #[allow(clippy::too_many_arguments)]
     pub unsafe fn advance_playback_position_unchecked(
         &self,
         project: ProjectContext,
         old_pos: PositionInSeconds,
-        loop_count: i64,
-        sample_rate: Option<Hz>,
-    ) -> ReaperFunctionResult<AdvancePlaybackPositionResult>
+        next_pos: &mut PositionInSeconds,
+        loop_count: &mut i64,
+        sample_rate: Hz,
+        max_slps: &mut i32,
+        sf: &mut i32,
+    ) -> BitFlags<AdvancePlaybackPositionEvent>
     where
         UsageScope: AnyThread,
     {
-        let mut next_pos = old_pos.get();
-        let mut new_loop_count = loop_count;
-        // Don't know what those two are about
-        let max_spls = null_mut();
-        let sf = null_mut();
+        let mut raw_next_pos = next_pos.get();
         let ret = self.low.AdvancePlaybackPosition(
             project.to_raw(),
             old_pos.get(),
-            &mut next_pos,
-            &mut new_loop_count,
-            sample_rate.map(|sr| sr.get()).unwrap_or(0.0),
-            max_spls,
-            sf,
+            &mut raw_next_pos as *mut _,
+            loop_count as *mut _,
+            sample_rate.get(),
+            max_slps as *mut _,
+            sf as *mut _,
         );
-        if ret < 0 {
-            return Err("AdvancePlaybackPosition failed".into());
-        }
-        let res = AdvancePlaybackPositionResult {
-            events: BitFlags::from_bits_truncate(ret as u32),
-            next_pos: PositionInSeconds::new_panic(next_pos),
-            loop_count: new_loop_count,
-        };
-        Ok(res)
+        *next_pos = PositionInSeconds::new_panic(raw_next_pos);
+        BitFlags::from_bits_truncate(ret as u32)
     }
 
     /// Returns `true` if the given window is a text field or should behave as such (JSFX editor, hooked via
@@ -9073,13 +9074,6 @@ pub enum GetFocusedFxResult {
     /// Represents a variant unknown to *reaper-rs*. Please contribute if you encounter a variant
     /// that is supported by REAPER but not yet by *reaper-rs*. Thanks!
     Unknown(Hidden<i32>),
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct AdvancePlaybackPositionResult {
-    pub events: BitFlags<AdvancePlaybackPositionEvent>,
-    pub next_pos: PositionInSeconds,
-    pub loop_count: i64,
 }
 
 pub use reaper_common_types::RgbColor;
