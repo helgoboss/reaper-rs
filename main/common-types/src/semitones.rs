@@ -20,7 +20,7 @@ use nutype::nutype;
         Serialize,
         Deserialize
     ),
-    default = f64::EPSILON
+    default = 0.0
 )]
 pub struct Semitones(f64);
 
