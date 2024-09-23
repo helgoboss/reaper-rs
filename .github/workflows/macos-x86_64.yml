@@ -48,9 +48,9 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-#      - name: Setup tmate session
-#        uses: mxschmitt/action-tmate@v2
-      - uses: actions/upload-artifact@v2
+      #      - name: Setup tmate session
+      #        uses: mxschmitt/action-tmate@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: test-plug-ins
           path: target/debug/*.dylib
