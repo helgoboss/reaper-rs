@@ -12,12 +12,12 @@ impl Tempo {
     pub fn from_normalized_value(normalized_value: f64) -> Tempo {
         assert!(is_normalized_value(normalized_value));
         Tempo(Bpm::new_panic(
-            Bpm::MIN.get() + normalized_value * bpm_span(),
+            Bpm::ONE_BPM.get() + normalized_value * bpm_span(),
         ))
     }
 
     pub fn normalized_value(self) -> f64 {
-        (self.0.get() - Bpm::MIN.get()) / bpm_span()
+        (self.0.get() - Bpm::ONE_BPM.get()) / bpm_span()
     }
 
     pub fn bpm(self) -> Bpm {
@@ -26,7 +26,7 @@ impl Tempo {
 }
 
 fn bpm_span() -> f64 {
-    Bpm::MAX.get() - Bpm::MIN.get()
+    Bpm::NINE_HUNDRED_SIXTY_BPM.get() - Bpm::ONE_BPM.get()
 }
 
 #[cfg(test)]
