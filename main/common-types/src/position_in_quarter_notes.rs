@@ -1,4 +1,6 @@
+use crate::DurationInQuarterNotes;
 use nutype::nutype;
+use std::ops::{Add, Neg};
 
 /// This represents a position expressed as an amount of quarter notes.
 ///
@@ -31,4 +33,26 @@ impl PositionInQuarterNotes {
     pub const ZERO: PositionInQuarterNotes = unsafe { PositionInQuarterNotes::new_unchecked(0.0) };
 
     nutype_additions!(f64);
+}
+
+impl From<DurationInQuarterNotes> for PositionInQuarterNotes {
+    fn from(v: DurationInQuarterNotes) -> Self {
+        PositionInQuarterNotes::new_panic(v.get())
+    }
+}
+
+impl Add<DurationInQuarterNotes> for PositionInQuarterNotes {
+    type Output = Self;
+
+    fn add(self, rhs: DurationInQuarterNotes) -> Self {
+        PositionInQuarterNotes::new_panic(self.get() + rhs.get())
+    }
+}
+
+impl Neg for PositionInQuarterNotes {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        Self::new_panic(-self.get())
+    }
 }

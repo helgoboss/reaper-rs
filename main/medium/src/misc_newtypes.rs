@@ -11,6 +11,7 @@ use std::num::NonZeroI32;
 pub use reaper_common_types::Bpm;
 pub use reaper_common_types::Db;
 pub use reaper_common_types::DurationInBeats;
+pub use reaper_common_types::DurationInQuarterNotes;
 pub use reaper_common_types::DurationInSeconds;
 pub use reaper_common_types::Hz;
 pub use reaper_common_types::LinearVolumeValue as ReaperVolumeValue;
