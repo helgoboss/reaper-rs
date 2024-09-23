@@ -73,7 +73,9 @@ pub trait HwndInfo {
     /// `msg` is only available in REAPER v7.23+.
     ///
     /// Return 0 if not a known window, or if `info_type` is unknown.
-    fn call(window: Hwnd, info_type: HwndInfoType, msg: Option<AccelMsg>) -> i32;
+    ///
+    /// The window is [sometimes not given](https://github.com/helgoboss/helgobox/issues/1205).
+    fn call(window: Option<Hwnd>, info_type: HwndInfoType, msg: Option<AccelMsg>) -> i32;
 }
 
 pub(crate) extern "C" fn delegating_hwnd_info<T: HwndInfo>(
@@ -81,7 +83,7 @@ pub(crate) extern "C" fn delegating_hwnd_info<T: HwndInfo>(
     info_type: INT_PTR,
 ) -> c_int {
     firewall(|| {
-        let window = Hwnd::new(hwnd).expect("REAPER hwnd_info hwnd pointer was null");
+        let window = Hwnd::new(hwnd);
         let info_type = HwndInfoType::from_raw(info_type);
         T::call(window, info_type, None)
     })
@@ -94,7 +96,7 @@ pub(crate) extern "C" fn delegating_hwnd_info_since_723<T: HwndInfo>(
     msg: *const MSG,
 ) -> c_int {
     firewall(|| {
-        let window = Hwnd::new(hwnd).expect("REAPER hwnd_info hwnd pointer was null");
+        let window = Hwnd::new(hwnd);
         let info_type = HwndInfoType::from_raw(info_type);
         let msg = if msg.is_null() {
             None
