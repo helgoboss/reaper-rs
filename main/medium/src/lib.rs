@@ -55,38 +55,38 @@
 //!
 //! 1. If the original function uses an integer which represents a limited set of
 //!    options that can be easily named, we introduce an enum. Example:
-//! [`get_track_automation_mode()`](struct.Reaper.html#method.insert_track_at_index),
-//! [`AutomationMode`](enum.AutomationMode.html)
+//!    [`get_track_automation_mode()`](struct.Reaper.html#method.insert_track_at_index),
+//!    [`AutomationMode`](enum.AutomationMode.html)
 //!
 //! 2. If the original function uses a string and there's a clear set of predefined
 //!    options, we introduce an enum. Example:
-//! [`get_media_track_info_value()`](struct.Reaper.html#method.get_media_track_info_value),
-//! [`TrackAttributeKey`](enum.TrackAttributeKey.html)
+//!    [`get_media_track_info_value()`](struct.Reaper.html#method.get_media_track_info_value),
+//!    [`TrackAttributeKey`](enum.TrackAttributeKey.html)
 //!
 //! 3. If the original function uses a bool and the name of the function doesn't give that bool
 //!    meaning, introduce an enum. Example:
-//! [`set_current_bpm()`](struct.Reaper.html#method.set_current_bpm),
-//! [`UndoBehavior`](enum.UndoBehavior.html)
+//!    [`set_current_bpm()`](struct.Reaper.html#method.set_current_bpm),
+//!    [`UndoBehavior`](enum.UndoBehavior.html)
 //!
 //! 4. If the original function can have different mutually exclusive results, introduce an enum.
 //!    Example:
-//! [`get_last_touched_fx()`](struct.Reaper.html#method.get_last_touched_fx),
-//! [`GetLastTouchedFxResult`](enum.GetLastTouchedFxResult.html)
+//!    [`get_last_touched_fx()`](struct.Reaper.html#method.get_last_touched_fx),
+//!    [`GetLastTouchedFxResult`](enum.GetLastTouchedFxResult.html)
 //!
 //! 5. If the original function has several parameters of which only certain combinations are valid,
 //!    introduce an enum for combining those. Example:
-//! [`kbd_on_main_action_ex()`](struct.Reaper.html#method.kbd_on_main_action_ex),
-//! [`ActionValueChange`](enum.ActionValueChange.html)
+//!    [`kbd_on_main_action_ex()`](struct.Reaper.html#method.kbd_on_main_action_ex),
+//!    [`ActionValueChange`](enum.ActionValueChange.html)
 //!
 //! 6. If the original function takes a parameter which describes how another parameter is
 //!    interpreted, introduce an enum. Example:
-//! [`csurf_on_pan_change_ex()`](struct.Reaper.html#method.csurf_on_pan_change_ex),
-//! [`ValueChange`](enum.ValueChange.html)
+//!    [`csurf_on_pan_change_ex()`](struct.Reaper.html#method.csurf_on_pan_change_ex),
+//!    [`ValueChange`](enum.ValueChange.html)
 //!
 //! 7. If the original function takes an optional value and one cannot conclude from the function
 //!    name what a `None` would mean, introduce an enum. Example:
-//! [`count_tracks()`](struct.Reaper.html#method.count_tracks),
-//! [`ProjectContext`](enum.ProjectContext.html)
+//!    [`count_tracks()`](struct.Reaper.html#method.count_tracks),
+//!    [`ProjectContext`](enum.ProjectContext.html)
 //!
 //! The first design didn't have many enums. Then, with every enum introduced in the medium-level
 //! API, the high-level API code was getting cleaner, more understandable and often even shorter.
@@ -268,7 +268,7 @@
 //!   satisfied by consumers. Rationale: This represents incorrect API usage.
 //!     - Luckily, the need for precondition checks is mitigated by using lots of newtypes and
 //!       enums, which don't allow parameters to be out of range in the first place.
-//!   Example: [`track_fx_get_fx_name()`](struct.Reaper.html#method.track_fx_get_fx_name)
+//!      - Example: [`track_fx_get_fx_name()`](struct.Reaper.html#method.track_fx_get_fx_name)
 //! - When a function takes pointers, we generally mark it as `unsafe`. Rationale: Pointers can
 //!   dangle (e.g. a pointer to a track dangles as soon as that track is removed). Passing a
 //!   dangling pointer to a REAPER function can and often will make REAPER crash. Example:
@@ -283,11 +283,8 @@
 //!          2. Using [`validate_ptr_2()`](struct.Reaper.html#method.validate_ptr_2) to
 //!             check if the cached pointer is still valid.
 //!          
-//!          3. Using a
-//!             [hidden control
-//! surface](struct.ReaperSession.html#method.plugin_register_add_csurf_inst)             to be
-//! informed whenever e.g. a `MediaTrack` is removed and invalidating the cached             pointer
-//! accordingly.
+//!          3. Using a [hidden control surface](struct.ReaperSession.html#method.plugin_register_add_csurf_inst)
+//!             to be informed whenever e.g. a `MediaTrack` is removed and invalidating the cached pointer accordingly.
 //! - There's one exception to this: If the parameters passed to the function in question are enough
 //!   to check whether the pointer is still valid, we do it, right in that function. If it's
 //!   invalid, we panic. We use [`validate_ptr_2()`](struct.Reaper.html#method.validate_ptr_2) to

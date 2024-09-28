@@ -3602,7 +3602,7 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
             let guid = guid.unwrap();
             let guid_string = guid.to_string_without_braces();
             assert_eq!(guid_string.len(), 36);
-            assert!(guid_string.find(|c| c == '{' || c == '}').is_none());
+            assert!(guid_string.find(['{', '}']).is_none());
             assert!(fx_chain.fx_by_guid(&guid).is_available());
             assert_eq!(fx_chain.fx_by_guid(&guid), fx);
             assert!(fx_chain.fx_by_guid_and_index(&guid, 0).is_available());
