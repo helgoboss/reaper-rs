@@ -159,6 +159,8 @@ fn write_reaper_config(reaper_home_path: &Path) -> Result<()> {
 mode=4
 
 [REAPER]
+; Not scanning installed VST instruments
+vst_scan=2
 ; For dummy audio on Linux
 linux_audio_mode=2
 ; For <none> audio on macOS
