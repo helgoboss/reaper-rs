@@ -61,6 +61,9 @@ impl FxChain {
         let reaper = Reaper::get().medium_reaper();
         match &self.context {
             FxChainContext::Track { track, is_input_fx } => {
+                if track.load_and_check_if_necessary_or_err().is_err() {
+                    return 0;
+                }
                 if *is_input_fx {
                     unsafe { reaper.track_fx_get_rec_count(track.raw()) }
                 } else {
@@ -82,6 +85,9 @@ impl FxChain {
         let reaper = Reaper::get().medium_reaper();
         match &self.context {
             FxChainContext::Track { track, is_input_fx } => {
+                if track.load_and_check_if_necessary_or_err().is_err() {
+                    return FxChainVisibility::Hidden;
+                }
                 if *is_input_fx {
                     unsafe { reaper.track_fx_get_rec_chain_visible(track.raw()) }
                 } else {
@@ -112,7 +118,9 @@ impl FxChain {
             FxChainContext::Take(_) => todo!(),
             _ => {
                 let track = self.track_or_master_track();
-
+                if track.load_and_check_if_necessary_or_err().is_err() {
+                    return;
+                }
                 let instruction = if visible {
                     let location = get_track_fx_location(0, self.is_input_fx());
                     FxShowInstruction::ShowChain(location)
@@ -142,6 +150,7 @@ impl FxChain {
                 FxChainContext::Take(_) => todo!(),
                 _ => {
                     let (track, location) = fx.track_and_location();
+                    track.load_and_check_if_necessary_or_err()?;
                     unsafe {
                         reaper.track_fx_copy_to_track(
                             (track.raw(), location),
@@ -357,6 +366,7 @@ DOCKED 0
                 if *is_input_fx {
                     return None;
                 }
+                track.load_and_check_if_necessary_or_err().ok()?;
                 let fx_index = unsafe {
                     Reaper::get()
                         .medium_reaper()
@@ -396,10 +406,12 @@ DOCKED 0
         let fx_index = match self.context() {
             FxChainContext::Take(_) => todo!(),
             _ => unsafe {
+                let track = self.track_or_master_track();
+                track.load_and_check_if_necessary_or_err().ok()?;
                 Reaper::get()
                     .medium_reaper()
                     .track_fx_add_by_name_add(
-                        self.track_or_master_track().raw(),
+                        track.raw(),
                         name,
                         if self.is_input_fx() {
                             TrackFxChainType::InputFxChain
@@ -458,6 +470,7 @@ DOCKED 0
         let fx_index = match self.context() {
             FxChainContext::Take(_) => todo!(),
             FxChainContext::Track { track, .. } => unsafe {
+                track.load_and_check_if_necessary_or_err().ok()?;
                 Reaper::get().medium_reaper().track_fx_add_by_name_query(
                     track.raw(),
                     name,
