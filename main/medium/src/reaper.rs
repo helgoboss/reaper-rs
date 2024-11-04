@@ -3391,6 +3391,33 @@ impl<UsageScope> Reaper<UsageScope> {
         NonNull::new(ptr)
     }
 
+    /// Opens a file picker.
+    ///
+    /// Returns `None` if the user canceled the dialog.
+    pub fn get_user_file_name_for_read<'a>(
+        &self,
+        path: &Utf8Path,
+        title: impl Into<ReaperStringArg<'a>>,
+        defext: impl Into<ReaperStringArg<'a>>,
+    ) -> Option<Utf8PathBuf>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let (file, successful) =
+            with_string_buffer_prefilled(path.to_string(), 4096, |buffer, _| unsafe {
+                self.low.GetUserFileNameForRead(
+                    buffer,
+                    title.into().as_ptr(),
+                    defext.into().as_ptr(),
+                )
+            });
+        if !successful {
+            return None;
+        }
+        Some(Utf8PathBuf::from(file.into_string()))
+    }
+
     /// Grants temporary access to the "reaper.ini" full filename.
     pub fn get_ini_file<R>(&self, use_ini_file: impl FnOnce(&Utf8Path) -> R) -> R
     where
