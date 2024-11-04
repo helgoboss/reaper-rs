@@ -57,7 +57,7 @@ pub fn create_default_console_msg_formatter(
             ),
         };
         let reaper_version = Reaper::get().version();
-        format!("
+        format!("!SHOWERR:
 
 ===== ATTENTION =====
 
