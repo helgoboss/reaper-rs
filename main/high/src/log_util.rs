@@ -57,7 +57,9 @@ pub fn create_default_console_msg_formatter(
             ),
         };
         let reaper_version = Reaper::get().version();
-        format!("!SHOWERR:
+        // In the future, we might want to use [format!("!SHOWERR:] in order to not pop up console immediately.
+        // But right now, it would hide errors: https://github.com/helgoboss/helgobox/issues/1304
+        format!("
 
 ===== ATTENTION =====
 
