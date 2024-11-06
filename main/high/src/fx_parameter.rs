@@ -29,7 +29,7 @@ impl FxParameter {
                 let (track, location) = self.fx().track_and_location();
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_set_param_normalized(
-                        track.raw(),
+                        track.raw_unchecked(),
                         location,
                         self.index,
                         reaper_value.into(),
@@ -47,7 +47,7 @@ impl FxParameter {
                 let (track, location) = self.fx().track_and_location();
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_get_param_normalized(
-                        track.raw(),
+                        track.raw_unchecked(),
                         location,
                         self.index,
                     )
@@ -64,7 +64,7 @@ impl FxParameter {
                 let (track, location) = self.fx().track_and_location();
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_end_param_edit(
-                        track.raw(),
+                        track.raw_unchecked(),
                         location,
                         self.index,
                     )
@@ -88,7 +88,7 @@ impl FxParameter {
                 let (track, location) = self.fx().track_and_location();
                 let name = unsafe {
                     Reaper::get().medium_reaper().track_fx_get_param_name(
-                        track.raw(),
+                        track.raw_unchecked(),
                         location,
                         self.index,
                         256,
@@ -118,7 +118,11 @@ impl FxParameter {
                 let result = unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_parameter_step_sizes(track.raw(), location, self.index)?
+                        .track_fx_get_parameter_step_sizes(
+                            track.raw_unchecked(),
+                            location,
+                            self.index,
+                        )?
                 };
                 // Try to fix some invalid results (which are most likely invalid because of messy
                 // plug-ins, not because of REAPER itself)
@@ -148,7 +152,12 @@ impl FxParameter {
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_formatted_param_value(track.raw(), location, self.index, 256)
+                        .track_fx_get_formatted_param_value(
+                            track.raw_unchecked(),
+                            location,
+                            self.index,
+                            256,
+                        )
                 }
             }
         }
@@ -174,7 +183,7 @@ impl FxParameter {
                     Reaper::get()
                         .medium_reaper()
                         .track_fx_format_param_value_normalized(
-                            track.raw(),
+                            track.raw_unchecked(),
                             location,
                             self.index,
                             reaper_value,
@@ -223,7 +232,7 @@ impl FxParameter {
                 let (track, location) = self.fx().track_and_location();
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_get_param_ex(
-                        track.raw(),
+                        track.raw_unchecked(),
                         location,
                         self.index,
                     )

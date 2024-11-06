@@ -65,9 +65,9 @@ impl FxChain {
                     return 0;
                 }
                 if *is_input_fx {
-                    unsafe { reaper.track_fx_get_rec_count(track.raw()) }
+                    unsafe { reaper.track_fx_get_rec_count(track.raw_unchecked()) }
                 } else {
-                    unsafe { reaper.track_fx_get_count(track.raw()) }
+                    unsafe { reaper.track_fx_get_count(track.raw_unchecked()) }
                 }
             }
             FxChainContext::Monitoring => {
@@ -75,7 +75,7 @@ impl FxChain {
                     .current_project()
                     .master_track()
                     .expect("master track of current project should exist");
-                unsafe { reaper.track_fx_get_rec_count(track.raw()) }
+                unsafe { reaper.track_fx_get_rec_count(track.raw_unchecked()) }
             }
             FxChainContext::Take(_) => todo!(),
         }
@@ -89,9 +89,9 @@ impl FxChain {
                     return FxChainVisibility::Hidden;
                 }
                 if *is_input_fx {
-                    unsafe { reaper.track_fx_get_rec_chain_visible(track.raw()) }
+                    unsafe { reaper.track_fx_get_rec_chain_visible(track.raw_unchecked()) }
                 } else {
-                    unsafe { reaper.track_fx_get_chain_visible(track.raw()) }
+                    unsafe { reaper.track_fx_get_chain_visible(track.raw_unchecked()) }
                 }
             }
             FxChainContext::Monitoring => {
@@ -99,7 +99,7 @@ impl FxChain {
                     .current_project()
                     .master_track()
                     .expect("master track of current project should exist");
-                unsafe { reaper.track_fx_get_rec_chain_visible(track.raw()) }
+                unsafe { reaper.track_fx_get_rec_chain_visible(track.raw_unchecked()) }
             }
             FxChainContext::Take(_) => todo!(),
         }
@@ -135,7 +135,7 @@ impl FxChain {
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_show(track.raw(), instruction);
+                        .track_fx_show(track.raw_unchecked(), instruction);
                 }
             }
         }
@@ -153,9 +153,9 @@ impl FxChain {
                     track.load_and_check_if_necessary_or_err()?;
                     unsafe {
                         reaper.track_fx_copy_to_track(
-                            (track.raw(), location),
+                            (track.raw_unchecked(), location),
                             (
-                                track.raw(),
+                                track.raw_unchecked(),
                                 get_track_fx_location(new_index, self.is_input_fx()),
                             ),
                             TransferBehavior::Move,
@@ -228,7 +228,7 @@ impl FxChain {
                     let (track, location) = fx.track_and_location();
                     unsafe {
                         reaper
-                            .track_fx_delete(track.raw(), location)
+                            .track_fx_delete(track.raw_unchecked(), location)
                             .map_err(|_| "couldn't delete track FX")?
                     };
                 }
@@ -370,7 +370,7 @@ DOCKED 0
                 let fx_index = unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_instrument(track.raw())
+                        .track_fx_get_instrument(track.raw_unchecked())
                 };
                 fx_index.and_then(|i| self.fx_by_index(i))
             }
@@ -411,7 +411,7 @@ DOCKED 0
                 Reaper::get()
                     .medium_reaper()
                     .track_fx_add_by_name_add(
-                        track.raw(),
+                        track.raw_unchecked(),
                         name,
                         if self.is_input_fx() {
                             TrackFxChainType::InputFxChain
@@ -472,7 +472,7 @@ DOCKED 0
             FxChainContext::Track { track, .. } => unsafe {
                 track.load_and_check_if_necessary_or_err().ok()?;
                 Reaper::get().medium_reaper().track_fx_add_by_name_query(
-                    track.raw(),
+                    track.raw_unchecked(),
                     name,
                     if self.is_input_fx() {
                         TrackFxChainType::InputFxChain
@@ -487,7 +487,7 @@ DOCKED 0
                         .current_project()
                         .master_track()
                         .expect("master track of current project should exist")
-                        .raw(),
+                        .raw_unchecked(),
                     name,
                     TrackFxChainType::InputFxChain,
                 )?

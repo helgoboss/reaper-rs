@@ -98,7 +98,7 @@ impl Fx {
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_fx_name(track.raw(), location, buffer_size)
+                        .track_fx_get_fx_name(track.raw_unchecked(), location, buffer_size)
                         .expect("Couldn't get track FX name")
                 }
             }
@@ -230,7 +230,7 @@ impl Fx {
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_num_params(track.raw(), location)
+                        .track_fx_get_num_params(track.raw_unchecked(), location)
                 }
             }
         }
@@ -244,7 +244,7 @@ impl Fx {
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_enabled(track.raw(), location)
+                        .track_fx_get_enabled(track.raw_unchecked(), location)
                 }
             }
         }
@@ -258,7 +258,7 @@ impl Fx {
                 unsafe {
                     !Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_offline(track.raw(), location)
+                        .track_fx_get_offline(track.raw_unchecked(), location)
                 }
             }
         }
@@ -276,7 +276,12 @@ impl Fx {
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_named_config_parm(track.raw(), location, name, buffer_size)
+                        .track_fx_get_named_config_parm(
+                            track.raw_unchecked(),
+                            location,
+                            name,
+                            buffer_size,
+                        )
                 }
             }
         }
@@ -294,7 +299,7 @@ impl Fx {
                 Reaper::get()
                     .medium_reaper()
                     .track_fx_get_named_config_parm_as_string(
-                        track.raw(),
+                        track.raw_unchecked(),
                         *location,
                         name,
                         buffer_size,
@@ -318,7 +323,12 @@ impl Fx {
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_set_named_config_parm(track.raw(), location, name, value)
+                        .track_fx_set_named_config_parm(
+                            track.raw_unchecked(),
+                            location,
+                            name,
+                            value,
+                        )
                 }
             }
         }
@@ -380,7 +390,7 @@ impl Fx {
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_param_from_ident(track.raw(), location, id)?
+                        .track_fx_get_param_from_ident(track.raw_unchecked(), location, id)?
                 }
             }
         };
@@ -531,7 +541,7 @@ impl Fx {
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_floating_window(track.raw(), location)
+                        .track_fx_get_floating_window(track.raw_unchecked(), location)
                 }
             }
         }
@@ -545,7 +555,7 @@ impl Fx {
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_open(track.raw(), location)
+                        .track_fx_get_open(track.raw_unchecked(), location)
                 }
             }
         }
@@ -582,7 +592,7 @@ impl Fx {
                 let (track, location) = self.track_and_location();
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_show(
-                        track.raw(),
+                        track.raw_unchecked(),
                         FxShowInstruction::ShowFloatingWindow(location),
                     );
                 }
@@ -598,7 +608,7 @@ impl Fx {
                 let (track, location) = self.track_and_location();
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_show(
-                        track.raw(),
+                        track.raw_unchecked(),
                         FxShowInstruction::HideFloatingWindow(location),
                     );
                 }
@@ -614,9 +624,10 @@ impl Fx {
             _ => {
                 let (track, location) = self.track_and_location();
                 unsafe {
-                    Reaper::get()
-                        .medium_reaper()
-                        .track_fx_show(track.raw(), FxShowInstruction::ShowChain(location));
+                    Reaper::get().medium_reaper().track_fx_show(
+                        track.raw_unchecked(),
+                        FxShowInstruction::ShowChain(location),
+                    );
                 }
             }
         }
@@ -657,7 +668,7 @@ impl Fx {
                 let (track, location) = self.track_and_location();
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_set_enabled(
-                        track.raw(),
+                        track.raw_unchecked(),
                         location,
                         enabled,
                     );
@@ -673,7 +684,7 @@ impl Fx {
                 let (track, location) = self.track_and_location();
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_set_offline(
-                        track.raw(),
+                        track.raw_unchecked(),
                         location,
                         !online,
                     );
@@ -719,7 +730,7 @@ impl Fx {
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_preset_index(track.raw(), location)
+                        .track_fx_get_preset_index(track.raw_unchecked(), location)
                 }
             }
         }
@@ -733,7 +744,7 @@ impl Fx {
                 let (track, location) = self.track_and_location();
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_set_preset_by_index(
-                        track.raw(),
+                        track.raw_unchecked(),
                         location,
                         preset,
                     )?;
@@ -754,7 +765,7 @@ impl Fx {
                 let (track, location) = self.track_and_location();
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_set_preset(
-                        track.raw(),
+                        track.raw_unchecked(),
                         location,
                         name,
                     )?;
@@ -773,9 +784,11 @@ impl Fx {
             _ => {
                 let (track, location) = self.track_and_location();
                 let result = unsafe {
-                    Reaper::get()
-                        .medium_reaper()
-                        .track_fx_get_preset(track.raw(), location, 0)
+                    Reaper::get().medium_reaper().track_fx_get_preset(
+                        track.raw_unchecked(),
+                        location,
+                        0,
+                    )
                 };
                 !result.state_matches_preset
             }
@@ -791,7 +804,7 @@ impl Fx {
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
-                        .track_fx_get_preset(track.raw(), location, 2000)
+                        .track_fx_get_preset(track.raw_unchecked(), location, 2000)
                         .name
                 }
             }
@@ -825,7 +838,7 @@ pub fn get_fx_guid(chain: &FxChain, index: u32) -> Option<Guid> {
             unsafe {
                 Reaper::get()
                     .medium_reaper()
-                    .track_fx_get_fx_guid(track.raw(), location)
+                    .track_fx_get_fx_guid(track.raw_unchecked(), location)
                     .ok()
             }
         }

@@ -249,7 +249,9 @@ impl Project {
 
     pub fn remove_track(self, track: &Track) {
         unsafe {
-            Reaper::get().medium_reaper().delete_track(track.raw());
+            Reaper::get()
+                .medium_reaper()
+                .delete_track(track.raw_unchecked());
         }
     }
 

@@ -537,7 +537,7 @@ impl ChangeDetectionMiddleware {
                         {
                             // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER <
                             // 5.95-pre2 and on chunk manipulations
-                            if let Some(mut td) = self.find_track_data(track.raw()) {
+                            if let Some(mut td) = self.find_track_data(track.raw_unchecked()) {
                                 self.detect_fx_changes_on_track(
                                     &mut td.fx_chain_pair,
                                     track,
@@ -560,7 +560,7 @@ impl ChangeDetectionMiddleware {
                 if let Some(fx) = self.fx_from_parm_fx_index(&track, args.fx_location, None, None) {
                     // Because CSURF_EXT_SETFXCHANGE doesn't fire if FX pasted in REAPER < 5.95-pre2
                     // and on chunk manipulations
-                    if let Some(mut td) = self.find_track_data(track.raw()) {
+                    if let Some(mut td) = self.find_track_data(track.raw_unchecked()) {
                         self.detect_fx_changes_on_track(
                             &mut td.fx_chain_pair,
                             track,
@@ -580,7 +580,7 @@ impl ChangeDetectionMiddleware {
             }
             ExtSetFxChange(args) => {
                 let track = Track::new(args.track, None);
-                if let Some(mut td) = self.find_track_data(track.raw()) {
+                if let Some(mut td) = self.find_track_data(track.raw_unchecked()) {
                     match args.fx_chain_type {
                         Some(t) => {
                             let is_input_fx = t == TrackFxChainType::InputFxChain;
@@ -741,7 +741,7 @@ impl ChangeDetectionMiddleware {
         let env = unsafe {
             Reaper::get()
                 .medium_reaper()
-                .get_track_envelope_by_name(track.raw(), parameter_name)
+                .get_track_envelope_by_name(track.raw_unchecked(), parameter_name)
         };
         if env.is_none() {
             return false;
@@ -768,7 +768,7 @@ impl ChangeDetectionMiddleware {
         param_index: Option<u32>,
         normalized_value: Option<ReaperNormalizedFxParamValue>,
     ) -> bool {
-        let td = match self.find_track_data(track.raw()) {
+        let td = match self.find_track_data(track.raw_unchecked()) {
             None => {
                 // Should not happen. In this case, an FX yet unknown to Realearn has sent a
                 // parameter change
@@ -951,7 +951,7 @@ impl ChangeDetectionMiddleware {
         mut handle_change: impl FnMut(ChangeEvent),
     ) {
         for t in project.master_track().into_iter().chain(project.tracks()) {
-            let mt = t.raw();
+            let mt = t.raw_unchecked();
             track_datas.entry(mt).or_insert_with(|| {
                 let func = Reaper::get().medium_reaper();
                 let mut td = unsafe {

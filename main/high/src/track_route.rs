@@ -90,12 +90,12 @@ impl TrackRoute {
             Send => unsafe {
                 Reaper::get()
                     .medium_reaper()
-                    .get_track_send_ui_vol_pan(self.track().raw(), self.index)?
+                    .get_track_send_ui_vol_pan(self.track().raw_unchecked(), self.index)?
             },
             Receive => unsafe {
                 Reaper::get()
                     .medium_reaper()
-                    .get_track_receive_ui_vol_pan(self.track().raw(), self.index)?
+                    .get_track_receive_ui_vol_pan(self.track().raw_unchecked(), self.index)?
             },
         };
         Ok(vol_pan)
@@ -108,7 +108,7 @@ impl TrackRoute {
     ) -> Result<(), ReaperFunctionError> {
         unsafe {
             Reaper::get().medium_reaper().set_track_send_ui_vol(
-                self.track().raw(),
+                self.track().raw_unchecked(),
                 self.send_ref(),
                 volume,
                 edit_mode,
@@ -143,13 +143,13 @@ impl TrackRoute {
             Send => unsafe {
                 Reaper::get()
                     .medium_reaper()
-                    .get_track_send_name(self.track().raw(), self.index, BUFFER_SIZE)
+                    .get_track_send_name(self.track().raw_unchecked(), self.index, BUFFER_SIZE)
                     .expect("send doesn't exist")
             },
             Receive => unsafe {
                 Reaper::get()
                     .medium_reaper()
-                    .get_track_receive_name(self.track().raw(), self.index, BUFFER_SIZE)
+                    .get_track_receive_name(self.track().raw_unchecked(), self.index, BUFFER_SIZE)
                     .expect("receive doesn't exist")
             },
         }
@@ -162,7 +162,7 @@ impl TrackRoute {
     pub fn set_pan(&self, pan: Pan, edit_mode: EditMode) -> ReaperResult<()> {
         unsafe {
             Reaper::get().medium_reaper().set_track_send_ui_pan(
-                self.track().raw(),
+                self.track().raw_unchecked(),
                 self.send_ref(),
                 pan.reaper_value(),
                 edit_mode,
@@ -176,12 +176,12 @@ impl TrackRoute {
             Send => unsafe {
                 Reaper::get()
                     .medium_reaper()
-                    .get_track_send_ui_mute(self.track().raw(), self.index())?
+                    .get_track_send_ui_mute(self.track().raw_unchecked(), self.index())?
             },
             Receive => unsafe {
                 Reaper::get()
                     .medium_reaper()
-                    .get_track_receive_ui_mute(self.track().raw(), self.index())?
+                    .get_track_receive_ui_mute(self.track().raw_unchecked(), self.index())?
             },
         };
         Ok(res)
@@ -200,7 +200,7 @@ impl TrackRoute {
             unsafe {
                 Reaper::get()
                     .medium_reaper
-                    .toggle_track_send_ui_mute(self.track().raw(), self.send_ref())?;
+                    .toggle_track_send_ui_mute(self.track().raw_unchecked(), self.send_ref())?;
             }
         }
         Ok(())
@@ -255,7 +255,7 @@ impl TrackRoute {
         let (category, index) = self.category_with_index();
         unsafe {
             Reaper::get().medium_reaper().set_track_send_info_value(
-                self.track().raw(),
+                self.track().raw_unchecked(),
                 category,
                 index,
                 key,
@@ -269,7 +269,7 @@ impl TrackRoute {
         let (category, index) = self.category_with_index();
         unsafe {
             Reaper::get().medium_reaper().get_track_send_info_value(
-                self.track().raw(),
+                self.track().raw_unchecked(),
                 category,
                 index,
                 key,
@@ -280,9 +280,11 @@ impl TrackRoute {
     pub fn delete(&self) -> Result<(), ReaperFunctionError> {
         let (category, index) = self.category_with_index();
         unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .remove_track_send(self.track().raw(), category, index)
+            Reaper::get().medium_reaper().remove_track_send(
+                self.track().raw_unchecked(),
+                category,
+                index,
+            )
         }
     }
 
@@ -322,14 +324,14 @@ fn get_partner_track_raw(
     let res = match direction {
         Receive => unsafe {
             Reaper::get().medium_reaper().get_track_send_info_srctrack(
-                track.raw(),
+                track.raw_unchecked(),
                 TrackSendDirection::Receive,
                 index,
             )
         },
         Send => unsafe {
             Reaper::get().medium_reaper().get_track_send_info_desttrack(
-                track.raw(),
+                track.raw_unchecked(),
                 TrackSendDirection::Send,
                 index,
             )
