@@ -2,6 +2,7 @@
 name = "reaper-test-extension-plugin"
 version = "0.1.0"
 authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
+license = "MIT"
 edition = "2021"
 publish = false
 
