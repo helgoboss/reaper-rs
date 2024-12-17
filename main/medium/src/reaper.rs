@@ -33,6 +33,8 @@ use crate::{
     TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior,
     UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
 };
+pub use reaper_common_types::RgbColor;
+use reaper_common_types::{Hz, Semitones};
 
 use helgoboss_midi::ShortMessage;
 use reaper_low::raw::GUID;
@@ -4623,6 +4625,7 @@ impl<UsageScope> Reaper<UsageScope> {
     /// The wrapped value contains additional information about whether the window is still focused.
     ///
     /// Returns `None` otherwise.
+    #[deprecated = "use `get_touched_or_focused_fx_currently_focused_fx` instead"]
     pub fn get_focused_fx_2(&self) -> Option<GetFocusedFx2Result>
     where
         UsageScope: MainThreadOnly,
@@ -4642,6 +4645,73 @@ impl<UsageScope> Reaper<UsageScope> {
         let result = GetFocusedFx2Result {
             is_still_focused: result & 0b100 == 0,
             fx,
+        };
+        Some(result)
+    }
+
+    /// Returns the currently focused FX.
+    pub fn get_touched_or_focused_fx_currently_focused_fx(
+        &self,
+    ) -> Option<GetTouchedOrFocusedFxCurrentlyFocusedFxResult>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let mut trackidx = MaybeUninit::uninit();
+        let mut itemidx = MaybeUninit::uninit();
+        let mut takeidx = MaybeUninit::uninit();
+        let mut fxidx = MaybeUninit::uninit();
+        let mut parm = MaybeUninit::uninit();
+        let successful = unsafe {
+            self.low.GetTouchedOrFocusedFX(
+                1,
+                trackidx.as_mut_ptr(),
+                itemidx.as_mut_ptr(),
+                takeidx.as_mut_ptr(),
+                fxidx.as_mut_ptr(),
+                parm.as_mut_ptr(),
+            )
+        };
+        if !successful {
+            return None;
+        }
+        let trackidx = unsafe { trackidx.assume_init() };
+        let itemidx = unsafe { itemidx.assume_init() };
+        let takeidx = unsafe { takeidx.assume_init() };
+        let fxidx = unsafe { fxidx.assume_init() };
+        let parm = unsafe { parm.assume_init() as u32 };
+        let result = GetTouchedOrFocusedFxCurrentlyFocusedFxResult {
+            is_still_focused: parm & 1 == 0,
+            fx: match itemidx {
+                -1 => FxLocation::TrackFx {
+                    track_location: match trackidx {
+                        -1 => TrackLocation::MasterTrack,
+                        x if x >= 0 => TrackLocation::NormalTrack(x as u32),
+                        _ => panic!("encountered negative track index"),
+                    },
+                    fx_location: TrackFxLocation::from_raw(fxidx),
+                },
+                x if x >= 0 => FxLocation::TakeFx {
+                    track_index: if trackidx >= 0 {
+                        trackidx as u32
+                    } else {
+                        panic!("encountered negative track index");
+                    },
+                    item_index: x as u32,
+                    take_index: if takeidx >= 0 {
+                        takeidx as u32
+                    } else {
+                        panic!("encountered negative take index");
+                    },
+                    fx_index: if fxidx >= 0 {
+                        // TODO Support FX in containers
+                        fxidx as u32
+                    } else {
+                        panic!("encountered negative FX index");
+                    },
+                },
+                _ => panic!("encountered negative item index"),
+            },
         };
         Some(result)
     }
@@ -9103,8 +9173,35 @@ pub enum GetFocusedFxResult {
     Unknown(Hidden<i32>),
 }
 
-pub use reaper_common_types::RgbColor;
-use reaper_common_types::{Hz, Semitones};
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct GetTouchedOrFocusedFxCurrentlyFocusedFxResult {
+    /// Whether the FX is still focused (vs. unfocused but still open).
+    pub is_still_focused: bool,
+    /// Returns the actual FX.
+    pub fx: FxLocation,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum FxLocation {
+    /// The (last) focused FX is a track FX.
+    TrackFx {
+        /// Track on which the FX is located.
+        track_location: TrackLocation,
+        /// Location of the FX on that track.
+        fx_location: TrackFxLocation,
+    },
+    /// The (last) focused FX is a take FX.
+    TakeFx {
+        /// Index of the track on which the item is located.
+        track_index: u32,
+        /// Index of the item on that track.
+        item_index: u32,
+        /// Index of the take within the item.
+        take_index: u32,
+        /// Index of the FX within the take FX chain.
+        fx_index: u32,
+    },
+}
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct NativeColorValue {
