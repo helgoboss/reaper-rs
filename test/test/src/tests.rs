@@ -1579,11 +1579,11 @@ fn set_track_pan() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_pan(
+        track.set_pan_smart(
             Pan::from_normalized_value(0.25),
             GangBehavior::DenyGang,
             GroupingBehavior::PreventGrouping,
-        );
+        )?;
         // Then
         let pan = track.pan();
         assert_eq!(pan.reaper_value(), ReaperPanValue::new_panic(-0.5));
@@ -1642,11 +1642,11 @@ fn set_track_width() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_width(
+        track.set_width_smart(
             Width::from_normalized_value(0.25),
             GangBehavior::DenyGang,
             GroupingBehavior::PreventGrouping,
-        );
+        )?;
         // Then
         let width = track.width();
         assert_eq!(width.reaper_value(), ReaperWidthValue::new(-0.5));
@@ -1721,13 +1721,13 @@ fn set_track_volume() -> TestStep {
                     mock.invoke(t);
                 });
         });
-        track.set_volume(
+        track.set_volume_smart(
             SliderVolume::try_from_normalized_slider_value(0.25)
                 .unwrap()
                 .reaper_value(),
             GangBehavior::DenyGang,
             GroupingBehavior::PreventGrouping,
-        );
+        )?;
         // Then
         let volume = track.volume();
         assert!(abs_diff_eq!(

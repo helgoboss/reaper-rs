@@ -20,12 +20,12 @@ use reaper_medium::TrackAttributeKey::{RecArm, RecInput, RecMon, Selected, Solo}
 use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, BeatAttachMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
-    InputMonitoringMode, MediaTrack, NativeColorValue, Progress, ReaProject, ReaperFunctionError,
-    ReaperPanValue, ReaperString, ReaperStringArg, ReaperVolumeValue, ReaperWidthValue,
-    RecordArmMode, RecordingInput, RecordingMode, RgbColor, SetTrackUiFlags, SoloMode, TrackArea,
-    TrackAttributeKey, TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity,
-    TrackPolarityOperation, TrackRecArmOperation, TrackSendCategory, TrackSendDirection,
-    TrackSoloOperation,
+    InputMonitoringMode, MediaTrack, NativeColorValue, NotificationBehavior, Progress, ReaProject,
+    ReaperFunctionError, ReaperPanValue, ReaperString, ReaperStringArg, ReaperVolumeValue,
+    ReaperWidthValue, RecordArmMode, RecordingInput, RecordingMode, RgbColor, SetTrackUiFlags,
+    SoloMode, TrackArea, TrackAttributeKey, TrackLocation, TrackMuteOperation, TrackMuteState,
+    TrackPolarity, TrackPolarityOperation, TrackRecArmOperation, TrackSendCategory,
+    TrackSendDirection, TrackSoloOperation, ValueChange,
 };
 use std::convert::TryInto;
 use std::hash::{Hash, Hasher};
@@ -399,20 +399,21 @@ impl Track {
         Pan::from_reaper_value(result.pan)
     }
 
-    pub fn set_pan(
+    pub fn set_pan_smart(
         &self,
         pan: Pan,
         gang_behavior: GangBehavior,
         grouping_behavior: GroupingBehavior,
-    ) {
-        self.load_and_check_if_necessary_or_complain();
+    ) -> ReaperResult<()> {
+        self.load_and_check_if_necessary_or_err()?;
         let reaper_value = pan.reaper_value();
-        let reaper_value = if self.project() == Reaper::get().current_project() {
+        let track = self.raw_internal();
+        let resulting_value = if self.project() == Reaper::get().current_project() {
             let reaper = Reaper::get().medium_reaper();
             if reaper.low().pointers().SetTrackUIPan.is_some() {
                 unsafe {
                     reaper.set_track_ui_pan(
-                        self.raw_unchecked(),
+                        track,
                         Absolute(reaper_value),
                         Progress::NotDone,
                         build_track_ui_flags(gang_behavior, grouping_behavior),
@@ -420,18 +421,14 @@ impl Track {
                 }
             } else {
                 unsafe {
-                    reaper.csurf_on_pan_change_ex(
-                        self.raw_unchecked(),
-                        Absolute(reaper_value),
-                        gang_behavior,
-                    )
+                    reaper.csurf_on_pan_change_ex(track, Absolute(reaper_value), gang_behavior)
                 }
             }
         } else {
             // ReaLearn #283
             unsafe {
                 let _ = Reaper::get().medium_reaper().set_media_track_info_value(
-                    self.raw_unchecked(),
+                    track,
                     TrackAttributeKey::Pan,
                     reaper_value.get(),
                 );
@@ -441,12 +438,45 @@ impl Track {
         // Setting the pan programmatically doesn't trigger SetSurfacePan for control surfaces so
         // we need to notify manually
         unsafe {
-            Reaper::get().medium_reaper().csurf_set_surface_pan(
-                self.raw_unchecked(),
-                reaper_value,
-                NotifyAll,
-            );
+            Reaper::get()
+                .medium_reaper()
+                .csurf_set_surface_pan(track, resulting_value, NotifyAll);
         }
+        Ok(())
+    }
+
+    /// Sets the given track's pan, also supports relative changes and gang.
+    pub fn csurf_on_pan_change_ex(
+        &self,
+        value_change: ValueChange<ReaperPanValue>,
+        gang_behavior: GangBehavior,
+    ) -> ReaperResult<ReaperPanValue> {
+        self.load_and_check_if_necessary_or_err()?;
+        let value = unsafe {
+            Reaper::get().medium_reaper.csurf_on_pan_change_ex(
+                self.raw_internal(),
+                value_change,
+                gang_behavior,
+            )
+        };
+        Ok(value)
+    }
+
+    /// Informs control surfaces that the given track's pan has changed.
+    pub fn csurf_set_surface_pan(
+        &self,
+        pan: ReaperPanValue,
+        notification_behavior: NotificationBehavior,
+    ) -> ReaperResult<()> {
+        self.load_and_check_if_necessary_or_err()?;
+        unsafe {
+            Reaper::get().medium_reaper.csurf_set_surface_pan(
+                self.raw_internal(),
+                pan,
+                notification_behavior,
+            )
+        };
+        Ok(())
     }
 
     pub fn width(&self) -> Width {
@@ -464,20 +494,21 @@ impl Track {
         Width::from_reaper_value(result.pan_2.as_width_value())
     }
 
-    pub fn set_width(
+    pub fn set_width_smart(
         &self,
         width: Width,
         gang_behavior: GangBehavior,
         grouping_behavior: GroupingBehavior,
-    ) {
-        self.load_and_check_if_necessary_or_complain();
+    ) -> ReaperResult<()> {
+        self.load_and_check_if_necessary_or_err()?;
         let reaper_value = width.reaper_value();
+        let track = self.raw_internal();
         if self.project() == Reaper::get().current_project() {
             let reaper = Reaper::get().medium_reaper();
             if reaper.low().pointers().SetTrackUIWidth.is_some() {
                 unsafe {
                     reaper.set_track_ui_width(
-                        self.raw_unchecked(),
+                        track,
                         Absolute(reaper_value),
                         Progress::NotDone,
                         build_track_ui_flags(gang_behavior, grouping_behavior),
@@ -485,18 +516,14 @@ impl Track {
                 }
             } else {
                 unsafe {
-                    reaper.csurf_on_width_change_ex(
-                        self.raw_unchecked(),
-                        Absolute(reaper_value),
-                        gang_behavior,
-                    );
+                    reaper.csurf_on_width_change_ex(track, Absolute(reaper_value), gang_behavior);
                 }
             }
         } else {
             // ReaLearn #283
             let _ = unsafe {
                 Reaper::get().medium_reaper().set_media_track_info_value(
-                    self.raw_unchecked(),
+                    track,
                     TrackAttributeKey::Width,
                     reaper_value.get(),
                 )
@@ -507,11 +534,29 @@ impl Track {
         // CSurf_SetSurfacePan.
         unsafe {
             Reaper::get().medium_reaper().csurf_set_surface_pan(
-                self.raw_unchecked(),
+                track,
                 self.pan().reaper_value(),
                 NotifyAll,
             );
         }
+        Ok(())
+    }
+
+    /// Sets the given track's width, also supports relative changes and gang.
+    pub fn csurf_on_width_change_ex(
+        &self,
+        value_change: ValueChange<ReaperWidthValue>,
+        gang_behavior: GangBehavior,
+    ) -> ReaperResult<ReaperWidthValue> {
+        self.load_and_check_if_necessary_or_err()?;
+        let value = unsafe {
+            Reaper::get().medium_reaper.csurf_on_width_change_ex(
+                self.raw_internal(),
+                value_change,
+                gang_behavior,
+            )
+        };
+        Ok(value)
     }
 
     pub fn folder_depth_change(&self) -> i32 {
@@ -553,14 +598,15 @@ impl Track {
         result.volume
     }
 
-    pub fn set_volume(
+    pub fn set_volume_smart(
         &self,
         volume: ReaperVolumeValue,
         gang_behavior: GangBehavior,
         grouping_behavior: GroupingBehavior,
-    ) {
-        self.load_and_check_if_necessary_or_complain();
-        let volume = if self.project() == Reaper::get().current_project() {
+    ) -> ReaperResult<()> {
+        self.load_and_check_if_necessary_or_err()?;
+        let track = self.raw_internal();
+        let resulting_value = if self.project() == Reaper::get().current_project() {
             let reaper = Reaper::get().medium_reaper();
             // Why we use this function and not the others:
             //
@@ -571,7 +617,7 @@ impl Track {
             if reaper.low().pointers().SetTrackUIVolume.is_some() {
                 unsafe {
                     reaper.set_track_ui_volume(
-                        self.raw_unchecked(),
+                        track,
                         Absolute(volume),
                         Progress::NotDone,
                         build_track_ui_flags(gang_behavior, grouping_behavior),
@@ -584,19 +630,13 @@ impl Track {
                 //   The return value reflects the cropped value. However, the precision became much
                 //   better with REAPER 5.28.
                 // - In automation mode "Touch" this leads to jumps.
-                unsafe {
-                    reaper.csurf_on_volume_change_ex(
-                        self.raw_unchecked(),
-                        Absolute(volume),
-                        gang_behavior,
-                    )
-                }
+                unsafe { reaper.csurf_on_volume_change_ex(track, Absolute(volume), gang_behavior) }
             }
         } else {
             // ReaLearn #283
             unsafe {
                 let _ = Reaper::get().medium_reaper().set_media_track_info_value(
-                    self.raw_unchecked(),
+                    track,
                     TrackAttributeKey::Vol,
                     volume.get(),
                 );
@@ -607,11 +647,46 @@ impl Track {
         // surfaces which are important for feedback. So use the following to notify manually.
         unsafe {
             Reaper::get().medium_reaper().csurf_set_surface_volume(
-                self.raw_unchecked(),
-                volume,
+                track,
+                resulting_value,
                 NotifyAll,
             );
         }
+        Ok(())
+    }
+
+    /// Sets the given track's volume, also supports relative changes and gang.
+    pub fn csurf_on_volume_change_ex(
+        &self,
+        value_change: ValueChange<ReaperVolumeValue>,
+        gang_behavior: GangBehavior,
+    ) -> ReaperResult<ReaperVolumeValue> {
+        self.load_and_check_if_necessary_or_err()?;
+        let value = unsafe {
+            Reaper::get().medium_reaper.csurf_on_volume_change_ex(
+                self.raw_internal(),
+                value_change,
+                gang_behavior,
+            )
+        };
+        Ok(value)
+    }
+
+    /// Informs control surfaces that the given track's volume has changed.
+    pub fn csurf_set_surface_volume(
+        &self,
+        volume: ReaperVolumeValue,
+        notification_behavior: NotificationBehavior,
+    ) -> ReaperResult<()> {
+        self.load_and_check_if_necessary_or_err()?;
+        unsafe {
+            Reaper::get().medium_reaper.csurf_set_surface_volume(
+                self.raw_internal(),
+                volume,
+                notification_behavior,
+            )
+        };
+        Ok(())
     }
 
     pub fn scroll_mixer(&self) {
