@@ -1,6 +1,6 @@
 use futures_timer::Delay;
 use reaper_high::{
-    ActionKind, CrashInfo, FutureMiddleware, FutureSupport, Reaper, ReaperGuard,
+    ActionKind, FutureMiddleware, FutureSupport, PluginInfo, Reaper, ReaperGuard,
     DEFAULT_MAIN_THREAD_TASK_BULK_SIZE,
 };
 use reaper_low::{reaper_vst_plugin, static_plugin_context, PluginContext};
@@ -129,7 +129,7 @@ impl TestVstPlugin {
                     PluginContext::from_vst_plugin(&self.host, static_plugin_context()).unwrap();
                 Reaper::setup_with_defaults(
                     context,
-                    CrashInfo {
+                    PluginInfo {
                         plugin_name: "reaper-rs test VST plug-in".to_string(),
                         plugin_version: env!("CARGO_PKG_VERSION").to_string(),
                         support_email_address: "info@helgoboss.org".to_string(),

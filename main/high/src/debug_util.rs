@@ -1,4 +1,5 @@
-use crate::{determine_module_info, Reaper};
+use crate::crash_handler::ModuleInfo;
+use crate::Reaper;
 use backtrace::Symbol;
 use regex::Regex;
 
@@ -58,7 +59,7 @@ fn resolve_multiple_symbols(
         ",
         addresses.len()
     ));
-    let our_module_info = determine_module_info()?;
+    let our_module_info = ModuleInfo::capture()?;
     if let Some(our_module_size) = our_module_info.size {
         if our_module_size != their_module_size {
             warn(format!(

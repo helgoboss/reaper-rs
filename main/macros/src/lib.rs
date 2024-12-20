@@ -106,13 +106,13 @@ fn generate_high_level_plugin_code(
     let tokens = quote! {
         #[::reaper_macros::reaper_extension_plugin]
         fn low_level_plugin_main(context: ::reaper_low::PluginContext) -> Result<(), Box<dyn std::error::Error>> {
-            let crash_info = ::reaper_high::CrashInfo {
+            let plugin_info = ::reaper_high::PluginInfo {
                 plugin_name: #plugin_name.to_string(),
                 plugin_version: #plugin_version.to_string(),
                 support_email_address: #support_email_address.to_string(),
                 update_url: #update_url.to_string(),
             };
-            ::reaper_high::Reaper::setup_with_defaults(context, crash_info);
+            ::reaper_high::Reaper::setup_with_defaults(context, plugin_info);
             #main_function_name()
         }
 

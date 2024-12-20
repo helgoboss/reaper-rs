@@ -1,4 +1,4 @@
-use crate::{CrashInfo, KeyBinding, KeyBindingKind};
+use crate::{CrashHandler, CrashHandlerConfig, KeyBinding, KeyBindingKind, PluginInfo};
 use std::cell::{Cell, RefCell, RefMut};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -8,7 +8,7 @@ use std::sync::{Arc, Weak};
 
 use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
-use crate::{create_default_console_msg_formatter, create_reaper_panic_hook, Project};
+use crate::{DefaultConsoleMessageFormatter, Project};
 use once_cell::sync::Lazy;
 use reaper_low::{raw, register_plugin_destroy_hook};
 
@@ -16,6 +16,7 @@ use reaper_low::PluginContext;
 
 use crate::helper_control_surface::{HelperControlSurface, HelperTask};
 use crate::mutex_util::lock_ignoring_poisoning;
+use derivative::Derivative;
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
@@ -25,6 +26,7 @@ use reaper_medium::{
 };
 use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 use tracing::debug;
 
@@ -81,6 +83,10 @@ impl ReaperBuilder {
                     undo_block_is_active: Cell::new(false),
                     session_status: RefCell::new(SessionStatus::Sleeping),
                     helper_task_sender,
+                    log_crashes_to_console: Default::default(),
+                    report_crashes_to_sentry: Default::default(),
+                    #[cfg(feature = "sentry")]
+                    sentry_guard: Default::default(),
                 };
                 INSTANCE = Some(reaper);
                 register_plugin_destroy_hook(|| INSTANCE = None);
@@ -103,7 +109,8 @@ impl ReaperBuilder {
 
 pub struct RealTimeReaper {}
 
-#[derive(Debug)]
+#[derive(Derivative)]
+#[derivative(Debug)]
 pub struct Reaper {
     medium_session: RefCell<reaper_medium::ReaperSession>,
     pub(crate) medium_reaper: reaper_medium::Reaper,
@@ -123,6 +130,13 @@ pub struct Reaper {
     undo_block_is_active: Cell<bool>,
     session_status: RefCell<SessionStatus>,
     helper_task_sender: crossbeam_channel::Sender<HelperTask>,
+    /// Whether to log to the REAPER console (user can toggle this at runtime).
+    log_crashes_to_console: Arc<AtomicBool>,
+    /// Whether to report to Sentry (user can toggle this at runtime).
+    report_crashes_to_sentry: Arc<AtomicBool>,
+    #[cfg(feature = "sentry")]
+    #[derivative(Debug = "ignore")]
+    sentry_guard: RefCell<Option<sentry::ClientInitGuard>>,
 }
 
 #[derive(Debug)]
@@ -221,12 +235,38 @@ impl Reaper {
     }
 
     /// This has an effect only if there isn't an instance already.
-    pub fn setup_with_defaults(context: PluginContext, crash_info: CrashInfo) {
-        require_main_thread(&context);
-        Reaper::load(context).setup();
-        std::panic::set_hook(create_reaper_panic_hook(Some(
-            create_default_console_msg_formatter(crash_info),
-        )));
+    pub fn setup_with_defaults(plugin_context: PluginContext, plugin_info: PluginInfo) {
+        require_main_thread(&plugin_context);
+        Reaper::load(plugin_context).setup();
+        let reaper = Reaper::get();
+        // Add custom panic hook
+        let crash_handler_config = CrashHandlerConfig {
+            plugin_info,
+            crash_formatter: Box::new(DefaultConsoleMessageFormatter),
+            console_logging_enabled: reaper.log_crashes_to_console.clone(),
+            sentry_enabled: reaper.report_crashes_to_sentry.clone(),
+        };
+        let crash_handler = CrashHandler::new(crash_handler_config);
+        std::panic::set_hook(Box::new(move |panic_info| {
+            crash_handler.handle_crash(panic_info);
+        }));
+    }
+
+    pub fn log_crashes_to_console(&self) -> bool {
+        self.log_crashes_to_console.load(Ordering::Relaxed)
+    }
+
+    pub fn set_log_crashes_to_console(&self, value: bool) {
+        self.log_crashes_to_console.store(value, Ordering::Relaxed);
+    }
+
+    pub fn report_crashes_to_sentry(&self) -> bool {
+        self.report_crashes_to_sentry.load(Ordering::Relaxed)
+    }
+
+    pub fn set_report_crashes_to_sentry(&self, value: bool) {
+        self.report_crashes_to_sentry
+            .store(value, Ordering::Relaxed);
     }
 
     /// May be called from any thread.
@@ -331,6 +371,7 @@ impl Reaper {
     }
 
     pub(crate) fn show_console_msg_thread_safe<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
+        // TODO-high CONTINUE Check if REAPER version already supports thread-safe console messaging!
         if self.is_in_main_thread() {
             self.show_console_msg(msg);
         } else {
@@ -672,6 +713,45 @@ fn register_action(
                     register_local(session, reg)
                 }
             }
+        }
+    }
+}
+
+#[cfg(feature = "sentry")]
+pub use sentry_impl::SentryConfig;
+
+#[cfg(feature = "sentry")]
+mod sentry_impl {
+    use super::*;
+    use sentry::types::Dsn;
+    use sentry::ClientOptions;
+
+    pub struct SentryConfig<'a> {
+        pub dsn: Dsn,
+        pub in_app_include: Vec<&'static str>,
+        pub plugin_info: &'a PluginInfo,
+    }
+
+    impl Reaper {
+        /// Initializes Sentry with the given configuration.
+        pub fn init_sentry(&self, config: SentryConfig) {
+            let client_options = ClientOptions {
+                dsn: Some(config.dsn),
+                release: Some(
+                    format!(
+                        "{}@{}",
+                        &config.plugin_info.plugin_name, &config.plugin_info.plugin_version
+                    )
+                    .into(),
+                ),
+                attach_stacktrace: false,
+                send_default_pii: false,
+                in_app_include: config.in_app_include,
+                // shutdown_timeout: Default::default(),
+                ..Default::default()
+            };
+            let sentry_guard = sentry::init(client_options);
+            self.sentry_guard.borrow_mut().replace(sentry_guard);
         }
     }
 }

@@ -19,8 +19,8 @@
 #[macro_use]
 mod regex_util;
 
-mod log_util;
-pub use log_util::*;
+mod crash_handler;
+pub use crash_handler::*;
 
 mod debug_util;
 pub use debug_util::*;
