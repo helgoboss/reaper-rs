@@ -199,10 +199,10 @@ Module size:         {module_size_label}
             // Sentry is enabled
             if let Some(error_id) = &crash_info.sentry_error_id {
                 // Error has been reported to Sentry successfully
-                &[intro, cut_intro, format!("Error ID: {error_id}"), cut_outro]
+                [intro, cut_intro, format!("Error ID: {error_id}"), cut_outro]
             } else {
                 // Reporting to Sentry failed
-                &[
+                [
                     intro,
                     cut_intro,
                     format!("Automatic error reporting failed!\n\nBacktrace: {backtrace}"),
@@ -211,7 +211,7 @@ Module size:         {module_size_label}
             }
         } else {
             // Sentry is disabled
-            &[
+            [
                 intro,
                 cut_intro,
                 format!("Backtrace: {backtrace}"),
