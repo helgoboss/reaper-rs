@@ -26,11 +26,17 @@ pub struct CrashHandlerConfig {
 }
 
 /// Information about the plug-in, to be shown in crash logs.
+#[derive(Clone, Debug)]
 pub struct PluginInfo {
     /// Name of the plug-in.
     pub plugin_name: String,
+    /// Just the version number, for example, "2.15.0".
     pub plugin_version: String,
+    /// Longer version info, maybe including the commit hash.
+    pub plugin_version_long: String,
+    /// Email address to which the user should send crash-related info.
     pub support_email_address: String,
+    /// URL which is presented to the user with the request to try with the latest version before reporting the error.
     pub update_url: String,
 }
 
@@ -144,7 +150,7 @@ impl CrashFormatter for DefaultConsoleMessageFormatter {
         let reaper_version = Reaper::get().version();
         let update_url = &crash_info.plugin_info.update_url;
         let plugin_name = &crash_info.plugin_info.plugin_name;
-        let plugin_version = &crash_info.plugin_info.plugin_version;
+        let plugin_version_long = &crash_info.plugin_info.plugin_version_long;
         let email_address = &crash_info.plugin_info.support_email_address;
         let panic_message = extract_panic_message(crash_info.panic_info);
         let intro = format!("
@@ -176,7 +182,7 @@ Message: {panic_message}
 
 REAPER version:      {reaper_version}
 Module name:         {plugin_name}
-Module version:      {plugin_version}
+Module version:      {plugin_version_long}
 Module path:         {module_path}
 Module base address: {module_base_address_label}
 Module size:         {module_size_label}
@@ -345,9 +351,9 @@ fn hyphen() -> String {
 mod sentry_impl {
     use super::*;
     use sentry::integrations::backtrace::backtrace_to_stacktrace;
-    use sentry::integrations::panic::{message_from_panic_info, PanicIntegration};
-    use sentry::protocol::{Event, Exception, Mechanism, Uuid};
-    use sentry::{Hub, Level, User};
+    use sentry::integrations::panic::message_from_panic_info;
+    use sentry::protocol::{Event, Exception, Mechanism};
+    use sentry::{Hub, Level};
 
     impl CrashHandler {
         /// Returns the error ID.

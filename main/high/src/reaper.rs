@@ -371,8 +371,12 @@ impl Reaper {
     }
 
     pub(crate) fn show_console_msg_thread_safe<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
-        // TODO-high CONTINUE Check if REAPER version already supports thread-safe console messaging!
-        if self.is_in_main_thread() {
+        if self
+            .medium_reaper
+            .features()
+            .show_console_msg_from_any_thread
+            || self.is_in_main_thread()
+        {
             self.show_console_msg(msg);
         } else {
             let _ = self.helper_task_sender.try_send(HelperTask::ShowConsoleMsg(
@@ -744,6 +748,16 @@ mod sentry_impl {
                     )
                     .into(),
                 ),
+                // We don't want default integrations because we have our own panic handler that uses the
+                // Sentry panic handler.
+                default_integrations: false,
+                integrations: vec![
+                    Arc::new(sentry::integrations::backtrace::AttachStacktraceIntegration),
+                    Arc::new(sentry::integrations::debug_images::DebugImagesIntegration::default()),
+                    Arc::new(sentry::integrations::contexts::ContextIntegration::default()),
+                    // Skip the panic integration
+                    Arc::new(sentry::integrations::backtrace::ProcessStacktraceIntegration),
+                ],
                 attach_stacktrace: false,
                 send_default_pii: false,
                 in_app_include: config.in_app_include,

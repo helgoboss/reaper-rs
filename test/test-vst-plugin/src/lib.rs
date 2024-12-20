@@ -127,11 +127,13 @@ impl TestVstPlugin {
             || {
                 let context =
                     PluginContext::from_vst_plugin(&self.host, static_plugin_context()).unwrap();
+                let version = env!("CARGO_PKG_VERSION").to_string();
                 Reaper::setup_with_defaults(
                     context,
                     PluginInfo {
                         plugin_name: "reaper-rs test VST plug-in".to_string(),
-                        plugin_version: env!("CARGO_PKG_VERSION").to_string(),
+                        plugin_version: version.clone(),
+                        plugin_version_long: version,
                         support_email_address: "info@helgoboss.org".to_string(),
                         update_url: "https://www.helgoboss.org/projects/helgobox".to_string(),
                     },

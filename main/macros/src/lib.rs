@@ -109,6 +109,7 @@ fn generate_high_level_plugin_code(
             let plugin_info = ::reaper_high::PluginInfo {
                 plugin_name: #plugin_name.to_string(),
                 plugin_version: #plugin_version.to_string(),
+                plugin_version_long: #plugin_version.to_string(),
                 support_email_address: #support_email_address.to_string(),
                 update_url: #update_url.to_string(),
             };

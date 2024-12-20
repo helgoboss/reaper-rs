@@ -162,19 +162,11 @@ impl AnyThread for RealTimeAudioThreadScope {}
 /// [`MainThreadOnly`]: trait.MainThreadOnly.html
 /// [`RealTimeAudioThreadOnly`]: trait.RealTimeAudioThreadOnly.html
 /// [`Reaper`]: struct.Reaper.html
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Reaper<UsageScope = MainThreadScope> {
     low: reaper_low::Reaper,
+    features: ReaperFeatures,
     p: PhantomData<UsageScope>,
-}
-
-impl<UsageScope> Clone for Reaper<UsageScope> {
-    fn clone(&self) -> Self {
-        Self {
-            low: self.low,
-            p: Default::default(),
-        }
-    }
 }
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
@@ -212,12 +204,34 @@ impl Reaper<MainThreadScope> {
     }
 }
 
-impl<UsageScope> Reaper<UsageScope> {
+/// Features of a particular REAPER version.
+#[derive(Clone, Eq, PartialEq, Debug, Default)]
+pub struct ReaperFeatures {
+    /// Whether it is safe to call [`Reaper::show_console_msg`] from any thread (vs. just the main thread).
+    pub show_console_msg_from_any_thread: bool,
+}
+
+impl ReaperFeatures {
+    fn from_reaper_version(version: &ReaperVersion) -> Self {
+        Self {
+            show_console_msg_from_any_thread: version.revision() >= "7",
+        }
+    }
+}
+
+impl<UsageScope> Reaper<UsageScope>
+where
+    UsageScope: AnyThread,
+{
     pub(crate) fn new(low: reaper_low::Reaper) -> Reaper<UsageScope> {
-        Reaper {
+        let mut reaper = Reaper {
             low,
             p: PhantomData,
-        }
+            features: Default::default(),
+        };
+        let version = reaper.get_app_version();
+        reaper.features = ReaperFeatures::from_reaper_version(&version);
+        reaper
     }
 
     /// Gives access to the low-level Reaper instance.
@@ -228,6 +242,11 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Returns the plug-in context.
     pub fn plugin_context(&self) -> PluginContext<UsageScope> {
         PluginContext::new(self.low.plugin_context())
+    }
+
+    /// Returns the features supported by this REAPER version.
+    pub fn features(&self) -> &ReaperFeatures {
+        &self.features
     }
 
     /// Returns the requested project and optionally its file name.
@@ -502,11 +521,22 @@ impl<UsageScope> Reaper<UsageScope> {
     /// Shows a message to the user in the ReaScript console.
     ///
     /// This is also useful for debugging. Send "\n" for newline and "" to clear the console.
+    ///
+    /// The message supports the following prefixes:
+    ///
+    /// - `!SHOW:`: Text will be added to console without opening the window
+    /// - `!SHOWERR:` Displays error indicator in main menu bar if ReaScript Console not already visible
+    ///
+    /// # Panics
+    ///
+    /// In REAPER versions < 7, this panics when not called from the main thread.
     pub fn show_console_msg<'a>(&self, message: impl Into<ReaperStringArg<'a>>)
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
-        self.require_main_thread();
+        if !self.features.show_console_msg_from_any_thread {
+            self.require_main_thread();
+        }
         unsafe { self.low.ShowConsoleMsg(message.into().as_ptr()) }
     }
 
@@ -8846,7 +8876,7 @@ impl<UsageScope> Reaper<UsageScope> {
 
     fn require_main_thread(&self)
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
         assert!(
             self.low.plugin_context().is_in_main_thread(),
