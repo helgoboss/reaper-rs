@@ -44,8 +44,9 @@ itertools = "0.10.5"
 camino = "1.1.7"
 # For excluding some fields from Debug
 derivative = "2.2.0"
-# For reporting panics to Sentry or GlitchTip, if enabled
-sentry = { version = "0.35.0", optional = true }
+# For reporting panics to Sentry or GlitchTip, if enabled.
+# We insist on rustls instead of native-tls because we don't want libssl dependencies on Linux.
+sentry = { version = "0.35.0", optional = true, default-features = false, features = ["backtrace", "contexts", "panic", "reqwest", "debug-images", "rustls"] }
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["psapi", "processthreadsapi", "winuser"] }
