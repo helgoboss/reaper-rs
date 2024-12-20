@@ -402,6 +402,9 @@ mod sentry_impl {
                 return Err("no sentry client bound");
             };
             let uuid = hub.capture_event(event);
+            if uuid.is_nil() {
+                return Err("capturing sentry event didn't work");
+            }
             client.flush(None);
             Ok(uuid.to_string())
         }

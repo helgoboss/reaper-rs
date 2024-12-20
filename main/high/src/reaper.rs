@@ -738,7 +738,12 @@ mod sentry_impl {
 
     impl Reaper {
         /// Initializes Sentry with the given configuration.
+        ///
+        /// Later calls will be ignored.
         pub fn init_sentry(&self, config: SentryConfig) {
+            if self.sentry_guard.borrow().is_some() {
+                return;
+            }
             let client_options = ClientOptions {
                 dsn: Some(config.dsn),
                 release: Some(
