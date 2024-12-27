@@ -367,9 +367,9 @@ impl Track {
     }
 
     /// This one also ensures the track is valid.
-    pub fn raw(&self) -> MediaTrack {
-        self.load_and_check_if_necessary_or_complain();
-        self.raw_internal()
+    pub fn raw(&self) -> ReaperResult<MediaTrack> {
+        self.load_and_check_if_necessary_or_err()?;
+        Ok(self.raw_internal())
     }
 
     /// This one **doesn't** ensure the track is valid.

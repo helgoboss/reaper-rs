@@ -1606,7 +1606,7 @@ fn set_track_pan_weirdness() -> TestStep {
             use GangBehavior::DenyGang;
             use ValueChange::Absolute;
             let reaper = reaper.medium_reaper();
-            let track = get_track(0)?.raw();
+            let track = get_track(0)?.raw()?;
             // Given
             reaper.csurf_on_pan_change_ex(
                 track,
@@ -1763,24 +1763,24 @@ fn set_track_volume_extreme_values() -> TestStep {
             // When
             let track_1_result = unsafe {
                 Reaper::get().medium_reaper().csurf_on_volume_change_ex(
-                    track_1.raw(),
+                    track_1.raw()?,
                     ValueChange::Absolute(ReaperVolumeValue::new_panic(1.0 / 0.0)),
                     GangBehavior::DenyGang,
                 );
                 Reaper::get()
                     .medium_reaper()
-                    .get_track_ui_vol_pan(track_1.raw())
+                    .get_track_ui_vol_pan(track_1.raw()?)
                     .unwrap()
             };
             let track_2_result = unsafe {
                 Reaper::get().medium_reaper().csurf_on_volume_change_ex(
-                    track_2.raw(),
+                    track_2.raw()?,
                     ValueChange::Absolute(ReaperVolumeValue::new_panic(f64::NAN)),
                     GangBehavior::DenyGang,
                 );
                 Reaper::get()
                     .medium_reaper()
-                    .get_track_ui_vol_pan(track_2.raw())
+                    .get_track_ui_vol_pan(track_2.raw()?)
                     .unwrap()
             };
             // Then
@@ -2067,7 +2067,7 @@ fn query_track_by_guid() -> TestStep {
         assert!(found_track.is_available());
         assert_eq!(&found_track, &new_track);
         assert_ne!(&found_track, &first_track);
-        assert_eq!(new_track.guid(), &get_media_track_guid(new_track.raw()));
+        assert_eq!(new_track.guid(), &get_media_track_guid(new_track.raw()?));
         Ok(())
     })
 }
