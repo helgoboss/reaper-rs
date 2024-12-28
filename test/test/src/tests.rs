@@ -9,7 +9,7 @@ use c_str_macro::c_str;
 use reaper_high::{
     get_media_track_guid, toggleable, ActionCharacter, ActionKind, FxChain, FxInfo,
     FxParameterCharacter, GroupingBehavior, Guid, Pan, PlayRate, Reaper, SendPartnerType,
-    SliderVolume, Tempo, Track, TrackRoutePartner, Width,
+    SliderVolume, Tempo, Track, TrackRoutePartner, TrackSetSmartOpts, Width,
 };
 use rxrust::prelude::*;
 
@@ -1580,9 +1580,8 @@ fn set_track_pan() -> TestStep {
                 });
         });
         track.set_pan_smart(
-            Pan::from_normalized_value(0.25),
-            GangBehavior::DenyGang,
-            GroupingBehavior::PreventGrouping,
+            Pan::from_normalized_value(0.25).reaper_value(),
+            TrackSetSmartOpts::default(),
         )?;
         // Then
         let pan = track.pan();
@@ -1643,9 +1642,8 @@ fn set_track_width() -> TestStep {
                 });
         });
         track.set_width_smart(
-            Width::from_normalized_value(0.25),
-            GangBehavior::DenyGang,
-            GroupingBehavior::PreventGrouping,
+            Width::from_normalized_value(0.25).reaper_value(),
+            TrackSetSmartOpts::default(),
         )?;
         // Then
         let width = track.width();
@@ -1725,8 +1723,7 @@ fn set_track_volume() -> TestStep {
             SliderVolume::try_from_normalized_slider_value(0.25)
                 .unwrap()
                 .reaper_value(),
-            GangBehavior::DenyGang,
-            GroupingBehavior::PreventGrouping,
+            TrackSetSmartOpts::default(),
         )?;
         // Then
         let volume = track.volume();

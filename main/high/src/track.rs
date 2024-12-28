@@ -17,7 +17,6 @@ use reaper_medium::NotificationBehavior::NotifyAll;
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::SendTarget::OtherTrack;
 use reaper_medium::TrackAttributeKey::{RecArm, RecInput, RecMon, Selected, Solo};
-use reaper_medium::ValueChange::Absolute;
 use reaper_medium::{
     AutomationMode, BeatAttachMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, NativeColorValue, NotificationBehavior, Progress, ReaProject,
@@ -399,48 +398,46 @@ impl Track {
         Pan::from_reaper_value(result.pan)
     }
 
+    /// Sets the pan using the best and most full-featured function available and informs control surfaces about it.
     pub fn set_pan_smart(
         &self,
-        pan: Pan,
-        gang_behavior: GangBehavior,
-        grouping_behavior: GroupingBehavior,
+        value: ReaperPanValue,
+        opts: TrackSetSmartOpts,
     ) -> ReaperResult<()> {
         self.load_and_check_if_necessary_or_err()?;
-        let reaper_value = pan.reaper_value();
         let track = self.raw_internal();
+        let reaper = Reaper::get().medium_reaper();
         let resulting_value = if self.project() == Reaper::get().current_project() {
-            let reaper = Reaper::get().medium_reaper();
             if reaper.low().pointers().SetTrackUIPan.is_some() {
                 unsafe {
                     reaper.set_track_ui_pan(
                         track,
-                        Absolute(reaper_value),
-                        Progress::NotDone,
-                        build_track_ui_flags(gang_behavior, grouping_behavior),
+                        ValueChange::Absolute(value),
+                        opts.progress(),
+                        build_track_ui_flags(opts.gang_behavior, opts.grouping_behavior),
                     )
                 }
             } else {
                 unsafe {
-                    reaper.csurf_on_pan_change_ex(track, Absolute(reaper_value), gang_behavior)
+                    reaper.csurf_on_pan_change_ex(
+                        track,
+                        ValueChange::Absolute(value),
+                        opts.gang_behavior,
+                    )
                 }
             }
         } else {
             // ReaLearn #283
             unsafe {
-                let _ = Reaper::get().medium_reaper().set_media_track_info_value(
-                    track,
-                    TrackAttributeKey::Pan,
-                    reaper_value.get(),
-                );
+                let _ =
+                    reaper.set_media_track_info_value(track, TrackAttributeKey::Pan, value.get());
             }
-            reaper_value
+            value
         };
         // Setting the pan programmatically doesn't trigger SetSurfacePan for control surfaces so
         // we need to notify manually
         unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .csurf_set_surface_pan(track, resulting_value, NotifyAll);
+            reaper.csurf_set_surface_pan(track, resulting_value, NotifyAll);
         }
         Ok(())
     }
@@ -494,50 +491,48 @@ impl Track {
         Width::from_reaper_value(result.pan_2.as_width_value())
     }
 
+    /// Sets the width using the best and most full-featured function available and informs control surfaces about it.
     pub fn set_width_smart(
         &self,
-        width: Width,
-        gang_behavior: GangBehavior,
-        grouping_behavior: GroupingBehavior,
+        value: ReaperWidthValue,
+        opts: TrackSetSmartOpts,
     ) -> ReaperResult<()> {
         self.load_and_check_if_necessary_or_err()?;
-        let reaper_value = width.reaper_value();
         let track = self.raw_internal();
+        let reaper = Reaper::get().medium_reaper();
         if self.project() == Reaper::get().current_project() {
-            let reaper = Reaper::get().medium_reaper();
             if reaper.low().pointers().SetTrackUIWidth.is_some() {
                 unsafe {
                     reaper.set_track_ui_width(
                         track,
-                        Absolute(reaper_value),
-                        Progress::NotDone,
-                        build_track_ui_flags(gang_behavior, grouping_behavior),
+                        ValueChange::Absolute(value),
+                        opts.progress(),
+                        build_track_ui_flags(opts.gang_behavior, opts.grouping_behavior),
                     );
                 }
             } else {
                 unsafe {
-                    reaper.csurf_on_width_change_ex(track, Absolute(reaper_value), gang_behavior);
+                    reaper.csurf_on_width_change_ex(
+                        track,
+                        ValueChange::Absolute(value),
+                        opts.gang_behavior,
+                    );
                 }
             }
         } else {
             // ReaLearn #283
             let _ = unsafe {
-                Reaper::get().medium_reaper().set_media_track_info_value(
-                    track,
-                    TrackAttributeKey::Width,
-                    reaper_value.get(),
-                )
+                reaper.set_media_track_info_value(track, TrackAttributeKey::Width, value.get())
             };
         }
         // Setting the width programmatically doesn't trigger SetSurfacePan for control surfaces
         // so we need to notify manually. There's no CSurf_SetSurfaceWidth, so we just retrigger
         // CSurf_SetSurfacePan.
         unsafe {
-            Reaper::get().medium_reaper().csurf_set_surface_pan(
-                track,
-                self.pan().reaper_value(),
-                NotifyAll,
-            );
+            let vol_pan = reaper.get_track_ui_vol_pan(track)?;
+            Reaper::get()
+                .medium_reaper()
+                .csurf_set_surface_pan(track, vol_pan.pan, NotifyAll);
         }
         Ok(())
     }
@@ -598,29 +593,29 @@ impl Track {
         result.volume
     }
 
+    /// Sets the volume using the best and most full-featured function available and informs control surfaces about it.
     pub fn set_volume_smart(
         &self,
-        volume: ReaperVolumeValue,
-        gang_behavior: GangBehavior,
-        grouping_behavior: GroupingBehavior,
+        value: ReaperVolumeValue,
+        opts: TrackSetSmartOpts,
     ) -> ReaperResult<()> {
         self.load_and_check_if_necessary_or_err()?;
         let track = self.raw_internal();
+        let reaper = Reaper::get().medium_reaper();
         let resulting_value = if self.project() == Reaper::get().current_project() {
-            let reaper = Reaper::get().medium_reaper();
-            // Why we use this function and not the others:
+            // Why we use SetTrackUIVolume or CSurf_OnVolumeChangeEx and not the others:
             //
-            // - Setting D_VOL directly via `set_media_track_info_value` will not work for writing
+            // - Setting D_VOL directly via `SetMediaTrackInfo_Value` will not work for writing
             //   automation.
-            // - csurf_set_surface_volume seems to only inform control surfaces, doesn't actually
+            // - `CSurf_SetSurfaceVolume` seems to only inform control surfaces, doesn't actually
             //   set the volume.
             if reaper.low().pointers().SetTrackUIVolume.is_some() {
                 unsafe {
                     reaper.set_track_ui_volume(
                         track,
-                        Absolute(volume),
-                        Progress::NotDone,
-                        build_track_ui_flags(gang_behavior, grouping_behavior),
+                        ValueChange::Absolute(value),
+                        opts.progress(),
+                        build_track_ui_flags(opts.gang_behavior, opts.grouping_behavior),
                     )
                 }
             } else {
@@ -630,29 +625,54 @@ impl Track {
                 //   The return value reflects the cropped value. However, the precision became much
                 //   better with REAPER 5.28.
                 // - In automation mode "Touch" this leads to jumps.
-                unsafe { reaper.csurf_on_volume_change_ex(track, Absolute(volume), gang_behavior) }
+                // - Doesn't support grouping
+                unsafe {
+                    reaper.csurf_on_volume_change_ex(
+                        track,
+                        ValueChange::Absolute(value),
+                        opts.gang_behavior,
+                    )
+                }
             }
         } else {
             // ReaLearn #283
             unsafe {
-                let _ = Reaper::get().medium_reaper().set_media_track_info_value(
-                    track,
-                    TrackAttributeKey::Vol,
-                    volume.get(),
-                );
+                let _ =
+                    reaper.set_media_track_info_value(track, TrackAttributeKey::Vol, value.get());
             }
-            volume
+            value
         };
         // Setting the volume programmatically doesn't inform control surfaces - including our own
         // surfaces which are important for feedback. So use the following to notify manually.
         unsafe {
-            Reaper::get().medium_reaper().csurf_set_surface_volume(
-                track,
-                resulting_value,
-                NotifyAll,
-            );
+            reaper.csurf_set_surface_volume(track, resulting_value, NotifyAll);
         }
         Ok(())
+    }
+
+    pub fn set_track_ui_volume(
+        &self,
+        value_change: ValueChange<ReaperVolumeValue>,
+        progress: Progress,
+        gang_behavior: GangBehavior,
+        grouping_behavior: GroupingBehavior,
+    ) -> ReaperResult<ReaperVolumeValue> {
+        let reaper = &Reaper::get().medium_reaper;
+        reaper
+            .low()
+            .pointers()
+            .SetTrackUIVolume
+            .ok_or("REAPER version too old to support SetTrackUIVolume")?;
+        self.load_and_check_if_necessary_or_err()?;
+        let value = unsafe {
+            reaper.set_track_ui_volume(
+                self.raw_internal(),
+                value_change,
+                progress,
+                build_track_ui_flags(gang_behavior, grouping_behavior),
+            )
+        };
+        Ok(value)
     }
 
     /// Sets the given track's volume, also supports relative changes and gang.
@@ -1745,6 +1765,37 @@ fn get_show_attribute_key(track_area: TrackArea) -> TrackAttributeKey<'static> {
 pub enum GroupingBehavior {
     PreventGrouping,
     UseGrouping,
+}
+
+pub struct TrackSetSmartOpts {
+    pub gang_behavior: GangBehavior,
+    pub grouping_behavior: GroupingBehavior,
+    /// This affects undo history and touch-mode automation writing.
+    ///
+    /// - When `true`, an undo point will be created for this change.
+    /// - When `true`, existing automation data will not be overwritten anymore.
+    pub done: bool,
+}
+
+impl TrackSetSmartOpts {
+    fn progress(&self) -> Progress {
+        if self.done {
+            Progress::Done
+        } else {
+            Progress::NotDone
+        }
+    }
+}
+
+impl Default for TrackSetSmartOpts {
+    fn default() -> Self {
+        Self {
+            gang_behavior: GangBehavior::DenyGang,
+            grouping_behavior: GroupingBehavior::PreventGrouping,
+            // Important to be false! We don't want to create undo points by default!
+            done: false,
+        }
+    }
 }
 
 fn build_track_ui_flags(
