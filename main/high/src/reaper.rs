@@ -371,12 +371,14 @@ impl Reaper {
     }
 
     pub(crate) fn show_console_msg_thread_safe<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
-        if self
-            .medium_reaper
-            .features()
-            .show_console_msg_from_any_thread
-            || self.is_in_main_thread()
-        {
+        // When calling from non-main thread with REAPER's feature "show_console_msg_from_any_thread",
+        // the message doesn't pop up (just a MSG indicator in the menu bar). That's bad. We want it to pop up.
+        let call_directly = self.is_in_main_thread();
+        // || self
+        //     .medium_reaper
+        //     .features()
+        //     .show_console_msg_from_any_thread;
+        if call_directly {
             self.show_console_msg(msg);
         } else {
             let _ = self.helper_task_sender.try_send(HelperTask::ShowConsoleMsg(
