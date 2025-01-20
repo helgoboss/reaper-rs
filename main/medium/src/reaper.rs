@@ -209,15 +209,12 @@ impl Reaper<MainThreadScope> {
 pub struct ReaperFeatures {
     /// Whether it is safe to call [`Reaper::show_console_msg`] from any thread (vs. just the main thread).
     pub show_console_msg_from_any_thread: bool,
-    /// Whether the FX named config parameter "fx_type" can be queried.
-    pub fx_named_config_param_fx_type: bool,
 }
 
 impl ReaperFeatures {
     fn from_reaper_version(version: &ReaperVersion) -> Self {
         Self {
             show_console_msg_from_any_thread: version.revision() >= "7",
-            fx_named_config_param_fx_type: version.revision() >= "6.37",
         }
     }
 }
