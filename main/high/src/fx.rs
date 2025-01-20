@@ -8,7 +8,7 @@ use crate::error::ReaperResult;
 use crate::fx_chain::FxChain;
 use crate::fx_parameter::FxParameter;
 use crate::guid::Guid;
-use crate::{ChunkRegion, FxChainContext, Project, Reaper, Track};
+use crate::{ChunkRegion, FxChainContext, Project, Reaper, ReaperError, Track};
 use either::Either;
 use reaper_medium::{
     FxPresetRef, FxShowInstruction, Hwnd, ParamId, ReaperFunctionError, ReaperString,
@@ -167,7 +167,13 @@ impl Fx {
     pub fn info(&self) -> ReaperResult<FxInfo> {
         self.load_if_necessary_or_err()?;
         let loc = self.track_and_location()?;
-        let fx_type = self.get_named_config_param_as_string_internal("fx_type", 10, &loc)?;
+        let fx_type = self
+            .get_named_config_param_as_string_internal("fx_type", 10, &loc)
+            .map_err(|_| {
+                ReaperError::new(
+                    "Couldn't get FX info. Make sure you use a REAPER version >= 6.37!",
+                )
+            })?;
         let fx_ident = self.get_named_config_param_as_string_internal("fx_ident", 1000, &loc);
         let (file_name, id) = if let Ok(fx_ident) = fx_ident {
             let c_string = fx_ident.into_inner();
