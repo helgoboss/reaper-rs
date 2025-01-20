@@ -94,7 +94,9 @@ impl Fx {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let Ok((track, location)) = self.track_and_location() else {
+                    return ReaperString::default();
+                };
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
@@ -160,7 +162,7 @@ impl Fx {
     // Attention: Currently implemented by parsing chunk
     pub fn info(&self) -> ReaperResult<FxInfo> {
         self.load_if_necessary_or_err()?;
-        let loc = self.track_and_location();
+        let loc = self.track_and_location()?;
         let fx_type = self.get_named_config_param_as_string_internal("fx_type", 10, &loc);
         let fx_ident = self.get_named_config_param_as_string_internal("fx_ident", 1000, &loc);
         let (file_name, id) = if let Ok(fx_ident) = fx_ident {
@@ -226,7 +228,9 @@ impl Fx {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let Ok((track, location)) = self.track_and_location() else {
+                    return 0;
+                };
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
@@ -240,7 +244,9 @@ impl Fx {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let Ok((track, location)) = self.track_and_location() else {
+                    return false;
+                };
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
@@ -254,7 +260,9 @@ impl Fx {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let Ok((track, location)) = self.track_and_location() else {
+                    return false;
+                };
                 unsafe {
                     !Reaper::get()
                         .medium_reaper()
@@ -268,12 +276,12 @@ impl Fx {
         &self,
         name: impl Into<ReaperStringArg<'a>>,
         buffer_size: u32,
-    ) -> Result<Vec<u8>, ReaperFunctionError> {
+    ) -> ReaperResult<Vec<u8>> {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
-                unsafe {
+                let (track, location) = self.track_and_location()?;
+                let bytes = unsafe {
                     Reaper::get()
                         .medium_reaper()
                         .track_fx_get_named_config_parm(
@@ -281,8 +289,9 @@ impl Fx {
                             location,
                             name,
                             buffer_size,
-                        )
-                }
+                        )?
+                };
+                Ok(bytes)
             }
         }
     }
@@ -315,11 +324,11 @@ impl Fx {
         &self,
         name: impl Into<ReaperStringArg<'a>>,
         value: *const c_char,
-    ) -> Result<(), ReaperFunctionError> {
+    ) -> ReaperResult<()> {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let (track, location) = self.track_and_location()?;
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
@@ -328,10 +337,11 @@ impl Fx {
                             location,
                             name,
                             value,
-                        )
-                }
+                        )?
+                };
             }
         }
+        Ok(())
     }
 
     pub fn parameters(&self) -> impl ExactSizeIterator<Item = FxParameter> + '_ {
@@ -386,7 +396,7 @@ impl Fx {
         let index = match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let (track, location) = self.track_and_location().ok()?;
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
@@ -408,9 +418,8 @@ impl Fx {
         get_track_fx_location(self.index(), self.is_input_fx())
     }
 
-    /// Panics if this is a take FX.
-    pub(crate) fn track_and_location(&self) -> (Track, TrackFxLocation) {
-        get_track_and_location(&self.chain, self.index()).expect("must be take FX")
+    pub(crate) fn track_and_location(&self) -> ReaperResult<(Track, TrackFxLocation)> {
+        get_track_and_location(&self.chain, self.index())
     }
 
     pub fn index(&self) -> u32 {
@@ -520,14 +529,15 @@ impl Fx {
         Ok(())
     }
 
-    pub fn vst_chunk(&self) -> Result<Vec<u8>, &'static str> {
+    pub fn vst_chunk(&self) -> ReaperResult<Vec<u8>> {
         let encoded_vst_chunk = self.vst_chunk_encoded()?;
-        base64::decode(encoded_vst_chunk.to_str().as_bytes()).map_err(|_| "couldn't decode bytes")
+        base64::decode(encoded_vst_chunk.to_str().as_bytes())
+            .map_err(|_| "couldn't decode bytes".into())
     }
 
     pub fn vst_chunk_encoded(&self) -> ReaperResult<ReaperString> {
         self.load_if_necessary_or_err()?;
-        let loc = self.track_and_location();
+        let loc = self.track_and_location()?;
         let encoded = self.get_named_config_param_as_string_internal("vst_chunk", 100_000, &loc)?;
         Ok(encoded)
     }
@@ -537,7 +547,7 @@ impl Fx {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let (track, location) = self.track_and_location().ok()?;
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
@@ -551,7 +561,9 @@ impl Fx {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let Ok((track, location)) = self.track_and_location() else {
+                    return false;
+                };
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
@@ -568,7 +580,7 @@ impl Fx {
         }
     }
 
-    pub fn show_in_floating_window(&self) {
+    pub fn show_in_floating_window(&self) -> ReaperResult<()> {
         #[cfg(windows)]
         {
             if let Some(window) = self.floating_window() {
@@ -576,20 +588,21 @@ impl Fx {
                     winapi::um::winuser::SetFocus(window.as_ptr() as _);
                 }
             } else {
-                self.show_in_floating_window_internal();
+                self.show_in_floating_window_internal()?;
             }
         }
         #[cfg(not(windows))]
         {
-            self.show_in_floating_window_internal();
+            self.show_in_floating_window_internal()?;
         }
+        Ok(())
     }
 
-    fn show_in_floating_window_internal(&self) {
+    fn show_in_floating_window_internal(&self) -> ReaperResult<()> {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let (track, location) = self.track_and_location()?;
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_show(
                         track.raw_unchecked(),
@@ -598,6 +611,7 @@ impl Fx {
                 }
             }
         }
+        Ok(())
     }
 
     pub fn hide_floating_window(&self) -> ReaperResult<()> {
@@ -605,7 +619,7 @@ impl Fx {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let (track, location) = self.track_and_location()?;
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_show(
                         track.raw_unchecked(),
@@ -622,7 +636,7 @@ impl Fx {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let (track, location) = self.track_and_location()?;
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_show(
                         track.raw_unchecked(),
@@ -653,19 +667,19 @@ impl Fx {
         &self.chain
     }
 
-    pub fn enable(&self) {
-        self.set_enabled(true);
+    pub fn enable(&self) -> ReaperResult<()> {
+        self.set_enabled(true)
     }
 
-    pub fn disable(&self) {
-        self.set_enabled(false);
+    pub fn disable(&self) -> ReaperResult<()> {
+        self.set_enabled(false)
     }
 
-    fn set_enabled(&self, enabled: bool) {
+    fn set_enabled(&self, enabled: bool) -> ReaperResult<()> {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let (track, location) = self.track_and_location()?;
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_set_enabled(
                         track.raw_unchecked(),
@@ -675,13 +689,14 @@ impl Fx {
                 }
             }
         }
+        Ok(())
     }
 
-    pub fn set_online(&self, online: bool) {
+    pub fn set_online(&self, online: bool) -> ReaperResult<()> {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let (track, location) = self.track_and_location()?;
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_set_offline(
                         track.raw_unchecked(),
@@ -691,6 +706,7 @@ impl Fx {
                 }
             }
         }
+        Ok(())
     }
 
     pub fn is_input_fx(&self) -> bool {
@@ -726,7 +742,9 @@ impl Fx {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let Ok((track, location)) = self.track_and_location() else {
+                    return TrackFxGetPresetIndexResult::default();
+                };
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
@@ -741,7 +759,7 @@ impl Fx {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let (track, location) = self.track_and_location()?;
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_set_preset_by_index(
                         track.raw_unchecked(),
@@ -762,7 +780,7 @@ impl Fx {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let (track, location) = self.track_and_location()?;
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_set_preset(
                         track.raw_unchecked(),
@@ -782,7 +800,9 @@ impl Fx {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let Ok((track, location)) = self.track_and_location() else {
+                    return false;
+                };
                 let result = unsafe {
                     Reaper::get().medium_reaper().track_fx_get_preset(
                         track.raw_unchecked(),
@@ -800,7 +820,7 @@ impl Fx {
         match self.chain.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.track_and_location();
+                let (track, location) = self.track_and_location().ok()?;
                 unsafe {
                     Reaper::get()
                         .medium_reaper()
@@ -812,21 +832,18 @@ impl Fx {
     }
 }
 
-fn get_track_and_location(chain: &FxChain, index: u32) -> Option<(Track, TrackFxLocation)> {
+fn get_track_and_location(chain: &FxChain, index: u32) -> ReaperResult<(Track, TrackFxLocation)> {
     match chain.context() {
         FxChainContext::Monitoring => {
-            let track = Reaper::get()
-                .current_project()
-                .master_track()
-                .expect("master track of current project should exist");
+            let track = Reaper::get().current_project().master_track()?;
             let location = TrackFxLocation::InputFxChain(index);
-            Some((track, location))
+            Ok((track, location))
         }
         FxChainContext::Track { track, is_input_fx } => {
             let location = get_track_fx_location(index, *is_input_fx);
-            Some((track.clone(), location))
+            Ok((track.clone(), location))
         }
-        FxChainContext::Take(_) => None,
+        FxChainContext::Take(_) => Err("not supported for take FX".into()),
     }
 }
 
@@ -834,7 +851,7 @@ pub fn get_fx_guid(chain: &FxChain, index: u32) -> Option<Guid> {
     let raw_guid = match chain.context() {
         FxChainContext::Take(_) => todo!(),
         _ => {
-            let (track, location) = get_track_and_location(chain, index).expect("must be take FX");
+            let (track, location) = get_track_and_location(chain, index).ok()?;
             unsafe {
                 Reaper::get()
                     .medium_reaper()

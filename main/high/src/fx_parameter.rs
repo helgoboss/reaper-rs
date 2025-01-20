@@ -3,8 +3,7 @@ use crate::fx::Fx;
 use crate::error::ReaperResult;
 use crate::{FxChain, FxChainContext, Reaper};
 use reaper_medium::{
-    GetParamExResult, GetParameterStepSizesResult, ReaperFunctionError,
-    ReaperNormalizedFxParamValue, ReaperString,
+    GetParamExResult, GetParameterStepSizesResult, ReaperNormalizedFxParamValue, ReaperString,
 };
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -21,22 +20,25 @@ impl FxParameter {
     pub fn set_reaper_normalized_value(
         &self,
         reaper_value: impl Into<ReaperNormalizedFxParamValue>,
-    ) -> Result<(), ReaperFunctionError> {
+    ) -> ReaperResult<()> {
         Reaper::get().require_main_thread();
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.fx().track_and_location();
+                let (track, location) = self.fx().track_and_location()?;
                 unsafe {
-                    Reaper::get().medium_reaper().track_fx_set_param_normalized(
-                        track.raw_unchecked(),
-                        location,
-                        self.index,
-                        reaper_value.into(),
-                    )
+                    Reaper::get()
+                        .medium_reaper()
+                        .track_fx_set_param_normalized(
+                            track.raw_unchecked(),
+                            location,
+                            self.index,
+                            reaper_value.into(),
+                        )?;
                 }
             }
         }
+        Ok(())
     }
 
     pub fn reaper_normalized_value(&self) -> ReaperNormalizedFxParamValue {
@@ -44,7 +46,9 @@ impl FxParameter {
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.fx().track_and_location();
+                let Ok((track, location)) = self.fx().track_and_location() else {
+                    return ReaperNormalizedFxParamValue::default();
+                };
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_get_param_normalized(
                         track.raw_unchecked(),
@@ -56,21 +60,22 @@ impl FxParameter {
         }
     }
 
-    pub fn end_edit(&self) -> Result<(), ReaperFunctionError> {
+    pub fn end_edit(&self) -> ReaperResult<()> {
         Reaper::get().require_main_thread();
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.fx().track_and_location();
+                let (track, location) = self.fx().track_and_location()?;
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_end_param_edit(
                         track.raw_unchecked(),
                         location,
                         self.index,
-                    )
+                    )?;
                 }
             }
         }
+        Ok(())
     }
 
     fn chain(&self) -> &FxChain {
@@ -85,7 +90,7 @@ impl FxParameter {
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.fx().track_and_location();
+                let (track, location) = self.fx().track_and_location()?;
                 let name = unsafe {
                     Reaper::get().medium_reaper().track_fx_get_param_name(
                         track.raw_unchecked(),
@@ -114,7 +119,7 @@ impl FxParameter {
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.fx().track_and_location();
+                let (track, location) = self.fx().track_and_location().ok()?;
                 let result = unsafe {
                     Reaper::get()
                         .medium_reaper()
@@ -144,12 +149,12 @@ impl FxParameter {
         }
     }
 
-    pub fn formatted_value(&self) -> Result<ReaperString, ReaperFunctionError> {
+    pub fn formatted_value(&self) -> ReaperResult<ReaperString> {
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.fx().track_and_location();
-                unsafe {
+                let (track, location) = self.fx().track_and_location()?;
+                let formatted = unsafe {
                     Reaper::get()
                         .medium_reaper()
                         .track_fx_get_formatted_param_value(
@@ -157,8 +162,9 @@ impl FxParameter {
                             location,
                             self.index,
                             256,
-                        )
-                }
+                        )?
+                };
+                Ok(formatted)
             }
         }
     }
@@ -174,12 +180,12 @@ impl FxParameter {
     pub fn format_reaper_normalized_value(
         &self,
         reaper_value: ReaperNormalizedFxParamValue,
-    ) -> Result<ReaperString, ReaperFunctionError> {
+    ) -> ReaperResult<ReaperString> {
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.fx().track_and_location();
-                unsafe {
+                let (track, location) = self.fx().track_and_location()?;
+                let formatted = unsafe {
                     Reaper::get()
                         .medium_reaper()
                         .track_fx_format_param_value_normalized(
@@ -188,8 +194,9 @@ impl FxParameter {
                             self.index,
                             reaper_value,
                             256,
-                        )
-                }
+                        )?
+                };
+                Ok(formatted)
             }
         }
     }
@@ -229,7 +236,9 @@ impl FxParameter {
         match self.chain().context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let (track, location) = self.fx().track_and_location();
+                let Ok((track, location)) = self.fx().track_and_location() else {
+                    return GetParamExResult::default();
+                };
                 unsafe {
                     Reaper::get().medium_reaper().track_fx_get_param_ex(
                         track.raw_unchecked(),

@@ -1491,7 +1491,7 @@ impl Track {
         self.complain_if_not_valid();
     }
 
-    pub(crate) fn load_and_check_if_necessary_or_err(&self) -> Result<(), &'static str> {
+    pub(crate) fn load_and_check_if_necessary_or_err(&self) -> ReaperResult<()> {
         unsafe {
             self.load_if_necessary_or_err_unchecked()?;
         }

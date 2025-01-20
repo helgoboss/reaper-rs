@@ -8925,7 +8925,7 @@ pub enum GetParameterStepSizesResult {
 }
 
 /// Each of these values can be negative! They are not normalized.
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, Default)]
 pub struct GetParamExResult {
     /// Current value.
     pub current_value: f64,
@@ -8985,7 +8985,7 @@ pub struct TrackFxGetPresetResult {
     pub name: Option<ReaperString>,
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
 pub struct TrackFxGetPresetIndexResult {
     /// Preset index or `None` if no preset or factory preset is selected or the FX doesn't exist.
     pub index: Option<u32>,

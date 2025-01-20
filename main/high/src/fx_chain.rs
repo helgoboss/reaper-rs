@@ -4,6 +4,7 @@ use crate::{
     get_track_fx_location, Chunk, ChunkRegion, Project, Reaper, Take, Track, MAX_TRACK_CHUNK_SIZE,
 };
 
+use crate::error::ReaperResult;
 use reaper_medium::{
     AddFxBehavior, ChunkCacheHint, FxChainVisibility, FxShowInstruction, ReaperStringArg,
     TrackFxChainType, TransferBehavior,
@@ -71,10 +72,9 @@ impl FxChain {
                 }
             }
             FxChainContext::Monitoring => {
-                let track = Reaper::get()
-                    .current_project()
-                    .master_track()
-                    .expect("master track of current project should exist");
+                let Ok(track) = Reaper::get().current_project().master_track() else {
+                    return 0;
+                };
                 unsafe { reaper.track_fx_get_rec_count(track.raw_unchecked()) }
             }
             FxChainContext::Take(_) => todo!(),
@@ -95,32 +95,29 @@ impl FxChain {
                 }
             }
             FxChainContext::Monitoring => {
-                let track = Reaper::get()
-                    .current_project()
-                    .master_track()
-                    .expect("master track of current project should exist");
+                let Ok(track) = Reaper::get().current_project().master_track() else {
+                    return FxChainVisibility::Hidden;
+                };
                 unsafe { reaper.track_fx_get_rec_chain_visible(track.raw_unchecked()) }
             }
             FxChainContext::Take(_) => todo!(),
         }
     }
 
-    pub fn show(&self) {
-        self.set_visible(true);
+    pub fn show(&self) -> ReaperResult<()> {
+        self.set_visible(true)
     }
 
-    pub fn hide(&self) {
-        self.set_visible(false);
+    pub fn hide(&self) -> ReaperResult<()> {
+        self.set_visible(false)
     }
 
-    fn set_visible(&self, visible: bool) {
+    fn set_visible(&self, visible: bool) -> ReaperResult<()> {
         match self.context() {
             FxChainContext::Take(_) => todo!(),
             _ => {
-                let track = self.track_or_master_track();
-                if track.load_and_check_if_necessary_or_err().is_err() {
-                    return;
-                }
+                let track = self.track_or_master_track()?;
+                track.load_and_check_if_necessary_or_err()?;
                 let instruction = if visible {
                     let location = get_track_fx_location(0, self.is_input_fx());
                     FxShowInstruction::ShowChain(location)
@@ -139,17 +136,18 @@ impl FxChain {
                 }
             }
         }
+        Ok(())
     }
 
     // Moves within this FX chain
-    pub fn move_fx(&self, fx: &Fx, new_index: u32) -> Result<(), &'static str> {
+    pub fn move_fx(&self, fx: &Fx, new_index: u32) -> ReaperResult<()> {
         assert_eq!(fx.chain(), self);
         let reaper = Reaper::get().medium_reaper();
         if reaper.low().pointers().TrackFX_CopyToTrack.is_some() {
             match self.context() {
                 FxChainContext::Take(_) => todo!(),
                 _ => {
-                    let (track, location) = fx.track_and_location();
+                    let (track, location) = fx.track_and_location()?;
                     track.load_and_check_if_necessary_or_err()?;
                     unsafe {
                         reaper.track_fx_copy_to_track(
@@ -165,7 +163,7 @@ impl FxChain {
             };
         } else {
             if !fx.is_available() {
-                return Err("FX not available");
+                return Err("FX not available".into());
             }
             if fx.index() == new_index {
                 return Ok(());
@@ -215,17 +213,17 @@ impl FxChain {
         }
     }
 
-    pub fn remove_fx(&self, fx: &Fx) -> Result<(), &'static str> {
+    pub fn remove_fx(&self, fx: &Fx) -> ReaperResult<()> {
         assert_eq!(fx.chain(), self);
         if !fx.is_available() {
-            return Err("FX not available");
+            return Err("FX not available".into());
         }
         let reaper = Reaper::get().medium_reaper();
         if reaper.low().pointers().TrackFX_Delete.is_some() {
             match self.context() {
                 FxChainContext::Take(_) => todo!(),
                 _ => {
-                    let (track, location) = fx.track_and_location();
+                    let (track, location) = fx.track_and_location()?;
                     unsafe {
                         reaper
                             .track_fx_delete(track.raw_unchecked(), location)
@@ -406,7 +404,7 @@ DOCKED 0
         let fx_index = match self.context() {
             FxChainContext::Take(_) => todo!(),
             _ => unsafe {
-                let track = self.track_or_master_track();
+                let track = self.track_or_master_track().ok()?;
                 track.load_and_check_if_necessary_or_err().ok()?;
                 Reaper::get()
                     .medium_reaper()
@@ -435,14 +433,11 @@ DOCKED 0
     ///
     /// We don't want to expose that monitoring FX is reachable via master track of current project
     /// - although it has nothing to do with the current project.
-    fn track_or_master_track(&self) -> Track {
+    fn track_or_master_track(&self) -> ReaperResult<Track> {
         match self.context() {
-            FxChainContext::Monitoring => Reaper::get()
-                .current_project()
-                .master_track()
-                .expect("master track of current project should exist"),
-            FxChainContext::Track { track, .. } => track.clone(),
-            FxChainContext::Take(take) => take.track().clone(),
+            FxChainContext::Monitoring => Reaper::get().current_project().master_track(),
+            FxChainContext::Track { track, .. } => Ok(track.clone()),
+            FxChainContext::Take(take) => Ok(take.track().clone()),
         }
     }
 
@@ -486,7 +481,7 @@ DOCKED 0
                     Reaper::get()
                         .current_project()
                         .master_track()
-                        .expect("master track of current project should exist")
+                        .ok()?
                         .raw_unchecked(),
                     name,
                     TrackFxChainType::InputFxChain,

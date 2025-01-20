@@ -2816,7 +2816,7 @@ fn show_fx_in_floating_window(get_fx_chain: GetFxChain) -> TestStep {
                     mock.invoke(fx);
                 });
         });
-        fx.show_in_floating_window();
+        fx.show_in_floating_window()?;
         // Then
         assert!(fx.floating_window().is_some());
         assert!(fx.window_is_open());
@@ -3469,7 +3469,7 @@ fn enable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
                     mock.invoke(t);
                 });
         });
-        fx_1.enable();
+        fx_1.enable()?;
         // Then
         assert!(fx_1.is_enabled());
         assert_eq!(mock.invocation_count(), 1);
@@ -3492,7 +3492,7 @@ fn disable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
                     mock.invoke(t);
                 });
         });
-        fx_1.disable();
+        fx_1.disable()?;
         // Then
         assert!(!fx_1.is_enabled());
         assert_eq!(mock.invocation_count(), 1);
