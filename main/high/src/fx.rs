@@ -159,11 +159,15 @@ impl Fx {
         Ok(res)
     }
 
-    // Attention: Currently implemented by parsing chunk
+    /// Returns basic information about the FX.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when used with REAPER version < 6.37.  Consider using [`Self::info_from_chunk`] in that case.
     pub fn info(&self) -> ReaperResult<FxInfo> {
         self.load_if_necessary_or_err()?;
         let loc = self.track_and_location()?;
-        let fx_type = self.get_named_config_param_as_string_internal("fx_type", 10, &loc);
+        let fx_type = self.get_named_config_param_as_string_internal("fx_type", 10, &loc)?;
         let fx_ident = self.get_named_config_param_as_string_internal("fx_ident", 1000, &loc);
         let (file_name, id) = if let Ok(fx_ident) = fx_ident {
             let c_string = fx_ident.into_inner();
@@ -187,34 +191,33 @@ impl Fx {
         } else {
             Default::default()
         };
-        if let Ok(fx_type) = fx_type {
-            // This must be REAPER >= 6.37. Use function to determine remaining FX info.
-            let fx_type = fx_type.into_string();
-            let info = FxInfo {
-                effect_name: self
-                    .get_named_config_param_as_string_internal("fx_name", 64, &loc)
-                    .map(|rs| rs.into_inner().to_string_lossy().into_owned())
-                    .unwrap_or_default(),
-                type_expression: match fx_type.as_str() {
-                    "VST" | "VSTi" | "VST3" | "VST3i" => "VST",
-                    "JS" => "JS",
-                    "AU" | "AUi" => "AU",
-                    "CLAP" | "CLAPi" => "CLAP",
-                    _ => "",
-                }
-                .to_owned(),
-                sub_type_expression: fx_type,
-                file_name,
-                id,
-            };
-            Ok(info)
-        } else {
-            // This must be REAPER < 6.37. Parse FX info from chunk.
-            let fx_info = FxInfo::from_first_line_of_tag_chunk(
-                &self.tag_chunk_internal()?.first_line().content(),
-            )?;
-            Ok(fx_info)
-        }
+        // This must be REAPER >= 6.37. Use function to determine remaining FX info.
+        let fx_type = fx_type.into_string();
+        let info = FxInfo {
+            effect_name: self
+                .get_named_config_param_as_string_internal("fx_name", 64, &loc)
+                .map(|rs| rs.into_inner().to_string_lossy().into_owned())
+                .unwrap_or_default(),
+            type_expression: match fx_type.as_str() {
+                "VST" | "VSTi" | "VST3" | "VST3i" => "VST",
+                "JS" => "JS",
+                "AU" | "AUi" => "AU",
+                "CLAP" | "CLAPi" => "CLAP",
+                _ => "",
+            }
+            .to_owned(),
+            sub_type_expression: fx_type,
+            file_name,
+            id,
+        };
+        Ok(info)
+    }
+
+    /// Works in REAPER versions < 6.37 but needs to access the track chunk.
+    pub fn info_from_chunk(&self) -> ReaperResult<FxInfo> {
+        Ok(FxInfo::from_first_line_of_tag_chunk(
+            &self.tag_chunk_internal()?.first_line().content(),
+        )?)
     }
 
     pub fn parameter_count(&self) -> u32 {
