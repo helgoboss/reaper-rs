@@ -2860,10 +2860,18 @@ where
 
     /// Returns the current position of the edit cursor.
     ///
+    /// # Errors
+    ///
+    /// Errors if REAPER returns an invalid position (INF, -INF or NaN). This doesn't usually happen, but I observed
+    /// it once.
+    ///
     /// # Panics
     ///
     /// Panics if the given project is not valid anymore.
-    pub fn get_cursor_position_ex(&self, project: ProjectContext) -> PositionInSeconds
+    pub fn get_cursor_position_ex(
+        &self,
+        project: ProjectContext,
+    ) -> ReaperFunctionResult<PositionInSeconds>
     where
         UsageScope: AnyThread,
     {
@@ -2881,12 +2889,12 @@ where
     pub unsafe fn get_cursor_position_ex_unchecked(
         &self,
         project: ProjectContext,
-    ) -> PositionInSeconds
+    ) -> ReaperFunctionResult<PositionInSeconds>
     where
         UsageScope: AnyThread,
     {
         let res = self.low.GetCursorPositionEx(project.to_raw());
-        PositionInSeconds::new_panic(res)
+        PositionInSeconds::new(res).map_err(|_| "returned cursor position was invalid".into())
     }
 
     /// Returns the latency-compensated actual-what-you-hear position.
@@ -9033,7 +9041,7 @@ pub struct EnumProjectMarkers3Result<'a> {
 }
 
 /// The given indexes count both markers and regions.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
 pub struct GetLastMarkerAndCurRegionResult {
     pub marker_index: Option<u32>,
     pub region_index: Option<u32>,

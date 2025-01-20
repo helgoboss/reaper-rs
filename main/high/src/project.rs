@@ -566,13 +566,15 @@ impl Project {
     }
 
     pub fn current_bookmark(self) -> GetLastMarkerAndCurRegionResult {
-        let reference_pos = self.play_or_edit_cursor_position();
+        let Ok(reference_pos) = self.play_or_edit_cursor_position() else {
+            return GetLastMarkerAndCurRegionResult::default();
+        };
         self.current_bookmark_at(reference_pos)
     }
 
-    pub fn play_or_edit_cursor_position(self) -> PositionInSeconds {
+    pub fn play_or_edit_cursor_position(self) -> ReaperResult<PositionInSeconds> {
         if self.is_playing() {
-            self.play_position_latency_compensated()
+            Ok(self.play_position_latency_compensated())
         } else {
             self.edit_cursor_position()
         }
@@ -596,10 +598,11 @@ impl Project {
             .get_play_position_ex(self.context())
     }
 
-    pub fn edit_cursor_position(self) -> PositionInSeconds {
-        Reaper::get()
+    pub fn edit_cursor_position(self) -> ReaperResult<PositionInSeconds> {
+        let pos = Reaper::get()
             .medium_reaper()
-            .get_cursor_position_ex(self.context())
+            .get_cursor_position_ex(self.context())?;
+        Ok(pos)
     }
 
     pub fn time_selection(self) -> Option<GetLoopTimeRange2Result> {
