@@ -35,7 +35,7 @@ macro_rules! dll_main {
         /// Windows entry and exit point for getting hold of the module handle (HINSTANCE) and
         /// clean-up.
         ///
-        /// Called by REAPER for Linux once at startup time with DLL_PROCESS_ATTACH and once
+        /// Called by REAPER for Windows once at startup time with DLL_PROCESS_ATTACH and once
         /// at exit time or manual unload time (after initial scan, whenever plug-in
         /// initialization failed or if "Allow complete unload of VST plug-ins" is enabled and
         /// last instance gone) with DLL_PROCESS_DETACH.
