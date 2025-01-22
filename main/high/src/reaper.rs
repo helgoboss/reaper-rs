@@ -10,7 +10,7 @@ use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
 use crate::{DefaultConsoleMessageFormatter, Project};
 use once_cell::sync::Lazy;
-use reaper_low::{raw, register_plugin_destroy_hook};
+use reaper_low::{raw, register_plugin_destroy_hook, PluginDestroyHook};
 
 use reaper_low::PluginContext;
 
@@ -89,7 +89,10 @@ impl ReaperBuilder {
                     sentry_guard: Default::default(),
                 };
                 INSTANCE = Some(reaper);
-                register_plugin_destroy_hook(|| INSTANCE = None);
+                register_plugin_destroy_hook(PluginDestroyHook {
+                    name: "reaper_high::Reaper",
+                    callback: || INSTANCE = None,
+                });
                 // We register a tiny control surface permanently just for the most essential stuff.
                 // It will be unregistered automatically using reaper-medium's Drop implementation.
                 let helper_control_surface = HelperControlSurface::new(helper_task_receiver);

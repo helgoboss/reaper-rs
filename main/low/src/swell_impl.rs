@@ -7,7 +7,8 @@
 #![allow(unused_variables)]
 
 use crate::{
-    bindings::root, register_plugin_destroy_hook, PluginContext, Swell, SwellFunctionPointers,
+    bindings::root, register_plugin_destroy_hook, PluginContext, PluginDestroyHook, Swell,
+    SwellFunctionPointers,
 };
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
@@ -26,7 +27,10 @@ impl Swell {
         unsafe {
             INIT_INSTANCE.call_once(|| {
                 INSTANCE = Some(functions);
-                register_plugin_destroy_hook(|| INSTANCE = None);
+                register_plugin_destroy_hook(PluginDestroyHook {
+                    name: "reaper_low::swell::Swell",
+                    callback: || INSTANCE = None,
+                });
             });
         }
     }

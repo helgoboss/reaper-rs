@@ -1,7 +1,7 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
-use crate::raw;
+use crate::{module_is_attached, raw};
 use derive_more::Display;
 use std::os::raw::{c_char, c_int, c_void};
 use std::ptr::null_mut;
@@ -197,7 +197,15 @@ impl PluginContext {
 
     /// Returns whether we are currently in the main thread.
     pub fn is_in_main_thread(&self) -> bool {
-        std::thread::current().id() == self.main_thread_id
+        if module_is_attached() {
+            std::thread::current().id() == self.main_thread_id
+        } else {
+            // If module not attached anymore, we shouldn't call std::thread::current() anymore
+            // because it would panic. We are probably running destructor code, so panicking
+            // would result in an abort. We can safely assume that we are in the main thread
+            // at this point.
+            true
+        }
     }
 }
 

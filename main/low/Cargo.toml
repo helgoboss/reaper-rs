@@ -39,6 +39,7 @@ vst.workspace = true
 derive_more.workspace = true
 downcast-rs.workspace = true
 fragile.workspace = true
+tracing.workspace = true
 
 [target.'cfg(windows)'.dependencies]
 winapi = { workspace = true, features = ["winuser", "winbase", "wingdi", "libloaderapi"] }

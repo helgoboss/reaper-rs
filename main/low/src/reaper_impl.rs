@@ -1,5 +1,7 @@
 use crate::raw::preview_register_t;
-use crate::{register_plugin_destroy_hook, PluginContext, Reaper, ReaperFunctionPointers};
+use crate::{
+    register_plugin_destroy_hook, PluginContext, PluginDestroyHook, Reaper, ReaperFunctionPointers,
+};
 
 // This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
 static mut INSTANCE: Option<Reaper> = None;
@@ -15,7 +17,10 @@ impl Reaper {
         unsafe {
             INIT_INSTANCE.call_once(|| {
                 INSTANCE = Some(functions);
-                register_plugin_destroy_hook(|| INSTANCE = None);
+                register_plugin_destroy_hook(PluginDestroyHook {
+                    name: "reaper_low::Reaper",
+                    callback: || INSTANCE = None,
+                });
             });
         }
     }

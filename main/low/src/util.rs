@@ -1,8 +1,12 @@
 use super::raw::{reaper_plugin_info_t, HINSTANCE};
 use super::PluginContext;
 use crate::StaticPluginContext;
+use fragile::Fragile;
+use std::cell::RefCell;
 use std::error::Error;
 use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::LazyLock;
 
 /// This function catches panics before they reach REAPER.
 ///
@@ -51,6 +55,21 @@ pub unsafe fn bootstrap_extension_plugin(
     .unwrap_or(0)
 }
 
+/// Returns whether the shared library module is still attached. If this was an executable,
+/// it would be analogous to still being inside the main function
+/// (see https://github.com/rust-lang/rust/issues/110708).
+///
+/// If this returns `false`, no code should call [`std::thread::current`] anymore, because it will
+/// panic, at least on Windows. This can have severe consequences because code that is executed
+/// when this returns `false` is usually destructor code. And panicking in a destructor will abort
+/// the application. This leads to a crash. This caused regular crashes on REAPER exit:
+/// (https://github.com/helgoboss/helgobox/issues/1423)
+pub fn module_is_attached() -> bool {
+    MODULE_IS_ATTACHED.load(Ordering::Relaxed)
+}
+
+static MODULE_IS_ATTACHED: AtomicBool = AtomicBool::new(true);
+
 /// This function executes all registered plug-in destroy hooks.
 ///
 /// It's supposed to be called when the extension plug-in is unloaded. This is taken care of
@@ -68,9 +87,14 @@ pub unsafe fn bootstrap_extension_plugin(
 ///
 /// Must only be called in main thread.
 pub unsafe fn execute_plugin_destroy_hooks() {
+    // Indicate that we are not within "main" anymore. Plug-in destroy hooks must not call
+    // std::thread::current anymore.
+    MODULE_IS_ATTACHED.store(false, Ordering::Relaxed);
     // Run destruction in reverse order (recently constructed things will be destroyed first)
-    for f in PLUGIN_DESTROY_HOOKS.drain(..).rev() {
-        f();
+    for hook in PLUGIN_DESTROY_HOOKS.get().borrow_mut().drain(..).rev() {
+        // We use println instead of tracing because tracing might not work anymore at this point
+        println!("Executing plug-in destroy hook {}", hook.name);
+        (hook.callback)();
     }
 }
 
@@ -82,8 +106,18 @@ pub unsafe fn execute_plugin_destroy_hooks() {
 /// # Safety
 ///
 /// Must only be called in main thread.
-pub unsafe fn register_plugin_destroy_hook(f: fn()) {
-    PLUGIN_DESTROY_HOOKS.push(f);
+pub unsafe fn register_plugin_destroy_hook(hook: PluginDestroyHook) {
+    tracing::debug!(msg = "Registering plug-in destroy hook", %hook.name);
+    PLUGIN_DESTROY_HOOKS.get().borrow_mut().push(hook);
 }
 
-static mut PLUGIN_DESTROY_HOOKS: Vec<fn()> = Vec::new();
+static PLUGIN_DESTROY_HOOKS: LazyLock<Fragile<RefCell<Vec<PluginDestroyHook>>>> =
+    LazyLock::new(Fragile::default);
+
+/// A plug-in destroy hook. See [`register_plugin_destroy_hook`].
+pub struct PluginDestroyHook {
+    /// Descriptive name. Useful for debugging.
+    pub name: &'static str,
+    /// Callback that will be invoked when the plug-in module gets unloaded.
+    pub callback: fn(),
+}

@@ -2,7 +2,7 @@ use std::ffi::CString;
 use std::os::raw::{c_char, c_int, c_void};
 use std::ptr::{null, null_mut, NonNull};
 
-use reaper_low::{raw, register_plugin_destroy_hook};
+use reaper_low::{raw, register_plugin_destroy_hook, PluginDestroyHook};
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
@@ -183,7 +183,10 @@ impl Reaper<MainThreadScope> {
         unsafe {
             INIT_INSTANCE.call_once(|| {
                 INSTANCE = Some(reaper);
-                register_plugin_destroy_hook(|| INSTANCE = None);
+                register_plugin_destroy_hook(PluginDestroyHook {
+                    name: "reaper_medium::Reaper",
+                    callback: || INSTANCE = None,
+                });
             });
         }
     }

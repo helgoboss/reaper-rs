@@ -1,4 +1,6 @@
-use crate::{raw, register_plugin_destroy_hook, GetSwellFunc, StaticPluginContext};
+use crate::{
+    raw, register_plugin_destroy_hook, GetSwellFunc, PluginDestroyHook, StaticPluginContext,
+};
 
 /// Exposes the (hopefully) obtained static plug-in context.
 ///
@@ -20,7 +22,10 @@ pub fn register_swell_function_provider(get_func: Option<GetSwellFunc>) {
     // Save provider in static variable.
     swell::INIT_GET_SWELL_FUNC.call_once(|| unsafe {
         swell::GET_SWELL_FUNC = get_func;
-        register_plugin_destroy_hook(|| swell::GET_SWELL_FUNC = None);
+        register_plugin_destroy_hook(PluginDestroyHook {
+            name: "reaper_low::swell::GET_SWELL_FUNC",
+            callback: || swell::GET_SWELL_FUNC = None,
+        });
     });
     // On Linux Rust will get informed first about the SWELL function provider, so we need to pass
     // it on to the C++ side.
@@ -40,7 +45,10 @@ pub fn register_hinstance(hinstance: raw::HINSTANCE) {
     // Save handle in static variable.
     hinstance::INIT_HINSTANCE.call_once(|| unsafe {
         hinstance::HINSTANCE = hinstance;
-        register_plugin_destroy_hook(|| hinstance::HINSTANCE = std::ptr::null_mut());
+        register_plugin_destroy_hook(PluginDestroyHook {
+            name: "reaper_low::hinstance::HINSTANCE",
+            callback: || hinstance::HINSTANCE = std::ptr::null_mut(),
+        });
     });
 }
 
