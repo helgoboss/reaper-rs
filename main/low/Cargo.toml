@@ -34,24 +34,25 @@ generate-stage-one = ["generate-stage-two", "bindgen"]
 generate-stage-two = ["quote", "syn", "proc-macro2", "phf"]
 
 [dependencies]
-c_str_macro = "1.0.2"
-vst = "*"
-derive_more = "0.99.5"
-downcast-rs = "1.1.1"
+c_str_macro.workspace = true
+vst.workspace = true
+derive_more.workspace = true
+downcast-rs.workspace = true
+fragile.workspace = true
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", features = ["winuser", "winbase", "wingdi", "libloaderapi"] }
+winapi = { workspace = true, features = ["winuser", "winbase", "wingdi", "libloaderapi"] }
 
 [target.'cfg(unix)'.dependencies]
-libc = "0.2"
+libc.workspace = true
 
 [dev-dependencies]
-version-sync = "0.9.2"
+version-sync.workspace = true
 
 [build-dependencies]
 cc = "1.0.65"
-bindgen = { version = "0.52.0", optional = true }
-quote = { version = "1.0.2", optional = true }
-syn = { version = "1.0.14", features = ["full"], optional = true }
-proc-macro2 = { version = "1.0.8", optional = true }
-phf = { version = "0.8", features = ["macros"], optional = true }
+bindgen = { workspace = true, optional = true }
+quote = { workspace = true, optional = true }
+syn = { workspace = true, features = ["full"], optional = true }
+proc-macro2 = { workspace = true, optional = true }
+phf = { workspace = true, features = ["macros"], optional = true }

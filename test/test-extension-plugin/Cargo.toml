@@ -14,20 +14,18 @@ default = ["run-reaper-integration-test"]
 run-reaper-integration-test = []
 
 [dependencies]
-reaper-high = { path = "../../main/high" }
-reaper-medium = { path = "../../main/medium" }
-reaper-low = { path = "../../main/low" }
-reaper-test = { path = "../test" }
-reaper-macros = { path = "../../main/macros" }
-c_str_macro = "1.0.2"
+reaper-high.workspace = true
+reaper-low.workspace = true
+reaper-test.workspace = true
+reaper-macros.workspace = true
 tracing.workspace = true
 
 [dev-dependencies]
-reqwest = { version = "0.10", default-features = false, features = ["blocking"] }
-tar = "0.4.26"
-xz2 = "0.1"
-wait-timeout = "0.1.5"
-fs_extra = "1.2.0"
+reqwest = { workspace = true, features = ["blocking"] }
+tar.workspace = true
+xz2.workspace = true
+wait-timeout.workspace = true
+fs_extra.workspace = true
 
 [lib]
 name = "reaper_test_extension_plugin"

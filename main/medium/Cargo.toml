@@ -11,25 +11,23 @@ edition = "2021"
 categories = ["api-bindings", "multimedia", "multimedia::audio"]
 
 [dependencies]
-c_str_macro = "1.0.2"
-derive_more = "0.99.5"
-reaper-common-types = { version = "0.1.0", path = "../common-types" }
-reaper-low = { version = "0.1.0", path = "../low" }
-reaper-macros = { path = "../macros" }
-helgoboss-midi = "0.4.0"
-enumflags2 = { version = "0.7.4", features = ["serde"] }
-vst = "*"
-serde = { version = "1.0", features = ["derive"], optional = true }
-ref-cast = "1.0.6"
-tracing = "0.1.40"
+derive_more.workspace = true
+reaper-common-types.workspace = true
+reaper-low.workspace = true
+helgoboss-midi.workspace = true
+enumflags2 = { workspace = true, features = ["serde"] }
+vst.workspace = true
+serde = { workspace = true, features = ["derive"], optional = true }
+ref-cast.workspace = true
+tracing.workspace = true
 # REAPER should expose all file paths as UTF-8. If not, it's a REAPER bug.
-camino = "1.1.7"
+camino.workspace = true
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", features = ["winuser", "synchapi"] }
+winapi = { workspace = true, features = ["winuser", "synchapi"] }
 
 [target.'cfg(unix)'.dependencies]
-libc = "0.2"
+libc.workspace = true
 
 [dev-dependencies]
 version-sync = "0.9.2"

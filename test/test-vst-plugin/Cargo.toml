@@ -7,15 +7,14 @@ edition = "2021"
 publish = false
 
 [dependencies]
-reaper-rx = { path = "../../main/rx" }
-reaper-high = { path = "../../main/high" }
-reaper-medium = { path = "../../main/medium" }
-reaper-low = { path = "../../main/low" }
-reaper-test = { path = "../test" }
-c_str_macro = "1.0.2"
-rxrust = { git = "https://github.com/rxRust/rxRust", rev = "349e50b3197e05926e2378ef8fc45cb67ad43b83" }
-vst = "*"
-futures-timer = "3.0.2"
+reaper-rx.workspace = true
+reaper-high.workspace = true
+reaper-medium.workspace = true
+reaper-low.workspace = true
+reaper-test.workspace = true
+rxrust.workspace = true
+vst.workspace = true
+futures-timer.workspace = true
 tracing.workspace = true
 
 [lib]

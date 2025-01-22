@@ -16,37 +16,33 @@ publish = false
 sentry = ["dep:sentry"]
 
 [dependencies]
-c_str_macro = "1.0.2"
-once_cell = "1.3.1"
-crossbeam-channel = "0.5"
-reaper-medium = { path = '../medium' }
-reaper-low = { path = '../low' }
-helgoboss-midi = "0.4.0"
-regex = "1.3.4"
+c_str_macro.workspace = true
+once_cell.workspace = true
+crossbeam-channel.workspace = true
+reaper-medium.workspace = true
+reaper-low.workspace = true
+helgoboss-midi.workspace = true
+regex.workspace = true
 tracing.workspace = true
-num_enum = "0.4.2"
-futures = "0.3"
-serde = { version = "1.0", features = ["derive"], optional = true }
-serde_yaml = "0.8"
-backtrace = "0.3"
-ref-cast = "1.0.6"
+futures.workspace = true
+serde = { workspace = true, features = ["derive"], optional = true }
+backtrace.workspace = true
+ref-cast.workspace = true
 # For relativizing to project path
-pathdiff = "0.2.0"
-enumflags2 = "0.7.4"
-either = "1.8.0"
+pathdiff.workspace = true
+enumflags2.workspace = true
+either.workspace = true
 # For parsing reaper-vstplugins files
-csv = "1.1"
+csv.workspace = true
 # For encoding VST chunks for REAPER
-base64 = "0.13.0"
-# For various things
-itertools = "0.10.5"
+base64.workspace = true
 # REAPER should expose all file paths as UTF-8. If not, it's a REAPER bug.
-camino = "1.1.7"
+camino.workspace = true
 # For excluding some fields from Debug
-derivative = "2.2.0"
+derivative.workspace = true
 # For reporting panics to Sentry or GlitchTip, if enabled.
 # We insist on rustls instead of native-tls because we don't want libssl dependencies on Linux.
-sentry = { version = "0.35.0", optional = true, default-features = false, features = ["backtrace", "contexts", "panic", "reqwest", "debug-images", "rustls"] }
+sentry = { workspace = true, optional = true, features = ["backtrace", "contexts", "panic", "reqwest", "debug-images", "rustls"] }
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", features = ["psapi", "processthreadsapi", "winuser"] }
+winapi = { workspace = true, features = ["psapi", "processthreadsapi", "winuser"] }

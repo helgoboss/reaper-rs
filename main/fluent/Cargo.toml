@@ -6,10 +6,9 @@ edition = "2021"
 
 [dependencies]
 # Own dependencies
-reaper-medium = { path = '../medium' }
-reaper-low = { path = '../low' }
-fragile = "2.0.0"
-thiserror = "1.0.45"
+reaper-medium.workspace = true
+reaper-low.workspace = true
+fragile.workspace = true
 
 [dev-dependencies]
-trybuild = "1.0"
+trybuild.workspace = true

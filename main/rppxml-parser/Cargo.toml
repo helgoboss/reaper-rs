@@ -7,4 +7,4 @@ license = "MIT"
 rust-version = "1.68.2"
 
 [dependencies]
-splitty = "1.0.1"
+splitty.workspace = true
