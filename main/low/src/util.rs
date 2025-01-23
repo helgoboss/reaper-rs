@@ -72,8 +72,11 @@ static MODULE_IS_ATTACHED: AtomicBool = AtomicBool::new(true);
 
 /// This function executes all registered plug-in destroy hooks.
 ///
-/// It's supposed to be called when the extension plug-in is unloaded. This is taken care of
-/// automatically by macros in the `reaper-macros` crate.
+/// It's supposed to be called latest when the plug-in is unloaded. This is taken care of
+/// automatically by macros in the `reaper-macros` crate. But you can also call it by yourself
+/// **before** the plug-in gets detached. On Windows, this has the advantage that you can arbitrary
+/// code. If you wait for DLL detachment, you can't execute certain code (see
+/// [`PluginDestroyHook::callback`]).
 ///
 /// Extension plug-in unloading happens when exiting REAPER but can also happen when the plug-in
 /// can't be loaded completely. Then it's important to clean up static variables.
@@ -83,10 +86,10 @@ static MODULE_IS_ATTACHED: AtomicBool = AtomicBool::new(true);
 /// initialized and hooks are registered, we get an access violation because they
 /// are not automatically freed on unload and destructors (drop functions) are not run!
 ///
-/// # Safety
+/// # Panics
 ///
-/// Must only be called in main thread.
-pub unsafe fn execute_plugin_destroy_hooks() {
+/// Panics if not called in the main thread.
+pub fn execute_plugin_destroy_hooks() {
     // Indicate that we are not within "main" anymore. Plug-in destroy hooks must not call
     // std::thread::current anymore.
     MODULE_IS_ATTACHED.store(false, Ordering::Relaxed);
@@ -120,9 +123,10 @@ pub struct PluginDestroyHook {
     pub name: &'static str,
     /// Callback that will be invoked when the plug-in module gets unloaded.
     ///
-    /// The function provided here must not call `std::thread::current` or access thread-locals.
-    /// This would cause panics on Windows. Most likely it would also cause a real crash,
-    /// because the panic probably occurs while executing `Drop` (destructor). Such a crash
+    /// If you are not calling [`execute_plugin_destroy_hooks`] explicitly before the DLL is
+    /// attached, the function provided here must not call `std::thread::current` or access
+    /// thread-locals. This would cause panics on Windows. Most likely it would also cause a real
+    /// crash, because the panic probably occurs while executing `Drop` (destructor). Such a crash
     /// might not always get visible because it probably happens when exiting REAPER. But it's
     /// definitely visible in the event viewer.
     ///
