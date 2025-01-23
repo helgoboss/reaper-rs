@@ -21,7 +21,7 @@ reaper-macros.workspace = true
 tracing.workspace = true
 
 [dev-dependencies]
-reqwest = { workspace = true, features = ["blocking"] }
+reqwest = { workspace = true, features = ["blocking", "rustls"] }
 tar.workspace = true
 xz2.workspace = true
 wait-timeout.workspace = true

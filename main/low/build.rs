@@ -389,7 +389,7 @@ mod codegen {
 
         /// Generates the token stream. All of this could also be done in a procedural macro but
         /// I prefer the code generation approach for now.
-        fn generate_reaper_token_stream(fn_ptrs: &Vec<FnPtr>) -> proc_macro2::TokenStream {
+        fn generate_reaper_token_stream(fn_ptrs: &[FnPtr]) -> proc_macro2::TokenStream {
             let Compartments {
                 names,
                 fn_ptr_signatures,
@@ -488,7 +488,7 @@ mod codegen {
 
         /// Generates the token stream. All of this could also be done in a procedural macro but
         /// I prefer the code generation approach for now.
-        fn generate_swell_token_stream(fn_ptrs: &Vec<FnPtr>) -> proc_macro2::TokenStream {
+        fn generate_swell_token_stream(fn_ptrs: &[FnPtr]) -> proc_macro2::TokenStream {
             let Compartments {
                 names,
                 fn_ptr_signatures,
@@ -502,7 +502,7 @@ mod codegen {
                     }
                     // It's important to use `extern "system"` here, otherwise the linker will
                     // complain about missing externals on Windows 32-bit.
-                    Some(generate_function(&p, p.name.clone(), "system"))
+                    Some(generate_function(p, p.name.clone(), "system"))
                 })
                 .collect();
             let windows_methods: Vec<_> = fn_ptrs
@@ -512,8 +512,8 @@ mod codegen {
                         return None;
                     }
                     Some(generate_method(
-                        &p,
-                        generate_swell_windows_method_body(&p, p.name.clone()),
+                        p,
+                        generate_swell_windows_method_body(p, p.name.clone()),
                         &ADDITIONAL_SAFE_SWELL_FUNCTIONS,
                     ))
                 })
@@ -634,7 +634,7 @@ mod codegen {
 
         /// This also modifies some unsafety and ABI fields based on the given sets.
         fn build_compartments(
-            fn_ptrs: &Vec<FnPtr>,
+            fn_ptrs: &[FnPtr],
             extern_system_functions: &phf::Set<&'static str>,
             safe_functions: &phf::Set<&'static str>,
         ) -> Compartments {
@@ -659,7 +659,7 @@ mod codegen {
                             unsafety: if p.is_safe(safe_functions) {
                                 None
                             } else {
-                                p.signature.unsafety.clone()
+                                p.signature.unsafety
                             },
                             ..p.signature.clone()
                         }
@@ -667,7 +667,7 @@ mod codegen {
                     .collect(),
                 methods: fn_ptrs
                     .iter()
-                    .map(|p| generate_method(&p, generate_method_body(&p), safe_functions))
+                    .map(|p| generate_method(p, generate_method_body(p), safe_functions))
                     .collect(),
             }
         }
