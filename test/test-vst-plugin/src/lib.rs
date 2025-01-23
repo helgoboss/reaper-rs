@@ -137,7 +137,8 @@ impl TestVstPlugin {
                         support_email_address: "info@helgoboss.org".to_string(),
                         update_url: "https://www.helgoboss.org/projects/helgobox".to_string(),
                     },
-                );
+                )
+                .expect("should be done only once");
                 let reaper = Reaper::get();
                 reaper.wake_up().unwrap();
                 debug!("Loaded reaper-rs integration test VST plugin");

@@ -113,7 +113,8 @@ fn generate_high_level_plugin_code(
                 support_email_address: #support_email_address.to_string(),
                 update_url: #update_url.to_string(),
             };
-            ::reaper_high::Reaper::setup_with_defaults(context, plugin_info);
+            ::reaper_high::Reaper::setup_with_defaults(context, plugin_info)
+                .map_err(|_| "attempt to setup reaper_high instance more than once")?;
             #main_function_name()
         }
 

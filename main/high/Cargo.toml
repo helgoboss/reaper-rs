@@ -22,6 +22,8 @@ crossbeam-channel.workspace = true
 reaper-medium.workspace = true
 reaper-low.workspace = true
 helgoboss-midi.workspace = true
+# For main-thread-only access to some stuff
+fragile.workspace = true
 regex.workspace = true
 tracing.workspace = true
 futures.workspace = true

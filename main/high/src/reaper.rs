@@ -4,7 +4,7 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
 use std::rc::Rc;
-use std::sync::{Arc, Weak};
+use std::sync::{Arc, OnceLock, Weak};
 
 use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
@@ -16,6 +16,7 @@ use reaper_low::PluginContext;
 
 use crate::helper_control_surface::{HelperControlSurface, HelperTask};
 use crate::mutex_util::lock_ignoring_poisoning;
+use fragile::Fragile;
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{
@@ -39,9 +40,7 @@ pub const DEFAULT_MAIN_THREAD_TASK_BULK_SIZE: usize = 100;
 /// We could also go the easy way of using one Reaper instance wrapped in a Mutex. Downside: This is
 /// more guarantees than we need. Why should audio thread and main thread fight for access to one
 /// Reaper instance. That results in performance loss and possible deadlocks.
-//
-// This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
-static mut INSTANCE: Option<Reaper> = None;
+static INSTANCE: OnceLock<Reaper> = OnceLock::new();
 
 /// This value can be set more than once and we don't necessarily have REAPER API access at our
 /// disposal when accessing it, that's why we can't use `call_once` in combination with thread check
@@ -63,45 +62,51 @@ impl ReaperBuilder {
     }
 
     /// This has an effect only if there isn't an instance already.
-    pub fn setup(self) {
-        static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
+    pub fn setup(self) -> Result<(), Reaper> {
         self.require_main_thread();
+        // At the moment this is just for logging to console when audio thread panics so
+        // we don't need it to be big.
+        let (helper_task_sender, helper_task_receiver) = crossbeam_channel::bounded(10);
+        let medium_reaper = self.medium.reaper().clone();
+        let medium_real_time_reaper = self.medium.create_real_time_reaper();
+        let reaper_main = ReaperMain {
+            medium_session: RefCell::new(self.medium),
+            command_by_id: RefCell::new(HashMap::new()),
+            action_value_change_history: RefCell::new(Default::default()),
+            undo_block_is_active: Cell::new(false),
+            session_status: RefCell::new(SessionStatus::Sleeping),
+            #[cfg(feature = "sentry")]
+            sentry_initialized: Default::default(),
+        };
+        let reaper = Reaper {
+            reaper_main: Fragile::new(reaper_main),
+            medium_reaper,
+            medium_real_time_reaper,
+            helper_task_sender,
+            log_crashes_to_console: Default::default(),
+            report_crashes_to_sentry: Default::default(),
+        };
+        INSTANCE.set(reaper)?;
+        // After init
         unsafe {
-            INIT_INSTANCE.call_once(|| {
-                // At the moment this is just for logging to console when audio thread panics so
-                // we don't need it to be big.
-                let (helper_task_sender, helper_task_receiver) = crossbeam_channel::bounded(10);
-                let medium_reaper = self.medium.reaper().clone();
-                let medium_real_time_reaper = self.medium.create_real_time_reaper();
-                let reaper = Reaper {
-                    medium_session: RefCell::new(self.medium),
-                    medium_reaper,
-                    medium_real_time_reaper,
-                    command_by_id: RefCell::new(HashMap::new()),
-                    action_value_change_history: RefCell::new(Default::default()),
-                    undo_block_is_active: Cell::new(false),
-                    session_status: RefCell::new(SessionStatus::Sleeping),
-                    helper_task_sender,
-                    log_crashes_to_console: Default::default(),
-                    report_crashes_to_sentry: Default::default(),
-                    #[cfg(feature = "sentry")]
-                    sentry_initialized: Default::default(),
-                };
-                INSTANCE = Some(reaper);
-                register_plugin_destroy_hook(PluginDestroyHook {
-                    name: "reaper_high::Reaper",
-                    callback: || INSTANCE = None,
-                });
-                // We register a tiny control surface permanently just for the most essential stuff.
-                // It will be unregistered automatically using reaper-medium's Drop implementation.
-                let helper_control_surface = HelperControlSurface::new(helper_task_receiver);
-                Reaper::get()
-                    .medium_session
-                    .borrow_mut()
-                    .plugin_register_add_csurf_inst(Box::new(helper_control_surface))
-                    .unwrap();
+            register_plugin_destroy_hook(PluginDestroyHook {
+                name: "reaper_high::Reaper",
+                callback: || {
+                    let _ = Reaper::get().go_to_sleep();
+                },
             });
         }
+        // We register a tiny control surface permanently just for the most essential stuff.
+        // It will be unregistered automatically using reaper-medium's Drop implementation.
+        let helper_control_surface = HelperControlSurface::new(helper_task_receiver);
+        Reaper::get()
+            .reaper_main
+            .get()
+            .medium_session
+            .borrow_mut()
+            .plugin_register_add_csurf_inst(Box::new(helper_control_surface))
+            .unwrap();
+        Ok(())
     }
 
     fn require_main_thread(&self) {
@@ -113,9 +118,19 @@ pub struct RealTimeReaper {}
 
 #[derive(Debug)]
 pub struct Reaper {
-    medium_session: RefCell<reaper_medium::ReaperSession>,
+    reaper_main: Fragile<ReaperMain>,
     pub(crate) medium_reaper: reaper_medium::Reaper,
     pub(crate) medium_real_time_reaper: reaper_medium::Reaper<RealTimeAudioThreadScope>,
+    helper_task_sender: crossbeam_channel::Sender<HelperTask>,
+    /// Whether to log to the REAPER console (user can toggle this at runtime).
+    log_crashes_to_console: Arc<AtomicBool>,
+    /// Whether to report to Sentry (user can toggle this at runtime).
+    report_crashes_to_sentry: Arc<AtomicBool>,
+}
+
+#[derive(Debug)]
+struct ReaperMain {
+    medium_session: RefCell<reaper_medium::ReaperSession>,
     // We take a mutable reference from this RefCell in order to add/remove commands.
     // TODO-low Adding an action in an action would panic because we have an immutable borrow of
     // the map  to obtain and execute the command, plus a mutable borrow of the map to add the
@@ -130,11 +145,7 @@ pub struct Reaper {
     action_value_change_history: RefCell<HashMap<CommandId, ActionValueChange>>,
     undo_block_is_active: Cell<bool>,
     session_status: RefCell<SessionStatus>,
-    helper_task_sender: crossbeam_channel::Sender<HelperTask>,
     /// Whether to log to the REAPER console (user can toggle this at runtime).
-    log_crashes_to_console: Arc<AtomicBool>,
-    /// Whether to report to Sentry (user can toggle this at runtime).
-    report_crashes_to_sentry: Arc<AtomicBool>,
     #[cfg(feature = "sentry")]
     sentry_initialized: Cell<bool>,
 }
@@ -235,9 +246,12 @@ impl Reaper {
     }
 
     /// This has an effect only if there isn't an instance already.
-    pub fn setup_with_defaults(plugin_context: PluginContext, plugin_info: PluginInfo) {
+    pub fn setup_with_defaults(
+        plugin_context: PluginContext,
+        plugin_info: PluginInfo,
+    ) -> Result<(), Reaper> {
         require_main_thread(&plugin_context);
-        Reaper::load(plugin_context).setup();
+        Reaper::load(plugin_context).setup()?;
         let reaper = Reaper::get();
         // Add custom panic hook
         let crash_handler_config = CrashHandlerConfig {
@@ -250,6 +264,7 @@ impl Reaper {
         std::panic::set_hook(Box::new(move |panic_info| {
             crash_handler.handle_crash(panic_info);
         }));
+        Ok(())
     }
 
     pub fn log_crashes_to_console(&self) -> bool {
@@ -281,16 +296,14 @@ impl Reaper {
     // singleton and allowing all REAPER functions to be called from an immutable context ...
     // although they can and often will lead to mutations within REAPER!
     pub fn get() -> &'static Reaper {
-        unsafe {
-            INSTANCE
-                .as_ref()
-                .expect("Reaper::load().setup() must be called before Reaper::get()")
-        }
+        INSTANCE
+            .get()
+            .expect("Reaper::load().setup() must be called before Reaper::get()")
     }
 
     /// Returns whether the instance is loaded already.
     pub fn is_loaded() -> bool {
-        unsafe { INSTANCE.is_some() }
+        INSTANCE.get().is_some()
     }
 
     /// This wakes reaper-rs up.
@@ -302,8 +315,8 @@ impl Reaper {
     /// - Registers toggle actions (to report action on/off states)
     /// - Registers all previously defined actions
     pub fn wake_up(&self) -> Result<(), &'static str> {
-        self.require_main_thread();
-        let mut session_status = self.session_status.borrow_mut();
+        let reaper_main = self.reaper_main.get();
+        let mut session_status = reaper_main.session_status.borrow_mut();
         if matches!(session_status.deref(), SessionStatus::Awake(_)) {
             return Err("Session is already awake");
         }
@@ -319,7 +332,7 @@ impl Reaper {
         // This only works since Reaper 6.19+dev1226, so we must allow it to fail.
         let _ = medium.plugin_register_add_hook_post_command_2::<HighLevelHookPostCommand2>();
         *session_status = SessionStatus::Awake(AwakeState {
-            action_regs: self
+            action_regs: reaper_main
                 .command_by_id
                 .borrow()
                 .iter()
@@ -339,8 +352,7 @@ impl Reaper {
     }
 
     pub fn go_to_sleep(&self) -> Result<(), &'static str> {
-        self.require_main_thread();
-        let mut session_status = self.session_status.borrow_mut();
+        let mut session_status = self.reaper_main.get().session_status.borrow_mut();
         let awake_state = match session_status.deref() {
             SessionStatus::Sleeping => return Err("Session is already sleeping"),
             SessionStatus::Awake(s) => s,
@@ -371,8 +383,7 @@ impl Reaper {
     }
 
     pub fn medium_session(&self) -> RefMut<reaper_medium::ReaperSession> {
-        self.require_main_thread();
-        self.medium_session.borrow_mut()
+        self.reaper_main.get().medium_session.borrow_mut()
     }
 
     pub(crate) fn show_console_msg_thread_safe<'a>(&self, msg: impl Into<ReaperStringArg<'a>>) {
@@ -400,7 +411,7 @@ impl Reaper {
         command_id: CommandId,
         use_command: impl FnOnce(Option<&Command>) -> R,
     ) -> R {
-        let command_by_id = self.command_by_id.borrow();
+        let command_by_id = self.reaper_main.get().command_by_id.borrow();
         let command = command_by_id.get(&command_id);
         use_command(command)
     }
@@ -413,7 +424,7 @@ impl Reaper {
         operation: impl FnMut() + 'static,
         kind: ActionKind,
     ) -> RegisteredAction {
-        self.require_main_thread();
+        let reaper_main = self.reaper_main.get();
         let mut medium = self.medium_session();
         let command_id = medium
             .plugin_register_add_command_id(command_name.clone())
@@ -426,12 +437,12 @@ impl Reaper {
             description.to_reaper_string(),
             default_key_binding,
         );
-        if let Entry::Vacant(p) = self.command_by_id.borrow_mut().entry(command_id) {
+        if let Entry::Vacant(p) = reaper_main.command_by_id.borrow_mut().entry(command_id) {
             p.insert(command);
         }
         let registered_action = RegisteredAction::new(command_id);
         // Immediately register if active
-        let mut session_status = self.session_status.borrow_mut();
+        let mut session_status = reaper_main.session_status.borrow_mut();
         let awake_state = match session_status.deref_mut() {
             SessionStatus::Sleeping => return registered_action,
             SessionStatus::Awake(s) => s,
@@ -447,13 +458,14 @@ impl Reaper {
     }
 
     fn unregister_action(&self, command_id: CommandId) {
+        let reaper_main = self.reaper_main.get();
         // Unregistering command when it's destroyed via RAII (implementing Drop)? Bad idea, because
         // this is the wrong point in time. The right point in time for unregistering is when it's
         // removed from the command hash map. Because even if the command still exists in memory,
         // if it's not in the map anymore, REAPER won't be able to find it.
-        self.command_by_id.borrow_mut().remove(&command_id);
+        reaper_main.command_by_id.borrow_mut().remove(&command_id);
         // Unregister if active
-        let mut session_status = self.session_status.borrow_mut();
+        let mut session_status = reaper_main.session_status.borrow_mut();
         let awake_state = match session_status.deref_mut() {
             SessionStatus::Sleeping => return,
             SessionStatus::Awake(s) => s,
@@ -480,15 +492,16 @@ impl Reaper {
         &self,
         command_id: CommandId,
     ) -> Option<ActionValueChange> {
-        self.action_value_change_history
+        self.reaper_main
+            .get()
+            .action_value_change_history
             .borrow()
             .get(&command_id)
             .copied()
     }
 
     pub fn undoable_action_is_running(&self) -> bool {
-        self.require_main_thread();
-        self.undo_block_is_active.get()
+        self.reaper_main.get().undo_block_is_active.get()
     }
 
     // Doesn't start a new block if we already are in an undo block.
@@ -498,24 +511,24 @@ impl Reaper {
         project: Project,
         label: &'a ReaperStr,
     ) -> Option<UndoBlock<'a>> {
-        self.require_main_thread();
-        if self.undo_block_is_active.get() {
+        let reaper_main = self.reaper_main.get();
+        if reaper_main.undo_block_is_active.get() {
             return None;
         }
-        self.undo_block_is_active.replace(true);
+        reaper_main.undo_block_is_active.replace(true);
         self.medium_reaper().undo_begin_block_2(Proj(project.raw()));
         Some(UndoBlock::new(project, label))
     }
 
     // Doesn't attempt to end a block if we are not in an undo block.
     pub(super) fn leave_undo_block_internal(&self, project: Project, label: &ReaperStr) {
-        self.require_main_thread();
-        if !self.undo_block_is_active.get() {
+        let reaper_main = self.reaper_main.get();
+        if !reaper_main.undo_block_is_active.get() {
             return;
         }
         self.medium_reaper()
             .undo_end_block_2(Proj(project.raw()), label, All);
-        self.undo_block_is_active.replace(false);
+        reaper_main.undo_block_is_active.replace(false);
     }
 
     pub fn require_main_thread(&self) {
@@ -615,7 +628,13 @@ struct HighLevelHookCommand {}
 impl HookCommand for HighLevelHookCommand {
     fn call(command_id: CommandId, _flag: i32) -> bool {
         // TODO-low Pass on flag
-        let operation = match Reaper::get().command_by_id.borrow().get(&command_id) {
+        let operation = match Reaper::get()
+            .reaper_main
+            .get()
+            .command_by_id
+            .borrow()
+            .get(&command_id)
+        {
             Some(command) => command.operation.clone(),
             None => return false,
         };
@@ -642,6 +661,8 @@ impl HookPostCommand2 for HighLevelHookPostCommand2 {
         }
         let reaper = Reaper::get();
         reaper
+            .reaper_main
+            .get()
             .action_value_change_history
             .borrow_mut()
             .insert(command_id, value_change);
@@ -654,7 +675,13 @@ struct HighLevelToggleAction {}
 
 impl ToggleAction for HighLevelToggleAction {
     fn call(command_id: CommandId) -> ToggleActionResult {
-        if let Some(command) = Reaper::get().command_by_id.borrow().get(&(command_id)) {
+        if let Some(command) = Reaper::get()
+            .reaper_main
+            .get()
+            .command_by_id
+            .borrow()
+            .get(&(command_id))
+        {
             match &command.kind {
                 ActionKind::Toggleable(is_on) => {
                     if is_on() {
@@ -749,7 +776,8 @@ mod sentry_impl {
         ///
         /// Later calls will be ignored.
         pub fn init_sentry(&self, config: SentryConfig) {
-            if self.sentry_initialized.get() {
+            let reaper_main = self.reaper_main.get();
+            if reaper_main.sentry_initialized.get() {
                 return;
             }
             let client_options = ClientOptions {
@@ -785,7 +813,7 @@ mod sentry_impl {
             // Therefore, we just forget about the sentry guard. We don't mind if some queued
             // messages don't get sent anymore on exit.
             mem::forget(sentry_guard);
-            self.sentry_initialized.set(true);
+            reaper_main.sentry_initialized.set(true);
         }
     }
 }
