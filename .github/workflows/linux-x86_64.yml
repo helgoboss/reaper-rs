@@ -20,7 +20,7 @@ jobs:
       - name: Set up dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install llvm
+          sudo apt-get install clang
       - uses: actions/checkout@v2
         with:
           submodules: recursive
