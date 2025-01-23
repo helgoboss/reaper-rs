@@ -86,7 +86,7 @@ impl ReaperBuilder {
                     log_crashes_to_console: Default::default(),
                     report_crashes_to_sentry: Default::default(),
                     #[cfg(feature = "sentry")]
-                    sentry_guard: Default::default(),
+                    sentry_initialized: Default::default(),
                 };
                 INSTANCE = Some(reaper);
                 register_plugin_destroy_hook(PluginDestroyHook {
@@ -112,8 +112,7 @@ impl ReaperBuilder {
 
 pub struct RealTimeReaper {}
 
-#[derive(Derivative)]
-#[derivative(Debug)]
+#[derive(Debug)]
 pub struct Reaper {
     medium_session: RefCell<reaper_medium::ReaperSession>,
     pub(crate) medium_reaper: reaper_medium::Reaper,
@@ -138,8 +137,7 @@ pub struct Reaper {
     /// Whether to report to Sentry (user can toggle this at runtime).
     report_crashes_to_sentry: Arc<AtomicBool>,
     #[cfg(feature = "sentry")]
-    #[derivative(Debug = "ignore")]
-    sentry_guard: RefCell<Option<sentry::ClientInitGuard>>,
+    sentry_initialized: Cell<bool>,
 }
 
 #[derive(Debug)]
@@ -734,6 +732,7 @@ mod sentry_impl {
     use super::*;
     use sentry::types::Dsn;
     use sentry::ClientOptions;
+    use std::mem;
 
     pub struct SentryConfig<'a> {
         pub dsn: Dsn,
@@ -746,7 +745,7 @@ mod sentry_impl {
         ///
         /// Later calls will be ignored.
         pub fn init_sentry(&self, config: SentryConfig) {
-            if self.sentry_guard.borrow().is_some() {
+            if self.sentry_initialized.get() {
                 return;
             }
             let client_options = ClientOptions {
@@ -775,7 +774,14 @@ mod sentry_impl {
                 ..Default::default()
             };
             let sentry_guard = sentry::init(client_options);
-            self.sentry_guard.borrow_mut().replace(sentry_guard);
+            // Keeping the sentry guard around will cause Sentry destructor code to run when
+            // Reaper is dropped. This destructor code does thread-local and/or std::thread::current
+            // calls, which would panic when executed after the DLL is detached (in plug-in
+            // destroy hooks). That in turn would cause a crash.
+            // Therefore, we just forget about the sentry guard. We don't mind if some queued
+            // messages don't get sent anymore on exit.
+            mem::forget(sentry_guard);
+            self.sentry_initialized.set(true);
         }
     }
 }
