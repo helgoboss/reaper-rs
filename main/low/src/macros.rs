@@ -48,7 +48,7 @@ macro_rules! dll_main {
             _: *const u8,
         ) -> u32 {
             if reason == reaper_low::raw::DLL_PROCESS_ATTACH {
-                reaper_low::register_hinstance(hinstance);
+                let _ = reaper_low::register_hinstance(hinstance);
             } else if reason == reaper_low::raw::DLL_PROCESS_DETACH {
                 reaper_low::execute_plugin_destroy_hooks();
             }

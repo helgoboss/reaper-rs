@@ -1,14 +1,17 @@
-use crate::{
-    raw, register_plugin_destroy_hook, GetSwellFunc, PluginDestroyHook, StaticPluginContext,
-};
+use crate::{raw, GetSwellFunc, StaticPluginContext};
+use fragile::Fragile;
+use std::ptr::null_mut;
 
 /// Exposes the (hopefully) obtained static plug-in context.
 ///
 /// This is typically called by one of the plugin macros.
 pub fn static_plugin_context() -> StaticPluginContext {
     StaticPluginContext {
-        h_instance: unsafe { hinstance::HINSTANCE },
-        get_swell_func: unsafe { swell::GET_SWELL_FUNC },
+        h_instance: hinstance::HINSTANCE
+            .get()
+            .map(|i| *i.get())
+            .unwrap_or(null_mut()),
+        get_swell_func: swell::GET_SWELL_FUNC.get().copied(),
     }
 }
 
@@ -18,21 +21,18 @@ pub fn static_plugin_context() -> StaticPluginContext {
 /// This is typically called by some SWELL entry point in one of the plugin macros.
 ///
 /// [`static_extension_plugin_context()`]: fn.static_extension_plugin_context.html
-pub fn register_swell_function_provider(get_func: Option<GetSwellFunc>) {
+pub fn register_swell_function_provider(get_func: GetSwellFunc) -> Result<(), &'static str> {
     // Save provider in static variable.
-    swell::INIT_GET_SWELL_FUNC.call_once(|| unsafe {
-        swell::GET_SWELL_FUNC = get_func;
-        register_plugin_destroy_hook(PluginDestroyHook {
-            name: "reaper_low::swell::GET_SWELL_FUNC",
-            callback: || swell::GET_SWELL_FUNC = None,
-        });
-    });
+    swell::GET_SWELL_FUNC
+        .set(get_func)
+        .map_err(|_| "SWELL function provider registered already")?;
     // On Linux Rust will get informed first about the SWELL function provider, so we need to pass
     // it on to the C++ side.
     #[cfg(target_os = "linux")]
     unsafe {
         swell::register_swell_function_provider_called_from_rust(get_func);
     }
+    Ok(())
 }
 
 /// Registers the module handle globally.
@@ -41,26 +41,17 @@ pub fn register_swell_function_provider(get_func: Option<GetSwellFunc>) {
 /// This is typically called on Windows only by some entry point in one of the plugin macros.
 ///
 /// [`static_plugin_context()`]: fn.static_plugin_context.html
-pub fn register_hinstance(hinstance: raw::HINSTANCE) {
-    // Save handle in static variable.
-    hinstance::INIT_HINSTANCE.call_once(|| unsafe {
-        hinstance::HINSTANCE = hinstance;
-        register_plugin_destroy_hook(PluginDestroyHook {
-            name: "reaper_low::hinstance::HINSTANCE",
-            callback: || hinstance::HINSTANCE = std::ptr::null_mut(),
-        });
-    });
+pub fn register_hinstance(hinstance: raw::HINSTANCE) -> Result<(), &'static str> {
+    hinstance::HINSTANCE
+        .set(Fragile::new(hinstance))
+        .map_err(|_| "HINSTANCE registered already")
 }
 
 mod swell {
-    use std::os::raw::{c_char, c_void};
-    use std::sync::Once;
+    use std::sync::OnceLock;
 
     /// On Linux/macOS this will contain the SWELL function provider after REAPER start.
-    pub static mut GET_SWELL_FUNC: Option<
-        unsafe extern "C" fn(name: *const c_char) -> *mut c_void,
-    > = None;
-    pub static INIT_GET_SWELL_FUNC: Once = Once::new();
+    pub static GET_SWELL_FUNC: OnceLock<crate::GetSwellFunc> = OnceLock::new();
 
     #[cfg(target_os = "linux")]
     extern "C" {
@@ -82,15 +73,17 @@ mod swell {
     #[cfg(target_os = "macos")]
     #[no_mangle]
     unsafe extern "C" fn register_swell_called_from_cpp(get_func: Option<crate::GetSwellFunc>) {
-        crate::register_swell_function_provider(get_func);
+        if let Some(get_func) = get_func {
+            let _ = crate::register_swell_function_provider(get_func);
+        }
     }
 }
 
 mod hinstance {
     use crate::raw;
-    use std::sync::Once;
+    use fragile::Fragile;
+    use std::sync::OnceLock;
 
     /// On Windows, this will contain the module handle after the plug-in has been loaded.
-    pub static mut HINSTANCE: raw::HINSTANCE = std::ptr::null_mut();
-    pub static INIT_HINSTANCE: Once = Once::new();
+    pub static HINSTANCE: OnceLock<Fragile<raw::HINSTANCE>> = OnceLock::new();
 }
