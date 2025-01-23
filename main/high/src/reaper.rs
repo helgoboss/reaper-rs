@@ -88,14 +88,12 @@ impl ReaperBuilder {
         };
         INSTANCE.set(reaper)?;
         // After init
-        unsafe {
-            register_plugin_destroy_hook(PluginDestroyHook {
-                name: "reaper_high::Reaper",
-                callback: || {
-                    let _ = Reaper::get().go_to_sleep();
-                },
-            });
-        }
+        register_plugin_destroy_hook(PluginDestroyHook {
+            name: "reaper_high::Reaper",
+            callback: || {
+                let _ = Reaper::get().go_to_sleep();
+            },
+        });
         // We register a tiny control surface permanently just for the most essential stuff.
         // It will be unregistered automatically using reaper-medium's Drop implementation.
         let helper_control_surface = HelperControlSurface::new(helper_task_receiver);

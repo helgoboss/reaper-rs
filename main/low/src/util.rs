@@ -106,10 +106,10 @@ pub fn execute_plugin_destroy_hooks() {
 /// This is supposed to be used from the *reaper-rs* low-level API but also higher-level APIs
 /// whenever they register static variables that require manual cleanup on plug-in unload.
 ///
-/// # Safety
+/// # Panics
 ///
-/// Must only be called in main thread.
-pub unsafe fn register_plugin_destroy_hook(hook: PluginDestroyHook) {
+/// Panics if not called in the main thread.
+pub fn register_plugin_destroy_hook(hook: PluginDestroyHook) {
     tracing::debug!(msg = "Registering plug-in destroy hook", %hook.name);
     PLUGIN_DESTROY_HOOKS.get().borrow_mut().push(hook);
 }
