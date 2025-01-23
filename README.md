@@ -13,7 +13,8 @@
 
 **Important note:** If you want to use _reaper-rs_ for your own project, please use the master branch for the time
 being, not the crates on [crates.io](https://crates.io/)! I push changes here pretty often, but I don't publish to
-crates.io at the moment, so my crates there are *very* outdated. Rationale: As long as I'm the only consumer of this library, this process is easier for me.
+crates.io at the moment, so my crates there are *very* outdated. Rationale: As long as I'm the only consumer of this
+library, this process is easier for me.
 
 Here's the snippet:
 
@@ -44,7 +45,10 @@ Win32 API.
 
 ## Example
 
-A minimal working extension project can be found [here](https://github.com/helgoboss/reaper-rs-hello-world-extension). **Make sure you also read the [basics](#basics) though!** It's important to understand the differences between the provided APIs and be aware that the high-level API shouldn't be used for anything else than bootstrapping the extension (because I don't keep it stable). 
+A minimal working extension project can be found [here](https://github.com/helgoboss/reaper-rs-hello-world-extension). *
+*Make sure you also read the [basics](#basics) though!** It's important to understand the differences between the
+provided APIs and be aware that the high-level API shouldn't be used for anything else than bootstrapping the
+extension (because I don't keep it stable).
 
 ## Basics
 
@@ -76,8 +80,10 @@ in such a case).
 Status:
 
 - ![](https://via.placeholder.com/30/aed581/000000?text=+) **crates.io**: published
-- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: approaching stable (quite polished already, breaking changes still possible)
-- ![](https://via.placeholder.com/30/aed581/000000?text=+) **Completion**: ~95% (some virtual function calls still missing)
+- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: approaching stable (quite polished
+  already, breaking changes still possible)
+- ![](https://via.placeholder.com/30/aed581/000000?text=+) **Completion**: ~95% (some virtual function calls still
+  missing)
 
 Example:
 
@@ -102,12 +108,15 @@ Since the high-level API is still very unstable, _this is the recommended API_.
 Status:
 
 - ![](https://via.placeholder.com/30/aed581/000000?text=+) **crates.io**: published
-- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: approaching stable (quite polished already, breaking changes still possible)
-- ![](https://via.placeholder.com/30/ff8a65/000000?text=+) **Completion**: ~13% (solid foundation, roughly 100 of 800 functions implemented)
+- ![](https://via.placeholder.com/30/ffd54f/000000?text=+) **API stability**: approaching stable (quite polished
+  already, breaking changes still possible)
+- ![](https://via.placeholder.com/30/ff8a65/000000?text=+) **Completion**: ~13% (solid foundation, roughly 100 of 800
+  functions implemented)
 
 #### Examples
 
 Basics:
+
 ```rust,ignore
 reaper.show_console_msg("Hello world from reaper-rs medium-level API!");
 let track = reaper.get_track(CurrentProject, 0).ok_or("no tracks")?;
@@ -115,6 +124,7 @@ unsafe { reaper.delete_track(track); }
 ```
 
 Control surface:
+
 ```rust,ignore
 #[derive(Debug)]
 struct MyControlSurface;
@@ -157,7 +167,8 @@ Status:
 
 - ![](https://via.placeholder.com/30/ff8a65/000000?text=+) **crates.io**: not published
 - ![](https://via.placeholder.com/30/ff8a65/000000?text=+) **API stability**: unstable (in a state of flux, but working)
-- ![](https://via.placeholder.com/30/ff8a65/000000?text=+) **Completion**: ~13% (roughly on par with the medium-level API)
+- ![](https://via.placeholder.com/30/ff8a65/000000?text=+) **Completion**: ~13% (roughly on par with the medium-level
+  API)
 
 Example:
 
@@ -229,7 +240,12 @@ fn plugin_main(context: PluginContext) -> Result<(), Box<dyn Error>> {
 }
 ```
 
-> **Important:** Compiled REAPER extension plug-ins (i.e. `.dll` files) must be prefixed with `reaper_` in order for REAPER to load them during startup - even on Linux and macOS, where library file names usually start with `lib`. On Windows, it's enough to name the library `reaper_my_extension` in `Cargo.toml` and it will result in the compiled file being named `reaper_my_extension`, thus obeying this rule. On Linux and macOS, you still need to remove the `lib` prefix. In any case, make sure that the compiled file placed in `REAPER_RESOURCE_PATH/UserPlugins` is prefixed with `reaper_` before attempting to test it!
+> **Important:** Compiled REAPER extension plug-ins (i.e. `.dll` files) must be prefixed with `reaper_` in order for
+> REAPER to load them during startup - even on Linux and macOS, where library file names usually start with `lib`. On
+> Windows, it's enough to name the library `reaper_my_extension` in `Cargo.toml` and it will result in the compiled file
+> being named `reaper_my_extension`, thus obeying this rule. On Linux and macOS, you still need to remove the `lib`
+> prefix. In any case, make sure that the compiled file placed in `REAPER_RESOURCE_PATH/UserPlugins` is prefixed with
+`reaper_` before attempting to test it!
 
 The macro primarily exposes an `extern "C" ReaperPluginEntry()` function which calls
 `reaper_low::bootstrap_extension_plugin()`. So if for some reason you don't want to use that
@@ -240,15 +256,19 @@ macro, have a look at the macro implementation. No magic there.
 The following instructions should result in a functional extension, loaded into REAPER on start:
 
 1. Run `cargo new reaper-my-extension --lib` to initialize the project
-2. Run `cargo build` from within `reaper-my-extension` to generate the compiled plugin extension inside of the `target/debug` directory
+2. Run `cargo build` from within `reaper-my-extension` to generate the compiled plugin extension inside of the
+   `target/debug` directory
 3. Copy the extension plug-in to the `REAPER/UserPlugins` directory
     - You could do this manually, and overwrite the file after each build
-    - Or, you could create a symbolic link from the `target/debug` file, to `REAPER/UserPlugins` so that they were synced
-        - > Note: Here it's explicitly necessary to give the link a name that starts with `reaper_` (by default it will start with `lib`)
-        - To do this, on unix-based systems, run `ln -s ./target/debug/<name-of-the-compiled-extension-file> <path to REAPER/UserPlugins>`
-        - On Windows, you can use the same command if running Git Bash, else you can use `mklink \D target\debug\<name-of-the-compiled-extension-file> %AppData%\REAPER\UserPlugins`
+    - Or, you could create a symbolic link from the `target/debug` file, to `REAPER/UserPlugins` so that they were
+      synced
+        - > Note: Here it's explicitly necessary to give the link a name that starts with `reaper_` (by default it will
+          start with `lib`)
+        - To do this, on unix-based systems, run
+          `ln -s ./target/debug/<name-of-the-compiled-extension-file> <path to REAPER/UserPlugins>`
+        - On Windows, you can use the same command if running Git Bash, else you can use
+          `mklink \D target\debug\<name-of-the-compiled-extension-file> %AppData%\REAPER\UserPlugins`
 4. Now start REAPER, and you should see the console message from the code appear!
-
 
 ### REAPER VST plug-in
 
@@ -272,7 +292,7 @@ crate-type = ["cdylib"]
 
 Then in your `lib.rs`:
 
-```rust
+```rust,ignore
 use vst::plugin::{Info, Plugin, HostCallback};
 use reaper_low::{PluginContext, reaper_vst_plugin, static_plugin_context};
 use reaper_medium::ReaperSession;
@@ -282,7 +302,7 @@ reaper_vst_plugin!();
 #[derive(Default)]
 struct MyReaperVstPlugin {
     host: HostCallback,
-};
+}
 
 impl Plugin for MyReaperVstPlugin {
     fn new(host: HostCallback) -> Self {
@@ -357,13 +377,15 @@ Thanks to Cargo, building _reaper-rs_ is not a big deal.
 
 #### Windows
 
-In the following you will find the complete instructions for Windows 10, including Rust setup. Points where you have to consider the target
+In the following you will find the complete instructions for Windows 10, including Rust setup. Points where you have to
+consider the target
 architecture (REAPER 32-bit vs. 64-bit) are marked with :star:.
 
 1. Setup "Build tools for Visual Studio 2019"
     - Rust uses native build toolchains. On Windows, it's necessary to use the MSVC (Microsoft Visual Studio
       C++) toolchain because REAPER plug-ins only work with that.
-    - [Visual Studio downloads](https://visualstudio.microsoft.com/downloads/) → All downloads → Tools for Visual Studio 2019
+    - [Visual Studio downloads](https://visualstudio.microsoft.com/downloads/) → All downloads → Tools for Visual Studio
+      2019
       → Build Tools for Visual Studio 2019
     - Start it and follow the installer instructions
     - Required components
@@ -390,7 +412,7 @@ architecture (REAPER 32-bit vs. 64-bit) are marked with :star:.
    ```batch
    cargo build
    ```
-   
+
 Regenerate the low-level API:
 
 - See section "Docker".
