@@ -92,7 +92,7 @@ macro_rules! swell_dll_main {
         extern "C" fn SWELL_dllMain(
             hinstance: reaper_low::raw::HINSTANCE,
             reason: u32,
-            get_func: Option<GetSwellFunc>,
+            get_func: Option<reaper_low::GetSwellFunc>,
         ) -> std::os::raw::c_int {
             if reason == reaper_low::raw::DLL_PROCESS_ATTACH {
                 if let Some(get_func) = get_func {

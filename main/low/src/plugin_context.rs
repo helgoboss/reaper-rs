@@ -10,7 +10,9 @@ use vst::plugin::HostCallback;
 
 type GetFunc = unsafe extern "C" fn(name: *const c_char) -> *mut c_void;
 type Register = unsafe extern "C" fn(name: *const c_char, infostruct: *mut c_void) -> c_int;
-pub(crate) type GetSwellFunc = unsafe extern "C" fn(name: *const c_char) -> *mut c_void;
+
+/// Function signature for getting SWELL function.
+pub type GetSwellFunc = unsafe extern "C" fn(name: *const c_char) -> *mut c_void;
 
 /// This represents the context which is needed to access REAPER functions from plug-ins.
 ///
