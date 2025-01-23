@@ -10,9 +10,9 @@ use crate::{
     bindings::root, register_plugin_destroy_hook, PluginContext, PluginDestroyHook, Swell,
     SwellFunctionPointers,
 };
+use std::sync::OnceLock;
 
-// This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
-static mut INSTANCE: Option<Swell> = None;
+static INSTANCE: OnceLock<Swell> = OnceLock::new();
 
 /// This impl block contains functions which exist in SWELL as macros and therefore are not picked
 /// up by `bindgen`.
@@ -22,17 +22,8 @@ impl Swell {
     /// After this has been called, the instance can be queried globally using `get()`.
     ///
     /// This can be called once only. Subsequent calls won't have any effect!
-    pub fn make_available_globally(functions: Swell) {
-        static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
-        unsafe {
-            INIT_INSTANCE.call_once(|| {
-                INSTANCE = Some(functions);
-                register_plugin_destroy_hook(PluginDestroyHook {
-                    name: "reaper_low::swell::Swell",
-                    callback: || INSTANCE = None,
-                });
-            });
-        }
+    pub fn make_available_globally(functions: Swell) -> Result<(), Swell> {
+        INSTANCE.set(functions)
     }
 
     /// Gives access to the instance which you made available globally before.
@@ -43,16 +34,14 @@ impl Swell {
     ///
     /// [`make_available_globally()`]: fn.make_available_globally.html
     pub fn get() -> &'static Swell {
-        unsafe {
-            INSTANCE
-                .as_ref()
-                .expect("call `make_available_globally()` before using `get()`")
-        }
+        INSTANCE
+            .get()
+            .expect("call `make_available_globally()` before using `get()`")
     }
 
     /// Returns whether SWELL has been made available globally already.
     pub fn is_available_globally() -> bool {
-        unsafe { INSTANCE.is_some() }
+        INSTANCE.get().is_some()
     }
 
     /// Gives access to the SWELL function pointers.
