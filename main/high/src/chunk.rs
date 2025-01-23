@@ -425,10 +425,7 @@ impl ChunkRegion {
     ) -> Option<usize> {
         let content = self.content();
         while rel_start_pos < content.len() {
-            let needle_pos_relative_to_rel_start_pos = match content[rel_start_pos..].find(needle) {
-                None => return None, // Needle not found
-                Some(p) => p,
-            };
+            let needle_pos_relative_to_rel_start_pos = content[rel_start_pos..].find(needle)?;
             // Needle found
             let rel_needle_pos = rel_start_pos + needle_pos_relative_to_rel_start_pos;
             let rel_following_char_pos = rel_needle_pos + needle.len();
@@ -458,10 +455,7 @@ impl ChunkRegion {
         let content = self.content();
         while rel_start_pos < content.len() {
             let rel_tag_opener_or_closer_pos =
-                match self.find_followed_by_one_of("\n", "<>", rel_start_pos) {
-                    None => return None, // No further tag opener or closer found
-                    Some(p) => p,
-                };
+                self.find_followed_by_one_of("\n", "<>", rel_start_pos)?;
             // Further tag opener or closer found
             let rel_tag_opener_or_closer_without_newline_pos = rel_tag_opener_or_closer_pos + 1;
             let tag_opener_or_closer_without_newline = content

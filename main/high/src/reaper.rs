@@ -75,8 +75,6 @@ impl ReaperBuilder {
             action_value_change_history: RefCell::new(Default::default()),
             undo_block_is_active: Cell::new(false),
             session_status: RefCell::new(SessionStatus::Sleeping),
-            #[cfg(feature = "sentry")]
-            sentry_initialized: Default::default(),
         };
         let reaper = Reaper {
             reaper_main: Fragile::new(reaper_main),
@@ -85,6 +83,8 @@ impl ReaperBuilder {
             helper_task_sender,
             log_crashes_to_console: Default::default(),
             report_crashes_to_sentry: Default::default(),
+            #[cfg(feature = "sentry")]
+            sentry_initialized: Default::default(),
         };
         INSTANCE.set(reaper)?;
         // After init
@@ -126,6 +126,9 @@ pub struct Reaper {
     log_crashes_to_console: Arc<AtomicBool>,
     /// Whether to report to Sentry (user can toggle this at runtime).
     report_crashes_to_sentry: Arc<AtomicBool>,
+    /// Whether to log to the REAPER console (user can toggle this at runtime).
+    #[cfg(feature = "sentry")]
+    sentry_initialized: AtomicBool,
 }
 
 #[derive(Debug)]
@@ -145,9 +148,6 @@ struct ReaperMain {
     action_value_change_history: RefCell<HashMap<CommandId, ActionValueChange>>,
     undo_block_is_active: Cell<bool>,
     session_status: RefCell<SessionStatus>,
-    /// Whether to log to the REAPER console (user can toggle this at runtime).
-    #[cfg(feature = "sentry")]
-    sentry_initialized: Cell<bool>,
 }
 
 #[derive(Debug)]
@@ -776,8 +776,7 @@ mod sentry_impl {
         ///
         /// Later calls will be ignored.
         pub fn init_sentry(&self, config: SentryConfig) {
-            let reaper_main = self.reaper_main.get();
-            if reaper_main.sentry_initialized.get() {
+            if self.sentry_initialized.load(Ordering::Relaxed) {
                 return;
             }
             let client_options = ClientOptions {
@@ -813,7 +812,7 @@ mod sentry_impl {
             // Therefore, we just forget about the sentry guard. We don't mind if some queued
             // messages don't get sent anymore on exit.
             mem::forget(sentry_guard);
-            reaper_main.sentry_initialized.set(true);
+            self.sentry_initialized.store(true, Ordering::Relaxed);
         }
     }
 }
