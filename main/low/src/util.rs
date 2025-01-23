@@ -16,7 +16,7 @@ use std::sync::LazyLock;
 /// panic).
 ///
 /// Right now this doesn't do anything else than calling `catch_unwind()` but it might do more in
-/// future. Please note that logging is *not* supposed to be done here. It should be done in the
+/// the future. Please note that logging is *not* supposed to be done here. It should be done in the
 /// panic hook instead.
 pub fn firewall<F: FnOnce() -> R, R>(f: F) -> Option<R> {
     catch_unwind(AssertUnwindSafe(f)).ok()

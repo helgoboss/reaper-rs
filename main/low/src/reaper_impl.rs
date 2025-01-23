@@ -1,10 +1,8 @@
 use crate::raw::preview_register_t;
-use crate::{
-    register_plugin_destroy_hook, PluginContext, PluginDestroyHook, Reaper, ReaperFunctionPointers,
-};
+use crate::{PluginContext, Reaper, ReaperFunctionPointers};
+use std::sync::OnceLock;
 
-// This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
-static mut INSTANCE: Option<Reaper> = None;
+static INSTANCE: OnceLock<Reaper> = OnceLock::new();
 
 impl Reaper {
     /// Makes the given instance available globally.
@@ -12,17 +10,8 @@ impl Reaper {
     /// After this has been called, the instance can be queried globally using `get()`.
     ///
     /// This can be called once only. Subsequent calls won't have any effect!
-    pub fn make_available_globally(functions: Reaper) {
-        static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
-        unsafe {
-            INIT_INSTANCE.call_once(|| {
-                INSTANCE = Some(functions);
-                register_plugin_destroy_hook(PluginDestroyHook {
-                    name: "reaper_low::Reaper",
-                    callback: || INSTANCE = None,
-                });
-            });
-        }
+    pub fn make_available_globally(functions: Reaper) -> Result<(), Reaper> {
+        INSTANCE.set(functions)
     }
 
     /// Gives access to the instance which you made available globally before.
@@ -33,11 +22,9 @@ impl Reaper {
     ///
     /// [`make_available_globally()`]: fn.make_available_globally.html
     pub fn get() -> &'static Reaper {
-        unsafe {
-            INSTANCE
-                .as_ref()
-                .expect("call `make_available_globally()` before using `get()`")
-        }
+        INSTANCE
+            .get()
+            .expect("call `make_available_globally()` before using `get()`")
     }
 
     /// Gives access to the REAPER function pointers.
