@@ -289,6 +289,11 @@ impl Reaper {
         }
     }
 
+    /// Returns whether the instance is loaded already.
+    pub fn is_loaded() -> bool {
+        unsafe { INSTANCE.is_some() }
+    }
+
     /// This wakes reaper-rs up.
     ///
     /// In particular, it does the following:
