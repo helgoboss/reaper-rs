@@ -50,9 +50,7 @@ macro_rules! dll_main {
             if reason == reaper_low::raw::DLL_PROCESS_ATTACH {
                 reaper_low::register_hinstance(hinstance);
             } else if reason == reaper_low::raw::DLL_PROCESS_DETACH {
-                unsafe {
-                    reaper_low::execute_plugin_destroy_hooks();
-                }
+                reaper_low::execute_plugin_destroy_hooks();
             }
             1
         }
