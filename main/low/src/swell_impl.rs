@@ -6,10 +6,7 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 
-use crate::{
-    bindings::root, register_plugin_destroy_hook, PluginContext, PluginDestroyHook, Swell,
-    SwellFunctionPointers,
-};
+use crate::{bindings::root, PluginContext, Swell, SwellFunctionPointers};
 use std::sync::OnceLock;
 
 static INSTANCE: OnceLock<Swell> = OnceLock::new();

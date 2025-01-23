@@ -4,6 +4,7 @@ use reaper_low::Swell;
 use std::ffi::CString;
 use std::fmt::{Display, Formatter};
 use std::os::raw::c_char;
+#[allow(deprecated)]
 use std::panic::PanicInfo;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -43,6 +44,7 @@ pub struct PluginInfo {
 /// All available information about a particular crash.
 pub struct CrashInfo<'a> {
     pub plugin_info: &'a PluginInfo,
+    #[allow(deprecated)]
     pub panic_info: &'a PanicInfo<'a>,
     pub backtrace: Option<&'a Backtrace>,
     pub console_enabled: bool,
@@ -56,6 +58,7 @@ impl CrashHandler {
         Self { config }
     }
 
+    #[allow(deprecated)]
     /// Handles a particular crash, initiated by a panic.
     ///
     /// This must be called from the panic hook.
@@ -125,6 +128,7 @@ pub trait CrashFormatter: 'static + Sync + Send {
     fn format(&self, crash_info: &CrashInfo) -> String;
 }
 
+#[allow(deprecated)]
 pub fn extract_panic_message(panic_info: &PanicInfo) -> String {
     let payload = panic_info.payload();
     match payload.downcast_ref::<&str>() {
@@ -224,7 +228,7 @@ Module size:         {module_size_label}
 
 struct FormattedBacktrace<'a>(Option<&'a Backtrace>);
 
-impl<'a> Display for FormattedBacktrace<'a> {
+impl Display for FormattedBacktrace<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if let Some(backtrace) = self.0 {
             write!(f, "\n\n{backtrace:#?}")?;
@@ -235,6 +239,7 @@ impl<'a> Display for FormattedBacktrace<'a> {
     }
 }
 
+#[allow(deprecated)]
 pub fn log_panic(panic_info: &PanicInfo, backtrace: Option<&Backtrace>) {
     tracing::error!(
         message = extract_panic_message(panic_info),
