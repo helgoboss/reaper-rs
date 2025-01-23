@@ -1561,7 +1561,7 @@ pub enum SectionContext<'a> {
     Sec(&'a KbdSectionInfo),
 }
 
-impl<'a> SectionContext<'a> {
+impl SectionContext<'_> {
     /// Converts this value to a raw pointer as expected by the low-level API.
     pub fn to_raw(self) -> *mut raw::KbdSectionInfo {
         use SectionContext::*;

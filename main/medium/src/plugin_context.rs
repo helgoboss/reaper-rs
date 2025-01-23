@@ -95,7 +95,7 @@ pub struct ExtensionPluginContext<'a> {
     low: &'a reaper_low::ExtensionPluginContext,
 }
 
-impl<'a> ExtensionPluginContext<'a> {
+impl ExtensionPluginContext<'_> {
     /// Returns the caller version from `reaper_plugin_info_t`.
     pub fn caller_version(self) -> i32 {
         self.low.caller_version()

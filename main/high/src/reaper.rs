@@ -16,7 +16,6 @@ use reaper_low::PluginContext;
 
 use crate::helper_control_surface::{HelperControlSurface, HelperTask};
 use crate::mutex_util::lock_ignoring_poisoning;
-use derivative::Derivative;
 use reaper_medium::ProjectContext::Proj;
 use reaper_medium::UndoScope::All;
 use reaper_medium::{

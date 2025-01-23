@@ -113,7 +113,7 @@ impl<'a> From<&'a str> for ReaperStringArg<'a> {
 // good reason: If there's a `String` which the consumer is okay to give away (move), this is
 // good for performance because no copy needs to be made in order to convert this into a C string.
 // By introducing this conversion, we want to encourage this scenario.
-impl<'a> From<String> for ReaperStringArg<'a> {
+impl From<String> for ReaperStringArg<'_> {
     fn from(s: String) -> Self {
         ReaperStringArg(ReaperString::from_string(s).into())
     }
@@ -235,7 +235,7 @@ impl Deref for ReaperString {
 }
 
 // This is important because we use `ReaperStr` often as cows (e.g. in enums).
-impl<'a> From<ReaperString> for Cow<'a, ReaperStr> {
+impl From<ReaperString> for Cow<'_, ReaperStr> {
     fn from(value: ReaperString) -> Self {
         Cow::Owned(value)
     }

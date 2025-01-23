@@ -90,7 +90,7 @@ impl<'a, T: AsRef<ReaperMutexPrimitive>> ReaperMutexGuard<'a, T> {
         Ok(guard)
     }
 }
-impl<'a, T: AsRef<ReaperMutexPrimitive>> Drop for ReaperMutexGuard<'a, T> {
+impl<T: AsRef<ReaperMutexPrimitive>> Drop for ReaperMutexGuard<'_, T> {
     fn drop(&mut self) {
         #[cfg(windows)]
         unsafe {

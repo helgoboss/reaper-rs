@@ -2464,8 +2464,9 @@ fn global_instances() -> TestStep {
             low_reaper = size_of_val(medium_reaper.low()),
         ));
         // Low-level REAPER
-        reaper_low::Reaper::make_available_globally(*medium_reaper.low());
-        reaper_low::Reaper::make_available_globally(*medium_reaper.low());
+        reaper_low::Reaper::make_available_globally(*medium_reaper.low()).unwrap();
+        let res = reaper_low::Reaper::make_available_globally(*medium_reaper.low());
+        assert!(res.is_err());
         let low = reaper_low::Reaper::get();
         println!("reaper_low::Reaper {:?}", &low);
         unsafe {
@@ -2474,7 +2475,7 @@ fn global_instances() -> TestStep {
         // Low-level SWELL
         let swell = Swell::load(*medium_reaper.low().plugin_context());
         println!("reaper_low::Swell {:?}", &swell);
-        Swell::make_available_globally(swell);
+        Swell::make_available_globally(swell).unwrap();
         let _ = Swell::get();
         // Medium-level REAPER
         reaper_medium::Reaper::make_available_globally(medium_reaper.clone());

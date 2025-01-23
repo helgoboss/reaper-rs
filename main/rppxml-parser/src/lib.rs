@@ -158,7 +158,7 @@ impl<'a> Element<'a> {
     }
 }
 
-impl<'a> Debug for Element<'a> {
+impl Debug for Element<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("Element").field(&self.0).finish()
     }

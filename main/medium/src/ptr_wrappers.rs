@@ -284,7 +284,7 @@ impl KbdSectionInfo {
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct KbdCmd<'a>(pub(crate) &'a raw::KbdCmd);
 
-impl<'a> KbdCmd<'a> {
+impl KbdCmd<'_> {
     /// Returns the command ID of this action.
     pub fn cmd(self) -> CommandId {
         CommandId(self.0.cmd as _)

@@ -865,13 +865,13 @@ impl<'a> ReaperVersion<'a> {
     }
 }
 
-impl<'a> AsRef<str> for ReaperVersion<'a> {
+impl AsRef<str> for ReaperVersion<'_> {
     fn as_ref(&self) -> &str {
         self.0.to_str()
     }
 }
 
-impl<'a> Display for ReaperVersion<'a> {
+impl Display for ReaperVersion<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0.to_str())
     }

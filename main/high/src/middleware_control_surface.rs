@@ -323,7 +323,7 @@ pub enum ControlSurfaceEvent<'a> {
     ExtSetProjectMarkerChange(ExtSetProjectMarkerChangeArgs),
 }
 
-impl<'a> ControlSurfaceEvent<'a> {
+impl ControlSurfaceEvent<'_> {
     pub fn into_owned(self) -> ControlSurfaceEvent<'static> {
         use ControlSurfaceEvent::*;
         match self {

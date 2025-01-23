@@ -337,7 +337,7 @@ pub struct SetTrackTitleArgs<'a> {
     pub name: Cow<'a, ReaperStr>,
 }
 
-impl<'a> SetTrackTitleArgs<'a> {
+impl SetTrackTitleArgs<'_> {
     pub fn into_owned(self) -> SetTrackTitleArgs<'static> {
         SetTrackTitleArgs {
             track: self.track,

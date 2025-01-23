@@ -32,7 +32,7 @@ impl TrackDesc {
     // }
 }
 
-impl<'a, A> Track<'a, A> {
+impl<A> Track<'_, A> {
     pub(crate) fn new(raw: MediaTrack) -> Self {
         Self {
             raw,

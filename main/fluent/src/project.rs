@@ -38,7 +38,7 @@ impl ProjectDesc {
     // }
 }
 
-impl<'a, A> Project<'a, A> {
+impl<A> Project<'_, A> {
     pub(crate) fn new(raw: ReaProject) -> Self {
         Self {
             raw,
