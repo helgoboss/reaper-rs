@@ -17,6 +17,10 @@ jobs:
     name: Check
     runs-on: ubuntu-latest
     steps:
+      - name: Set up dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install llvm
       - uses: actions/checkout@v2
         with:
           submodules: recursive
