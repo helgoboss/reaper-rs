@@ -119,5 +119,19 @@ pub struct PluginDestroyHook {
     /// Descriptive name. Useful for debugging.
     pub name: &'static str,
     /// Callback that will be invoked when the plug-in module gets unloaded.
+    ///
+    /// The function provided here must not call `std::thread::current` or access thread-locals.
+    /// This would cause panics on Windows. Most likely it would also cause a real crash,
+    /// because the panic probably occurs while executing `Drop` (destructor). Such a crash
+    /// might not always get visible because it probably happens when exiting REAPER. But it's
+    /// definitely visible in the event viewer.
+    ///
+    /// In practice, it can sometimes be hard to fulfill above requirement because destructor code
+    /// runs automatically. Some value in the destroyed struct might have complex disposal
+    /// logic that you can't change (e.g. Sentry client). In such a case, it's probably better
+    /// to not register the destroy hook. Then exiting REAPER won't crash. The only downside is
+    /// that, if you write a VST, REAPER for Windows preference "VST => Allow complete unload of
+    /// VST plug-ins" should not be ticked. Otherwise, the unload will fail. But ticking that
+    /// option is not the best idea anyway.
     pub callback: fn(),
 }
