@@ -1,4 +1,4 @@
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_int, c_void};
 use std::ptr::{null, null_mut, NonNull};
 
@@ -7765,17 +7765,24 @@ where
     }
 
     /// Grants temporary access to the name of the given input channel.
+    ///
+    /// I encountered situations in which the name is not properly UTF-8 encoded, therefore, it's exposed as
+    /// `CStr` instead of `ReaperStr`.
     pub fn get_input_channel_name<R>(
         &self,
         channel_index: u32,
-        use_name: impl FnOnce(Option<&ReaperStr>) -> R,
+        use_name: impl FnOnce(Option<&CStr>) -> R,
     ) -> R
     where
         UsageScope: MainThreadOnly,
     {
         self.require_main_thread();
         let ptr = self.low.GetInputChannelName(channel_index as _);
-        let passing_c_str = unsafe { create_passing_c_str(ptr) };
+        let passing_c_str = if ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { CStr::from_ptr(ptr) })
+        };
         use_name(passing_c_str)
     }
 
