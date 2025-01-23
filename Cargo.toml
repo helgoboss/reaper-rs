@@ -67,7 +67,7 @@ doc-comment = "0.3.3"
 splitty = "1.0.1"
 rxrust = { git = "https://github.com/rxRust/rxRust", rev = "349e50b3197e05926e2378ef8fc45cb67ad43b83" }
 approx = "0.3.2"
-reqwest = { version = "0.10", default-features = false }
+reqwest = "0.12.12"
 tar = "0.4.26"
 xz2 = "0.1"
 wait-timeout = "0.1.5"
