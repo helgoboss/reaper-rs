@@ -2,7 +2,7 @@ use std::ffi::CString;
 use std::os::raw::{c_char, c_int, c_void};
 use std::ptr::{null, null_mut, NonNull};
 
-use reaper_low::{raw, register_plugin_destroy_hook, PluginDestroyHook};
+use reaper_low::raw;
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
@@ -50,6 +50,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 use std::num::NonZeroU32;
+use std::sync::OnceLock;
 
 /// Represents a privilege to execute functions which are safe to execute from any thread.
 pub trait AnyThread: private::Sealed {}
@@ -169,8 +170,7 @@ pub struct Reaper<UsageScope = MainThreadScope> {
     p: PhantomData<UsageScope>,
 }
 
-// This is safe (see https://doc.rust-lang.org/std/sync/struct.Once.html#examples-1).
-static mut INSTANCE: Option<Reaper<MainThreadScope>> = None;
+static INSTANCE: OnceLock<Reaper<MainThreadScope>> = OnceLock::new();
 
 impl Reaper<MainThreadScope> {
     /// Makes the given instance available globally.
@@ -178,17 +178,10 @@ impl Reaper<MainThreadScope> {
     /// After this has been called, the instance can be queried globally using `get()`.
     ///
     /// This can be called once only. Subsequent calls won't have any effect!
-    pub fn make_available_globally(reaper: Reaper<MainThreadScope>) {
-        static INIT_INSTANCE: std::sync::Once = std::sync::Once::new();
-        unsafe {
-            INIT_INSTANCE.call_once(|| {
-                INSTANCE = Some(reaper);
-                register_plugin_destroy_hook(PluginDestroyHook {
-                    name: "reaper_medium::Reaper",
-                    callback: || INSTANCE = None,
-                });
-            });
-        }
+    pub fn make_available_globally(
+        reaper: Reaper<MainThreadScope>,
+    ) -> Result<(), Reaper<MainThreadScope>> {
+        INSTANCE.set(reaper)
     }
 
     /// Gives access to the instance which you made available globally before.
@@ -199,11 +192,9 @@ impl Reaper<MainThreadScope> {
     ///
     /// [`make_available_globally()`]: fn.make_available_globally.html
     pub fn get() -> &'static Reaper<MainThreadScope> {
-        unsafe {
-            INSTANCE
-                .as_ref()
-                .expect("call `make_available_globally()` before using `get()`")
-        }
+        INSTANCE
+            .get()
+            .expect("call `make_available_globally()` before using `get()`")
     }
 }
 

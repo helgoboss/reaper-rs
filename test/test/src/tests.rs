@@ -2478,8 +2478,9 @@ fn global_instances() -> TestStep {
         Swell::make_available_globally(swell).unwrap();
         let _ = Swell::get();
         // Medium-level REAPER
-        reaper_medium::Reaper::make_available_globally(medium_reaper.clone());
-        reaper_medium::Reaper::make_available_globally(medium_reaper.clone());
+        reaper_medium::Reaper::make_available_globally(medium_reaper.clone()).unwrap();
+        let res = reaper_medium::Reaper::make_available_globally(medium_reaper.clone());
+        assert!(res.is_err());
         medium_reaper.show_console_msg("- Hello from medium-level API\n");
         Ok(())
     })
