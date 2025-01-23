@@ -26,7 +26,7 @@ pub fn register_swell_function_provider(get_func: GetSwellFunc) -> Result<(), &'
     swell::GET_SWELL_FUNC
         .set(get_func)
         .map_err(|_| "SWELL function provider registered already")?;
-    // On Linux Rust will get informed first about the SWELL function provider, so we need to pass
+    // On Linux, Rust will get informed first about the SWELL function provider, so we need to pass
     // it on to the C++ side.
     #[cfg(target_os = "linux")]
     unsafe {
@@ -62,9 +62,7 @@ mod swell {
         /// the plug-in the chance to initialize its SWELL function pointers as well, which is necessary
         /// for many use cases (e.g. creating dialog windows). This is only needed on Linux. On Windows
         /// we don't have SWELL and on macOS the mechanism of obtaining SWELL is different.
-        pub fn register_swell_function_provider_called_from_rust(
-            get_func: Option<crate::GetSwellFunc>,
-        );
+        pub fn register_swell_function_provider_called_from_rust(get_func: crate::GetSwellFunc);
     }
 
     /// On macOS, this function is called from Objective-C side (`swell-modstub-custom.mm`).

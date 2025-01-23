@@ -34,7 +34,7 @@ jobs:
     name: Test Suite
     runs-on: macos-latest
     env:
-      MACOSX_DEPLOYMENT_TARGET: 10.7
+      MACOSX_DEPLOYMENT_TARGET: 10.12
     steps:
       - uses: actions/checkout@v2
         with:
