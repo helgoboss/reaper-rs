@@ -362,6 +362,7 @@ mod sentry_impl {
 
     impl CrashHandler {
         /// Returns the error ID.
+        #[allow(deprecated)]
         pub(crate) fn report_to_sentry(
             &self,
             panic_info: &PanicInfo,

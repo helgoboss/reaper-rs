@@ -1,6 +1,7 @@
 use crossbeam_channel::{Receiver, Sender};
 
 use crate::{Reaper, DEFAULT_MAIN_THREAD_TASK_BULK_SIZE};
+use fragile::Fragile;
 use futures::channel::oneshot;
 use std::time::{Duration, SystemTime};
 use tracing::warn;
@@ -8,10 +9,6 @@ use tracing::warn;
 pub struct TaskSupport {
     sender: Sender<MainThreadTask>,
 }
-
-// TODO-medium Is this correct? It was already like that when TaskSupport was a part of Reaper
-// struct.
-unsafe impl Sync for TaskSupport {}
 
 impl TaskSupport {
     pub fn new(sender: Sender<MainThreadTask>) -> TaskSupport {
@@ -24,7 +21,8 @@ impl TaskSupport {
         &self,
         op: impl FnOnce() + Send + 'static,
     ) -> Result<(), &'static str> {
-        unsafe { self.do_later_in_main_thread_asap_internal(op) }
+        let op = MainThreadTaskOp::Send(Box::new(op));
+        self.do_later_in_main_thread_asap_internal(op)
     }
 
     // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
@@ -34,16 +32,16 @@ impl TaskSupport {
         op: impl FnOnce() + 'static,
     ) -> Result<(), &'static str> {
         Reaper::get().require_main_thread();
-        unsafe { self.do_later_in_main_thread_asap_internal(op) }
+        let op = MainThreadTaskOp::NonSend(Fragile::new(Box::new(op)));
+        self.do_later_in_main_thread_asap_internal(op)
     }
 
-    /// Unsafe because doesn't require send (which should be required in the general case).
-    unsafe fn do_later_in_main_thread_asap_internal(
+    fn do_later_in_main_thread_asap_internal(
         &self,
-        op: impl FnOnce() + 'static,
+        op: MainThreadTaskOp,
     ) -> Result<(), &'static str> {
         self.sender
-            .send(MainThreadTask::new(Box::new(op), None))
+            .send(MainThreadTask::new(op, None))
             .map_err(|_| "channel disconnected")
     }
 
@@ -64,13 +62,9 @@ impl TaskSupport {
         }
     }
 
-    /// Unsafe because doesn't require send (which should be required in the general case).
-    unsafe fn do_in_main_thread_asap_internal(
-        &self,
-        op: impl FnOnce() + 'static,
-    ) -> Result<(), &'static str> {
+    fn do_in_main_thread_asap_internal(&self, op: MainThreadTaskOp) -> Result<(), &'static str> {
         if Reaper::get().is_in_main_thread() {
-            op();
+            op.execute();
             Ok(())
         } else {
             self.do_later_in_main_thread_asap_internal(op)
@@ -84,7 +78,8 @@ impl TaskSupport {
         waiting_time: Duration,
         op: impl FnOnce() + Send + 'static,
     ) -> Result<(), &'static str> {
-        unsafe { self.do_later_in_main_thread_internal(waiting_time, op) }
+        let op = MainThreadTaskOp::Send(Box::new(op));
+        self.do_later_in_main_thread_internal(waiting_time, op)
     }
 
     // Thread-safe. Returns an error if task queue is full (typically if Reaper has been
@@ -95,21 +90,17 @@ impl TaskSupport {
         op: impl FnOnce() + 'static,
     ) -> Result<(), &'static str> {
         Reaper::get().require_main_thread();
-        unsafe { self.do_later_in_main_thread_internal(waiting_time, op) }
+        let op = MainThreadTaskOp::NonSend(Fragile::new(Box::new(op)));
+        self.do_later_in_main_thread_internal(waiting_time, op)
     }
 
-    /// Unsafe because doesn't require send (which should be required in the general case).
-    unsafe fn do_later_in_main_thread_internal(
+    fn do_later_in_main_thread_internal(
         &self,
         waiting_time: Duration,
-        op: impl FnOnce() + 'static,
+        op: MainThreadTaskOp,
     ) -> Result<(), &'static str> {
-        self.sender
-            .send(MainThreadTask::new(
-                Box::new(op),
-                Some(SystemTime::now() + waiting_time),
-            ))
-            .map_err(|_| "channel disconnected")
+        let task = MainThreadTask::new(op, Some(SystemTime::now() + waiting_time));
+        self.sender.send(task).map_err(|_| "channel disconnected")
     }
 
     /// Thread-safe. Returns an error if task queue is full (typically if Reaper has been
@@ -118,7 +109,8 @@ impl TaskSupport {
         &self,
         op: impl FnOnce() + Send + 'static,
     ) -> Result<(), &'static str> {
-        unsafe { self.do_in_main_thread_asap_internal(op) }
+        let op = MainThreadTaskOp::Send(Box::new(op));
+        self.do_in_main_thread_asap_internal(op)
     }
 
     /// Panics if not in main thread. The difference to `do_in_main_thread_asap()` is that `Send` is
@@ -128,7 +120,8 @@ impl TaskSupport {
         op: impl FnOnce() + 'static,
     ) -> Result<(), &'static str> {
         Reaper::get().require_main_thread();
-        unsafe { self.do_in_main_thread_asap_internal(op) }
+        let op = MainThreadTaskOp::NonSend(Fragile::new(Box::new(op)));
+        self.do_in_main_thread_asap_internal(op)
     }
 }
 
@@ -171,14 +164,14 @@ impl MainTaskMiddleware {
             .take(DEFAULT_MAIN_THREAD_TASK_BULK_SIZE)
         {
             match task.desired_execution_time {
-                None => (task.op)(),
+                None => task.op.execute(),
                 Some(t) => {
                     if SystemTime::now() < t {
                         self.main_thread_task_sender
                             .send(task)
                             .expect("couldn't reschedule main thread task");
                     } else {
-                        (task.op)()
+                        task.op.execute()
                     }
                 }
             }
@@ -186,15 +179,27 @@ impl MainTaskMiddleware {
     }
 }
 
-type MainThreadTaskOp = Box<dyn FnOnce() + 'static>;
+enum MainThreadTaskOp {
+    NonSend(Fragile<Box<dyn FnOnce() + 'static>>),
+    Send(Box<dyn FnOnce() + Send + 'static>),
+}
+
+impl MainThreadTaskOp {
+    fn execute(self) {
+        match self {
+            MainThreadTaskOp::NonSend(op) => op.into_inner()(),
+            MainThreadTaskOp::Send(op) => op(),
+        }
+    }
+}
 
 pub struct MainThreadTask {
-    pub desired_execution_time: Option<SystemTime>,
-    pub op: MainThreadTaskOp,
+    desired_execution_time: Option<SystemTime>,
+    op: MainThreadTaskOp,
 }
 
 impl MainThreadTask {
-    pub fn new(op: MainThreadTaskOp, desired_execution_time: Option<SystemTime>) -> MainThreadTask {
+    fn new(op: MainThreadTaskOp, desired_execution_time: Option<SystemTime>) -> MainThreadTask {
         MainThreadTask {
             desired_execution_time,
             op,
