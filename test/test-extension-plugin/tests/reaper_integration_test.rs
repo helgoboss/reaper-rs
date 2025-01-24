@@ -77,18 +77,19 @@ fn run_integration_test_in_reaper(reaper_executable: &Path) -> Result<()> {
         Some(s) => s,
     };
     if exit_status.success() {
+        // Integration test instance returned successfully
         return Ok(());
     }
-    let exit_code = exit_status
-        .code()
-        .context("REAPER exited because of signal")?;
-    if exit_code == 172 {
-        bail!("Integration test failed");
-    } else {
-        bail!(
-            "REAPER exited unsuccessfully but neither because of signal nor because of failed \
-            integration test",
-        );
+    match exit_status.code() {
+        Some(172) => {
+            bail!("Integration test failed due to failing test step");
+        }
+        Some(x) => {
+            bail!("Integration test failed because REAPER process returned exit code {x}");
+        }
+        None => {
+            bail!("Integration test failed because REAPER process didn't return any exit code. Unix signal: {:?}", exit_status.unix_signal());
+        }
     }
 }
 

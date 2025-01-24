@@ -5,6 +5,7 @@ use reaper_test::IntegrationTest;
 use std::error::Error;
 use std::process;
 use std::time::Duration;
+use futures_timer::Delay;
 
 #[reaper_extension_plugin(
     name = "reaper-rs test extension plug-in",
@@ -26,7 +27,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             // On Linux, we shouldn't start executing tests right after starting REAPER. Otherwise,
             // some events will not be raised.
             println!("From REAPER: Waiting a bit before starting the test...");
-            futures_timer::Delay::new(Duration::from_millis(5000)).await;
+            millis(2000).await;
             let exit_code = match reaper_test::execute_integration_test().await {
                 Ok(_) => {
                     println!("From REAPER: reaper-rs integration test executed successfully");
@@ -39,6 +40,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                     172
                 }
             };
+            // Waiting somehow lowers the risk of exiting with SIGSEGV (signal 11) on Linux.
+            // Not sure where this SIGSEGV comes from.
+            println!("From REAPER: Waiting a bit before exiting the REAPER process...");
+            millis(5000).await;
             process::exit(exit_code);
         });
     }
@@ -56,4 +61,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         ActionKind::NotToggleable,
     );
     Ok(())
+}
+
+fn millis(millis: u64) -> Delay {
+    futures_timer::Delay::new(Duration::from_millis(millis))
 }
