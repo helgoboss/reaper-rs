@@ -30,5 +30,4 @@ jobs:
         uses: swatinem/rust-cache@v2
 
       - name: cargo build
-        run:
-          cargo build --target aarch64-apple-darwin
+        run: cargo build --target aarch64-apple-darwin

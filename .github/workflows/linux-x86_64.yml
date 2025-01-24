@@ -12,119 +12,128 @@ name: Linux x86_64
 jobs:
   check:
     name: Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.84.0
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
       - name: cargo check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
+        run: cargo check
 
   generate:
     name: Generate low-level API
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
       - name: Set up dependencies
         run: |
           sudo apt-get update
           sudo apt-get install clang
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: cargo build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --manifest-path main/low/Cargo.toml --features generate
 
-  test:
-    name: Test Suite
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.84.0
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
       - name: cargo build
-        uses: actions-rs/cargo@v1
+        run: cargo build --manifest-path main/low/Cargo.toml --features generate
+
+  test:
+    name: Run tests
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          command: build
-      - uses: actions/upload-artifact@v4
+          submodules: recursive
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.84.0
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
+      - name: cargo build
+        run: cargo build
+
+      - name: Upload test plug-ins
+        uses: actions/upload-artifact@v4
         with:
           name: test-plug-ins
           path: target/debug/*.so
+
       - name: cargo test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: -- --nocapture
+        run: cargo test -- --nocapture
 
   fmt:
-    name: Rustfmt
-    runs-on: ubuntu-latest
+    name: Check formatting
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - run: rustup component add rustfmt
+          submodules: recursive
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.84.0
+        with:
+          components: rustfmt
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
       - name: cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+        run: cargo fmt --all -- --check
 
   doc:
-    name: Doc
-    runs-on: ubuntu-latest
+    name: Check docs
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: actions-rs/toolchain@v1
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.84.0
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - run: rustup component add rust-docs
+          components: rust-docs
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
       - name: cargo doc
-        uses: actions-rs/cargo@v1
-        with:
-          command: doc
+        run: cargo doc
 
   clippy:
-    name: Clippy
-    runs-on: ubuntu-latest
+    name: Check clippy lints
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: actions-rs/toolchain@v1
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.84.0
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - run: rustup component add clippy
+          components: clippy
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
       - name: cargo clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
+        run: cargo clippy -- -D warnings
