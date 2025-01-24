@@ -19,7 +19,6 @@ use reaper_rx::{ActionRxHookPostCommand, ActionRxHookPostCommand2, ControlSurfac
 use std::error::Error;
 use std::fmt::Display;
 use std::panic::AssertUnwindSafe;
-use tracing::info;
 
 /// Executes the complete integration test.
 ///
