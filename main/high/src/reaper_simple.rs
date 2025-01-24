@@ -467,15 +467,13 @@ impl Reaper {
     pub fn get_preference_ref<'a, T>(
         &self,
         name: impl Into<ReaperStringArg<'a>>,
-    ) -> Result<&mut T, &'static str> {
+    ) -> ReaperResult<&mut T> {
         let config_var_result = Reaper::get()
             .medium_reaper
             .get_config_var(name)
-            .ok_or("preference doesn't exist")?;
+            .context("preference doesn't exist")?;
         let size_matches = config_var_result.size as usize == mem::size_of::<T>();
-        if !size_matches {
-            return Err("size mismatch");
-        }
+        ensure!(size_matches, "size mismatch");
         let mut casted_value_ptr = config_var_result.value.cast::<T>();
         let casted_value_ref = unsafe { casted_value_ptr.as_mut() };
         Ok(casted_value_ref)
