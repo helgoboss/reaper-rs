@@ -24,7 +24,8 @@ fn run_reaper_integration_test() -> Result<()> {
     } else if cfg!(target_os = "linux") {
         run_on_linux(&target_dir_path, &reaper_download_dir_path)
     } else {
-        bail!("Running headless reaper-rs integration tests not supported on this OS");
+        println!("Skipping headless reaper-rs integration tests because not supported on this OS");
+        return Ok(());
     }
 }
 
