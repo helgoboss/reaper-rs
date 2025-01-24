@@ -3,7 +3,6 @@ use reaper_high::{ActionKind, Reaper};
 use reaper_macros::reaper_extension_plugin;
 use std::error::Error;
 use std::process;
-use tracing::debug;
 
 #[reaper_extension_plugin(
     name = "reaper-rs test extension plug-in",
