@@ -38,7 +38,7 @@ fn run_on_linux(target_dir_path: &Path, reaper_download_dir_path: &Path) -> Resu
 fn run_on_macos(target_dir_path: &Path, reaper_download_dir_path: &Path) -> Result<()> {
     let reaper_home_path = setup_reaper_for_macos(reaper_download_dir_path)?;
     install_plugin(&target_dir_path, &reaper_home_path)?;
-    let reaper_executable = reaper_home_path.join("REAPER64.app/Contents/MacOS/REAPER");
+    let reaper_executable = reaper_home_path.join("REAPER.app/Contents/MacOS/REAPER");
     run_integration_test_in_reaper(&reaper_executable)?;
     Ok(())
 }
@@ -104,7 +104,7 @@ fn setup_reaper_for_linux(reaper_download_dir_path: &Path) -> Result<PathBuf> {
     if !reaper_tarball_path.exists() {
         println!("Downloading REAPER to ({:?})...", &reaper_tarball_path);
         download(
-            "https://www.reaper.fm/files/6.x/reaper637_linux_x86_64.tar.xz",
+            "https://www.reaper.fm/files/6.x/reaper683_linux_x86_64.tar.xz",
             &reaper_tarball_path,
         )?;
     }
@@ -125,7 +125,7 @@ fn setup_reaper_for_macos(reaper_download_dir_path: &Path) -> Result<PathBuf> {
     if !reaper_dmg_path.exists() {
         println!("Downloading REAPER to ({:?})...", &reaper_dmg_path);
         download(
-            "https://www.reaper.fm/files/6.x/reaper637_x86_64.dmg",
+            "https://www.reaper.fm/files/6.x/reaper683_x86_64.dmg",
             &reaper_dmg_path,
         )?;
     }
@@ -134,7 +134,7 @@ fn setup_reaper_for_macos(reaper_download_dir_path: &Path) -> Result<PathBuf> {
     println!("Copying from mount...");
     fs::create_dir_all(&reaper_home_path)?;
     fs_extra::dir::copy(
-        "/Volumes/REAPER_INSTALL_64/REAPER64.app",
+        "/Volumes/REAPER_INSTALL_INTEL64/REAPER.app",
         &reaper_home_path,
         &CopyOptions {
             overwrite: false,
