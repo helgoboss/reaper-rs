@@ -1,11 +1,11 @@
 use reaper_high::{ActionKind, Reaper};
 
+use futures_timer::Delay;
 use reaper_macros::reaper_extension_plugin;
 use reaper_test::IntegrationTest;
 use std::error::Error;
 use std::process;
 use std::time::Duration;
-use futures_timer::Delay;
 
 #[reaper_extension_plugin(
     name = "reaper-rs test extension plug-in",
