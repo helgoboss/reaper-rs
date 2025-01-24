@@ -4,6 +4,7 @@ use reaper_macros::reaper_extension_plugin;
 use reaper_test::IntegrationTest;
 use std::error::Error;
 use std::process;
+use std::time::Duration;
 
 #[reaper_extension_plugin(
     name = "reaper-rs test extension plug-in",
@@ -20,9 +21,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     reaper.wake_up()?;
     let integration_test = IntegrationTest::setup();
     if run_integration_test {
-        println!("From REAPER: Entering reaper-rs integration test...");
         let future_support_clone = integration_test.future_support().clone();
         future_support_clone.spawn_in_main_thread_from_main_thread(async {
+            // On Linux, we shouldn't start executing tests right after starting REAPER. Otherwise,
+            // some events will not be raised.
+            println!("From REAPER: Waiting a bit before starting the test...");
+            futures_timer::Delay::new(Duration::from_millis(5000)).await;
             let exit_code = match reaper_test::execute_integration_test().await {
                 Ok(_) => {
                     println!("From REAPER: reaper-rs integration test executed successfully");

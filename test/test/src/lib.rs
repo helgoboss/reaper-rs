@@ -87,6 +87,7 @@ async fn execute_integration_test_internal() -> anyhow::Result<()> {
             result
         };
         future.await?;
+        // futures_timer::Delay::new(Duration::from_millis(1)).await;
     }
     Ok(())
 }

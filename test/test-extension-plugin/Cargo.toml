@@ -19,6 +19,7 @@ reaper-low.workspace = true
 reaper-test.workspace = true
 reaper-macros.workspace = true
 tracing.workspace = true
+futures-timer.workspace = true
 
 [dev-dependencies]
 reqwest = { workspace = true, features = ["blocking"] }
