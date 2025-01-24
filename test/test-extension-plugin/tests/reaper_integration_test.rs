@@ -95,20 +95,20 @@ fn run_integration_test_in_reaper(reaper_executable: &Path) -> Result<()> {
 
 /// Returns path of REAPER home
 fn setup_reaper_for_linux(reaper_download_dir_path: &Path) -> Result<PathBuf> {
-    let reaper_home_path = reaper_download_dir_path.join("reaper_linux_x86_64/REAPER");
+    let (tarball_suffix, base_dir) = if cfg!(target_arch = "aarch64") {
+        ("_linux_aarch64.tar.xz", "reaper_linux_aarch64")
+    } else if cfg!(target_arch = "x86_64") {
+        ("_linux_x86_64.tar.xz", "reaper_linux_x86_64")
+    } else {
+        bail!("Linux architecture not supported");
+    };
+    let reaper_home_path = reaper_download_dir_path.join(base_dir).join("REAPER");
     if reaper_home_path.exists() {
         return Ok(reaper_home_path);
     }
     let reaper_tarball_path = reaper_download_dir_path.join("reaper.tar.xz");
     if !reaper_tarball_path.exists() {
-        let suffix = if cfg!(target_arch = "aarch64") {
-            "_linux_aarch64.tar.xz"
-        } else if cfg!(target_arch = "x86_64") {
-            "_linux_x86_64.tar.xz"
-        } else {
-            bail!("Linux architecture not supported");
-        };
-        let url = get_reaper_download_url(REAPER_VERSION, suffix)?;
+        let url = get_reaper_download_url(REAPER_VERSION, tarball_suffix)?;
         println!("Downloading from {url} REAPER to {reaper_tarball_path:?}...");
         download(&url, &reaper_tarball_path)?;
     }
