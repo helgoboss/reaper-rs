@@ -11,65 +11,43 @@ name: Windows x86_64
 
 jobs:
   check:
-    name: Check
-    runs-on: windows-latest
+    name: Check code
+    runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: actions-rs/toolchain@v1
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.84.0
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: cargo check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
+          components: clippy
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
+      - name: cargo clippy
+        run: cargo clippy -- -D warnings
 
   test:
-    name: Test Suite
-    runs-on: windows-latest
-    env:
-      MACOSX_DEPLOYMENT_TARGET: 10.12
+    name: Run tests
+    runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: cargo build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: test-plug-ins
-          path: target/debug/*.dll
-      - name: cargo test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: -- --nocapture
 
-  clippy:
-    name: Clippy
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - run: rustup component add clippy
-      - name: cargo clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.84.0
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
+      - name: cargo build
+        run: cargo build
+
+      - name: cargo test
+        run: cargo test -- --nocapture
+

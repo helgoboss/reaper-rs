@@ -10,68 +10,22 @@ on:
 name: macOS x86_64
 
 jobs:
-  check:
-    name: Check
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: cargo check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
-
-  test:
-    name: Test Suite
-    runs-on: macos-latest
+  build:
+    name: Build
+    runs-on: macos-13
     env:
-      MACOSX_DEPLOYMENT_TARGET: 10.12
+      MACOSX_DEPLOYMENT_TARGET: 10.9
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: cargo build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-      #      - name: Setup tmate session
-      #        uses: mxschmitt/action-tmate@v2
-      - uses: actions/upload-artifact@v4
-        with:
-          name: test-plug-ins
-          path: target/debug/*.dylib
-      - name: cargo test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: -- --nocapture
 
-  clippy:
-    name: Clippy
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - run: rustup component add clippy
-      - name: cargo clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.84.0
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
+      - name: cargo build
+        run: cargo build

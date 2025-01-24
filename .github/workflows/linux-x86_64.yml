@@ -11,8 +11,8 @@ name: Linux x86_64
 
 jobs:
   check:
-    name: Check
-    runs-on: ubuntu-22.04
+    name: Check code
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,39 +21,18 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@1.84.0
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-
-      - name: cargo check
-        run: cargo check
-
-  generate:
-    name: Generate low-level API
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Set up dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install clang
-
-      - name: Checkout
-        uses: actions/checkout@v4
         with:
-          submodules: recursive
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.84.0
+          components: clippy
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
 
-      - name: cargo build
-        run: cargo build --manifest-path main/low/Cargo.toml --features generate
+      - name: cargo clippy
+        run: cargo clippy -- -D warnings
 
   test:
     name: Run tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -69,18 +48,12 @@ jobs:
       - name: cargo build
         run: cargo build
 
-      - name: Upload test plug-ins
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-plug-ins
-          path: target/debug/*.so
-
       - name: cargo test
         run: cargo test -- --nocapture
 
   fmt:
     name: Check formatting
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -100,7 +73,7 @@ jobs:
 
   doc:
     name: Check docs
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -118,10 +91,15 @@ jobs:
       - name: cargo doc
         run: cargo doc
 
-  clippy:
-    name: Check clippy lints
-    runs-on: ubuntu-22.04
+  generate:
+    name: Generate low-level API
+    runs-on: ubuntu-20.04
     steps:
+      - name: Set up dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install clang
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -129,11 +107,9 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@1.84.0
-        with:
-          components: clippy
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
 
-      - name: cargo clippy
-        run: cargo clippy -- -D warnings
+      - name: cargo build
+        run: cargo build --manifest-path main/low/Cargo.toml --features generate

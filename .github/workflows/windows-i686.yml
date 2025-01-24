@@ -10,21 +10,23 @@ on:
 name: Windows i686
 
 jobs:
-  check:
+  build:
     name: Build
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: actions-rs/toolchain@v1
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.84.0
         with:
-          profile: minimal
-          toolchain: stable-i686-pc-windows-msvc
-          target: i686-pc-windows-msvc
-          override: true
+          components: clippy
+          targets: stable-i686-pc-windows-msvc
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
       - name: cargo build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --target i686-pc-windows-msvc
+        run: cargo build --target stable-i686-pc-windows-msvc

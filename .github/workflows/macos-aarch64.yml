@@ -10,8 +10,28 @@ on:
 name: macOS aarch64
 
 jobs:
-  build:
-    name: Build
+  check:
+    name: Check
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.84.0
+        with:
+          components: clippy
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
+      - name: cargo clippy
+        run: cargo clippy -- -D warnings
+
+  test:
+    name: Run tests
     runs-on: macos-14
     env:
       # The first aarch64 target
@@ -21,13 +41,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@1.84.0
-        with:
-          targets: aarch64-apple-darwin
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
 
       - name: cargo build
-        run: cargo build --target aarch64-apple-darwin
+        run: cargo build
+
+      - name: cargo test
+        run: cargo test -- --nocapture
