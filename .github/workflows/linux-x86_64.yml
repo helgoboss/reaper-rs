@@ -95,10 +95,6 @@ jobs:
     name: Generate low-level API
     runs-on: ubuntu-20.04
     steps:
-      - name: Set up dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install clang
 
       - name: Checkout
         uses: actions/checkout@v4
