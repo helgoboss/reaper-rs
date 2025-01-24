@@ -9,22 +9,23 @@ use std::time::Duration;
 use std::{fs, io};
 use wait_timeout::ChildExt;
 
-type Result<T> = std::result::Result<T, Box<dyn Error>>;
+use anyhow::{bail, ensure, Context, Result};
+
+const REAPER_VERSION: &str = "7.30";
 
 #[test]
-fn run_reaper_integration_test() {
-    if cfg!(target_family = "windows") {
-        println!("REAPER integration tests currently not supported on Windows");
-        return;
-    }
-    let target_dir_path = std::env::current_dir().unwrap().join("../../target");
+fn run_reaper_integration_test() -> Result<()> {
+    let target_dir_path = std::env::current_dir()?
+        .join("../../target")
+        .canonicalize()?;
     let reaper_download_dir_path = target_dir_path.join("reaper");
-    let result = if cfg!(target_os = "macos") {
+    if cfg!(target_os = "macos") {
         run_on_macos(&target_dir_path, &reaper_download_dir_path)
-    } else {
+    } else if cfg!(target_os = "linux") {
         run_on_linux(&target_dir_path, &reaper_download_dir_path)
-    };
-    result.expect("Running the integration test in REAPER failed");
+    } else {
+        bail!("Running headless reaper-rs integration tests not supported on this OS");
+    }
 }
 
 fn run_on_linux(target_dir_path: &Path, reaper_download_dir_path: &Path) -> Result<()> {
@@ -55,7 +56,7 @@ fn install_plugin(target_dir_path: &Path, reaper_home_path: &Path) -> Result<()>
     let target_path = reaper_home_path
         .join("UserPlugins")
         .join(format!("reaper_test_extension_plugin.{}", extension));
-    fs::create_dir_all(target_path.parent().ok_or("no parent")?)?;
+    fs::create_dir_all(target_path.parent().context("no parent")?)?;
     println!("Copying plug-in to {:?}...", &target_path);
     fs::copy(&source_path, &target_path)?;
     Ok(())
@@ -72,9 +73,7 @@ fn run_integration_test_in_reaper(reaper_executable: &Path) -> Result<()> {
     let exit_status = match exit_status {
         None => {
             child.kill()?;
-            return Err(
-                "REAPER didn't exit in time (maybe integration test has not started at all)",
-            )?;
+            bail!("REAPER didn't exit in time (maybe integration test has not started at all)",);
         }
         Some(s) => s,
     };
@@ -83,14 +82,14 @@ fn run_integration_test_in_reaper(reaper_executable: &Path) -> Result<()> {
     }
     let exit_code = exit_status
         .code()
-        .ok_or("REAPER exited because of signal")?;
+        .context("REAPER exited because of signal")?;
     if exit_code == 172 {
-        Err("Integration test failed")?
+        bail!("Integration test failed");
     } else {
-        Err(
+        bail!(
             "REAPER exited unsuccessfully but neither because of signal nor because of failed \
             integration test",
-        )?
+        );
     }
 }
 
@@ -100,13 +99,18 @@ fn setup_reaper_for_linux(reaper_download_dir_path: &Path) -> Result<PathBuf> {
     if reaper_home_path.exists() {
         return Ok(reaper_home_path);
     }
-    let reaper_tarball_path = reaper_download_dir_path.join("reaper-linux.tar.xz");
+    let reaper_tarball_path = reaper_download_dir_path.join("reaper.tar.xz");
     if !reaper_tarball_path.exists() {
-        println!("Downloading REAPER to ({:?})...", &reaper_tarball_path);
-        download(
-            "https://www.reaper.fm/files/6.x/reaper683_linux_x86_64.tar.xz",
-            &reaper_tarball_path,
-        )?;
+        let suffix = if cfg!(target_arch = "aarch64") {
+            "_linux_aarch64.tar.xz"
+        } else if cfg!(target_arch = "x86_64") {
+            "_linux_x86_64.tar.xz"
+        } else {
+            bail!("Linux architecture not supported");
+        };
+        let url = get_reaper_download_url(REAPER_VERSION, suffix)?;
+        println!("Downloading from {url} REAPER to {reaper_tarball_path:?}...");
+        download(&url, &reaper_tarball_path)?;
     }
     println!("Unpacking REAPER tarball...");
     unpack_tar_xz(&reaper_tarball_path, &reaper_download_dir_path)?;
@@ -117,24 +121,22 @@ fn setup_reaper_for_linux(reaper_download_dir_path: &Path) -> Result<PathBuf> {
 
 /// Returns path of REAPER home
 fn setup_reaper_for_macos(reaper_download_dir_path: &Path) -> Result<PathBuf> {
-    let reaper_home_path = reaper_download_dir_path.join("reaper_macos_x86_64");
+    let reaper_home_path = reaper_download_dir_path.join("reaper");
     if reaper_home_path.exists() {
         return Ok(reaper_home_path);
     }
-    let reaper_dmg_path = reaper_download_dir_path.join("reaper-macos.dmg");
-    if !reaper_dmg_path.exists() {
-        println!("Downloading REAPER to ({:?})...", &reaper_dmg_path);
-        download(
-            "https://www.reaper.fm/files/6.x/reaper683_x86_64.dmg",
-            &reaper_dmg_path,
-        )?;
+    let dmg_path = reaper_download_dir_path.join("reaper.dmg");
+    if !dmg_path.exists() {
+        let url = get_reaper_download_url(REAPER_VERSION, "_universal.dmg")?;
+        println!("Downloading REAPER from {url} to {dmg_path:?}...");
+        download(&url, &dmg_path)?;
     }
-    println!("Unpacking REAPER dmg...");
-    mount_dmg(&reaper_dmg_path)?;
+    println!("Unpacking REAPER DMG...");
+    let mount_dir = mount_dmg(&dmg_path)?;
     println!("Copying from mount...");
     fs::create_dir_all(&reaper_home_path)?;
     fs_extra::dir::copy(
-        "/Volumes/REAPER_INSTALL_INTEL64/REAPER.app",
+        mount_dir.join("REAPER.app"),
         &reaper_home_path,
         &CopyOptions {
             overwrite: false,
@@ -145,8 +147,10 @@ fn setup_reaper_for_macos(reaper_download_dir_path: &Path) -> Result<PathBuf> {
             ..Default::default()
         },
     )?;
+    println!("Unmount DMG...");
+    unmount_dir_macos(&mount_dir)?;
     write_reaper_config(&reaper_home_path)?;
-    remove_rewire_plugin_macos_bundle(&reaper_home_path)?;
+    // remove_rewire_plugin_macos_bundle(&reaper_home_path)?;
     println!("REAPER home directory is {:?}", &reaper_home_path);
     Ok(reaper_home_path)
 }
@@ -159,8 +163,12 @@ fn write_reaper_config(reaper_home_path: &Path) -> Result<()> {
 mode=4
 
 [REAPER]
-; Not scanning installed VST instruments
-vst_scan=2
+; Not scanning installed VST instruments.
+; This still does some scanning because REAPER auto-adds some external folders :/
+vstpath=
+vstpath_arm64=
+;This even doesn't scan internal VSTs :/
+;vst_scan=2
 ; For dummy audio on Linux
 linux_audio_mode=2
 ; For <none> audio on macOS
@@ -174,7 +182,8 @@ coreaudiooutdevnew=<none>
 
 fn remove_rewire_plugin_macos_bundle(reaper_home_path: &Path) -> Result<()> {
     println!("Removing Rewire plug-in (because it makes REAPER get stuck on headless macOS)...");
-    fs::remove_dir_all(reaper_home_path.join("REAPER64.app/Contents/Plugins/ReWire.bundle"))?;
+    let dir = reaper_home_path.join("REAPER.app/Contents/Plugins/ReWire.bundle");
+    fs::remove_dir_all(&dir).with_context(|| dir.to_string_lossy().to_string())?;
     Ok(())
 }
 
@@ -183,7 +192,7 @@ fn download(url: &str, dest_file_path: &Path) -> Result<()> {
     fs::create_dir_all(
         dest_file_path
             .parent()
-            .ok_or("download destination path must be absolute")?,
+            .context("download destination path must be absolute")?,
     )?;
     let mut dest_file = fs::File::create(&dest_file_path)?;
     io::copy(&mut response, &mut dest_file)?;
@@ -198,18 +207,57 @@ fn unpack_tar_xz(file_path: &Path, dest_dir_path: &Path) -> Result<()> {
     Ok(())
 }
 
-fn mount_dmg(file_path: &Path) -> Result<()> {
-    let mut child = Command::new("hdiutil")
-        .arg("attach")
-        .arg(file_path)
-        .stdin(Stdio::piped())
-        .spawn()?;
-    let stdin = child.stdin.as_mut().ok_or("Failed to open stdin")?;
-    // Get rid of displayed license by simulating q and y key presses
-    stdin.write_all("q\nq\ny\ny\ny\ny\n".as_bytes())?;
-    let status = child.wait()?;
-    if !status.success() {
-        return Err("mount not successful".into());
+fn unmount_dir_macos(mount: &Path) -> Result<()> {
+    if !Command::new("hdiutil")
+        .arg("detach")
+        .arg(mount)
+        .spawn()?
+        .wait()?
+        .success()
+    {
+        bail!("Detaching the mounted image failed");
     }
     Ok(())
+}
+
+fn mount_dmg(dmg: &Path) -> Result<PathBuf> {
+    let dir = dmg.parent().context("dmg has no parent dir")?;
+    let mount_dir = dir.join("mounted-dmg");
+    let cdr = dir.join("reaper.cdr");
+    if !Command::new("hdiutil")
+        .arg("convert")
+        .arg("-quiet")
+        .arg(dmg)
+        .arg("-format")
+        .arg("UDTO")
+        .arg("-o")
+        .arg(&cdr)
+        .spawn()?
+        .wait()?
+        .success()
+    {
+        bail!("conversion to CDR image failed");
+    }
+    if !Command::new("hdiutil")
+        .arg("attach")
+        .arg(&cdr)
+        .arg("-mountpoint")
+        .arg(&mount_dir)
+        .spawn()?
+        .wait()?
+        .success()
+    {
+        bail!("mount not successful");
+    }
+    Ok(mount_dir)
+}
+
+fn get_reaper_download_url(version: &str, suffix: &str) -> Result<String> {
+    let (major, _) = version
+        .split_once('.')
+        .context("REAPER version should contain dot")?;
+    let dot_less_version = version.replace('.', "");
+    Ok(format!(
+        "https://www.reaper.fm/files/{major}.x/reaper{dot_less_version}{suffix}"
+    ))
 }

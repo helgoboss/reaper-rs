@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     let reaper = Reaper::get();
     reaper.wake_up()?;
-    debug!("Loaded reaper-rs integration test plugin");
+    println!("From REAPER: Loaded reaper-rs integration test plugin");
     if run_integration_test {
         println!("From REAPER: Entering reaper-rs integration test...");
         reaper_test::execute_integration_test(|result| {

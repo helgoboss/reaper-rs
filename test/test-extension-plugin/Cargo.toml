@@ -22,6 +22,7 @@ tracing.workspace = true
 
 [dev-dependencies]
 reqwest = { workspace = true, features = ["blocking"] }
+anyhow.workspace = true
 tar.workspace = true
 xz2.workspace = true
 wait-timeout.workspace = true

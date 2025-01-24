@@ -189,6 +189,6 @@ fn log_step(step_index: usize, name: &str) {
 fn log(msg: impl Into<String>) {
     let msg = msg.into();
     let reaper = Reaper::get();
-    info!("{msg}");
+    println!("{msg}");
     reaper.show_console_msg(msg)
 }
