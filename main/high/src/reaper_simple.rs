@@ -1,9 +1,10 @@
 //! This file should contain all the top-level REAPER functions which can be implemented with
 //! just access to `reaper_medium::Reaper` - without all the advanced stuff like subjects,
 //! channels etc. Although they end up in the same struct, this gives a little bit of structure.
+use crate::error::ReaperResult;
 use crate::{
     Action, Fx, FxChain, FxParameter, Guid, MidiInputDevice, MidiOutputDevice, Project, Reaper,
-    Section,
+    ReaperError, Section,
 };
 use camino::Utf8PathBuf;
 use helgoboss_midi::ShortMessage;
@@ -471,9 +472,11 @@ impl Reaper {
         let config_var_result = Reaper::get()
             .medium_reaper
             .get_config_var(name)
-            .context("preference doesn't exist")?;
+            .ok_or(ReaperError::new("preference doesn't exist"))?;
         let size_matches = config_var_result.size as usize == mem::size_of::<T>();
-        ensure!(size_matches, "size mismatch");
+        if !size_matches {
+            return Err("size mismatch".into());
+        }
         let mut casted_value_ptr = config_var_result.value.cast::<T>();
         let casted_value_ref = unsafe { casted_value_ptr.as_mut() };
         Ok(casted_value_ref)
