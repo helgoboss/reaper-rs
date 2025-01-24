@@ -1,15 +1,13 @@
 #![cfg(feature = "run-reaper-integration-test")]
 use fs_extra::dir::CopyOptions;
-use std::error::Error;
 use std::fs::File;
-use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::Command;
 use std::time::Duration;
 use std::{fs, io};
 use wait_timeout::ChildExt;
 
-use anyhow::{bail, ensure, Context, Result};
+use anyhow::{bail, Context, Result};
 
 const REAPER_VERSION: &str = "7.30";
 
@@ -181,6 +179,7 @@ coreaudiooutdevnew=<none>
     Ok(())
 }
 
+#[allow(dead_code)]
 fn remove_rewire_plugin_macos_bundle(reaper_home_path: &Path) -> Result<()> {
     println!("Removing Rewire plug-in (because it makes REAPER get stuck on headless macOS)...");
     let dir = reaper_home_path.join("REAPER.app/Contents/Plugins/ReWire.bundle");

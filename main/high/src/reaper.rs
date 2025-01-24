@@ -312,11 +312,11 @@ impl Reaper {
     /// - Registers post command hooks (to inform listeners of executed actions)
     /// - Registers toggle actions (to report action on/off states)
     /// - Registers all previously defined actions
-    pub fn wake_up(&self) -> Result<(), &'static str> {
+    pub fn wake_up(&self) -> ReaperResult<()> {
         let reaper_main = self.reaper_main.get();
         let mut session_status = reaper_main.session_status.borrow_mut();
         if matches!(session_status.deref(), SessionStatus::Awake(_)) {
-            return Err("Session is already awake");
+            return Err("Session is already awake".into());
         }
         debug!("Waking up...");
         // Functions
@@ -349,10 +349,10 @@ impl Reaper {
         Ok(())
     }
 
-    pub fn go_to_sleep(&self) -> Result<(), &'static str> {
+    pub fn go_to_sleep(&self) -> ReaperResult<()> {
         let mut session_status = self.reaper_main.get().session_status.borrow_mut();
         let awake_state = match session_status.deref() {
-            SessionStatus::Sleeping => return Err("Session is already sleeping"),
+            SessionStatus::Sleeping => return Err("Session is already sleeping".into()),
             SessionStatus::Awake(s) => s,
         };
         debug!("Going to sleep...");
@@ -753,6 +753,7 @@ fn register_action(
     }
 }
 
+use crate::error::ReaperResult;
 #[cfg(feature = "sentry")]
 pub use sentry_impl::SentryConfig;
 

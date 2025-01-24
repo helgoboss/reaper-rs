@@ -30,6 +30,7 @@ use reaper_medium::{
     StuffMidiMessageTarget, TrackFxGetPresetIndexResult, TrackLocation, UndoBehavior, ValueChange,
 };
 
+use anyhow::{bail, Context};
 use reaper_low::{raw, Swell};
 use reaper_rx::ActionRxProvider;
 use std::os::raw::{c_int, c_void};
@@ -292,9 +293,9 @@ fn redo() -> TestStep {
         let label = project.label_of_last_undoable_action();
         // Then
         assert!(successful);
-        assert_eq!(track.name().ok_or("no track name")?.to_str(), "Renamed");
+        assert_eq!(track.name().context("no track name")?.to_str(), "Renamed");
         assert_eq!(
-            label.ok_or("no undo label")?.to_str(),
+            label.context("no undo label")?.to_str(),
             "reaper-rs integration test operation"
         );
         Ok(())
@@ -311,9 +312,9 @@ fn undo() -> TestStep {
         let label = project.label_of_last_redoable_action();
         // Then
         assert!(successful);
-        assert_eq!(track.name().ok_or("no track name")?.to_str().len(), 0);
+        assert_eq!(track.name().context("no track name")?.to_str().len(), 0);
         assert_eq!(
-            label.ok_or("no redo label")?.to_str(),
+            label.context("no redo label")?.to_str(),
             "reaper-rs integration test operation"
         );
         Ok(())
@@ -340,9 +341,9 @@ fn use_undoable() -> TestStep {
         });
         let label = project.label_of_last_undoable_action();
         // Then
-        assert_eq!(track.name().ok_or("no track name")?.to_str(), "Renamed");
+        assert_eq!(track.name().context("no track name")?.to_str(), "Renamed");
         assert_eq!(
-            label.ok_or("no undo label")?.to_str(),
+            label.context("no undo label")?.to_str(),
             "reaper-rs integration test operation"
         );
         assert_eq!(mock.invocation_count(), 1);
@@ -408,7 +409,7 @@ fn scroll_mixer() -> TestStep {
     step(AllVersions, "Scroll mixer", |_, _| {
         // Given
         let project = Reaper::get().current_project();
-        let track = project.track_by_index(3).ok_or("Missing track 2")?;
+        let track = project.track_by_index(3).context("Missing track 2")?;
         // When
         track.scroll_mixer();
         // Then
@@ -420,7 +421,7 @@ fn insert_track_at() -> TestStep {
     step(AllVersions, "Insert track at", |_, step| {
         // Given
         let project = Reaper::get().current_project();
-        let track_2 = project.track_by_index(1).ok_or("Missing track 2")?;
+        let track_2 = project.track_by_index(1).context("Missing track 2")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -437,7 +438,7 @@ fn insert_track_at() -> TestStep {
         assert_eq!(new_track.location(), TrackLocation::NormalTrack(1));
         assert_eq!(new_track.index(), Some(1));
         assert_eq!(
-            new_track.name().ok_or("no track name")?.to_str(),
+            new_track.name().context("no track name")?.to_str(),
             "Inserted track"
         );
         assert_eq!(track_2.index(), Some(2));
@@ -721,7 +722,7 @@ fn invoke_action() -> TestStep {
             assert_eq!(mock.invocation_count(), 1);
             let normalized_value = action
                 .normalized_value()
-                .ok_or("action should be able to report normalized value")?;
+                .context("action should be able to report normalized value")?;
             assert!(abs_diff_eq!(normalized_value, 1.0));
         } else {
             assert_eq!(mock.invocation_count(), 0);
@@ -811,11 +812,11 @@ fn set_track_send_pan() -> TestStep {
     step(AllVersions, "Set track send pan", |_, step| {
         // Given
         let project = Reaper::get().current_project();
-        let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
-        let track_3 = project.track_by_index(2).ok_or("Missing track 3")?;
+        let track_1 = project.track_by_index(0).context("Missing track 1")?;
+        let track_3 = project.track_by_index(2).context("Missing track 3")?;
         let send = track_1
             .find_send_by_destination_track(&track_3)
-            .ok_or("missing send")?;
+            .context("missing send")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -842,11 +843,11 @@ fn set_track_send_mute() -> TestStep {
     step(AllVersions, "Mute track send", |_, _| {
         // Given
         let project = Reaper::get().current_project();
-        let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
-        let track_3 = project.track_by_index(2).ok_or("Missing track 3")?;
+        let track_1 = project.track_by_index(0).context("Missing track 1")?;
+        let track_3 = project.track_by_index(2).context("Missing track 3")?;
         let send = track_1
             .find_send_by_destination_track(&track_3)
-            .ok_or("missing send")?;
+            .context("missing send")?;
         // When
         send.mute()?;
         // Then
@@ -863,11 +864,11 @@ fn set_track_send_volume() -> TestStep {
     step(AllVersions, "Set track send volume", |_, step| {
         // Given
         let project = Reaper::get().current_project();
-        let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
-        let track_3 = project.track_by_index(2).ok_or("Missing track 3")?;
+        let track_1 = project.track_by_index(0).context("Missing track 1")?;
+        let track_3 = project.track_by_index(2).context("Missing track 3")?;
         let send = track_1
             .find_send_by_destination_track(&track_3)
-            .ok_or("missing send")?;
+            .context("missing send")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -899,13 +900,13 @@ fn query_track_send() -> TestStep {
     step(AllVersions, "Query track send", |_session, _| {
         // Given
         let project = Reaper::get().current_project();
-        let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
-        let track_2 = project.track_by_index(1).ok_or("Missing track 2")?;
+        let track_1 = project.track_by_index(0).context("Missing track 1")?;
+        let track_2 = project.track_by_index(1).context("Missing track 2")?;
         let track_3 = project.add_track()?;
         // When
         let send_to_track_2 = track_1
             .find_send_by_destination_track(&track_2)
-            .ok_or("missing send")?;
+            .context("missing send")?;
         let send_to_track_3 = track_1.add_send_to(&track_3);
         // Then
         assert!(send_to_track_2.is_available());
@@ -941,8 +942,8 @@ fn add_track_send() -> TestStep {
     step(AllVersions, "Add track send", |_session, step| {
         // Given
         let project = Reaper::get().current_project();
-        let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
-        let track_2 = project.track_by_index(1).ok_or("Missing track 2")?;
+        let track_1 = project.track_by_index(0).context("Missing track 1")?;
+        let track_2 = project.track_by_index(1).context("Missing track 2")?;
         // When
         let (send_mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -982,12 +983,12 @@ fn add_track_send() -> TestStep {
         assert!(track_2.receive_by_index(0).unwrap().is_available());
         assert!(track_1
             .find_send_by_destination_track(&track_2)
-            .ok_or("missing send")?
+            .context("missing send")?
             .is_available());
         assert!(track_2.find_send_by_destination_track(&track_1).is_none());
         assert!(track_2
             .find_receive_by_source_track(&track_1)
-            .ok_or("missing receive")?
+            .context("missing receive")?
             .is_available());
         assert!(track_1.find_receive_by_source_track(&track_2).is_none());
         assert_eq!(track_1.sends().count(), 1);
@@ -1080,10 +1081,10 @@ fn remove_track() -> TestStep {
         let track_count_before = project.track_count();
         let track_1 = project
             .track_by_ref(TrackLocation::NormalTrack(0))
-            .ok_or("Missing track 1")?;
+            .context("Missing track 1")?;
         let track_2 = project
             .track_by_ref(TrackLocation::NormalTrack(1))
-            .ok_or("Missing track 2")?;
+            .context("Missing track 2")?;
         let track_2_guid = track_2.guid();
         assert!(track_1.is_available());
         assert_eq!(track_2.index(), Some(1));
@@ -1113,9 +1114,9 @@ fn select_track_exclusively() -> TestStep {
     step(AllVersions, "Select track exclusively", |_, step| {
         // Given
         let project = Reaper::get().current_project();
-        let track_1 = project.track_by_index(0).ok_or("Missing track 1")?;
-        let track_2 = project.track_by_index(1).ok_or("Missing track 2")?;
-        let track_3 = project.track_by_index(2).ok_or("Missing track 3")?;
+        let track_1 = project.track_by_index(0).context("Missing track 1")?;
+        let track_2 = project.track_by_index(1).context("Missing track 2")?;
+        let track_3 = project.track_by_index(2).context("Missing track 3")?;
         let master_track = project.master_track()?;
         assert!(master_track.is_selected());
         track_1.unselect();
@@ -1458,7 +1459,7 @@ fn select_master_track() -> TestStep {
         );
         let first_selected_track = project
             .first_selected_track(MasterTrackBehavior::IncludeMasterTrack)
-            .ok_or("Couldn't get first selected track")?;
+            .context("Couldn't get first selected track")?;
         assert!(first_selected_track.is_master_track());
         assert_eq!(
             project
@@ -1495,7 +1496,7 @@ fn unselect_track() -> TestStep {
         );
         let first_selected_track = project
             .first_selected_track(MasterTrackBehavior::ExcludeMasterTrack)
-            .ok_or("Couldn't get first selected track")?;
+            .context("Couldn't get first selected track")?;
         assert_eq!(first_selected_track.index(), Some(2));
         assert_eq!(
             project
@@ -1514,7 +1515,7 @@ fn select_track() -> TestStep {
         // Given
         let project = Reaper::get().current_project();
         let track = get_track(0)?;
-        let track2 = project.track_by_index(2).ok_or("No track at index 2")?;
+        let track2 = project.track_by_index(2).context("No track at index 2")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -1535,7 +1536,7 @@ fn select_track() -> TestStep {
         );
         let first_selected_track = project
             .first_selected_track(MasterTrackBehavior::ExcludeMasterTrack)
-            .ok_or("Couldn't get first selected track")?;
+            .context("Couldn't get first selected track")?;
         assert_eq!(first_selected_track.index(), Some(0));
         assert_eq!(
             project
@@ -1932,7 +1933,7 @@ fn query_track_recording_input() -> TestStep {
         // Then
         match input {
             Some(RecordingInput::Mono(0)) => Ok(()),
-            _ => Err("Expected MidiRecordingInput".into()),
+            _ => bail!("Expected MidiRecordingInput"),
         }
     })
 }
@@ -2003,7 +2004,7 @@ fn set_track_name() -> TestStep {
         });
         track.set_name("Foo Bla");
         // Then
-        assert_eq!(track.name().ok_or("no track name")?.to_str(), "Foo Bla");
+        assert_eq!(track.name().context("no track name")?.to_str(), "Foo Bla");
         assert_eq!(mock.invocation_count(), 1);
         assert_eq!(mock.last_arg(), track);
         Ok(())
@@ -2017,7 +2018,7 @@ fn query_track_name() -> TestStep {
         // When
         let track_name = track.name();
         // Then
-        assert_eq!(track_name.ok_or("no track name")?.to_str().len(), 0);
+        assert_eq!(track_name.context("no track name")?.to_str().len(), 0);
         Ok(())
     })
 }
@@ -2268,7 +2269,7 @@ fn general() -> TestStep {
         let rev = version.revision();
         let os_and_arch = version
             .os_and_architecture()
-            .ok_or("REAPER version number doesn't contain os-and-architecture info")?;
+            .context("REAPER version number doesn't contain os-and-architecture info")?;
         // Then
         assert!(resource_path.is_dir());
         assert!(resource_path.as_str().to_lowercase().contains("reaper"));
@@ -2436,8 +2437,8 @@ fn query_prefs() -> TestStep {
         let is_enabled = query_track_sel_on_mouse_is_enabled();
         // Then
         if is_enabled {
-            return Err(
-                "\"Mouse click on volume/pan faders and track buttons changes track selection\" seems to be enabled. Maybe you are not using the REAPER default preferences?".into(),
+            bail!(
+                "\"Mouse click on volume/pan faders and track buttons changes track selection\" seems to be enabled. Maybe you are not using the REAPER default preferences?"
             );
         }
         Ok(())
@@ -2504,7 +2505,7 @@ fn register_api_functions() -> TestStep {
                 )
                 // TODO-low This will fail on second test run. Unregister after usage as soon
                 //  as possible!
-                .map_err(|_| "couldn't register API function")?;
+                .context("couldn't register API function")?;
         }
         // Then
         let ptr = session
@@ -2514,7 +2515,7 @@ fn register_api_functions() -> TestStep {
         assert!(!ptr.is_null());
         let restored_function: Option<extern "C" fn()> = unsafe { std::mem::transmute(ptr) };
         let restored_function =
-            restored_function.ok_or("couldn't restore API function from ptr")?;
+            restored_function.context("couldn't restore API function from ptr")?;
         restored_function();
         Ok(())
     })
@@ -2543,7 +2544,7 @@ fn low_plugin_context() -> TestStep {
             assert!(swell_function_provider.is_none());
         } else {
             let swell_function_provider =
-                swell_function_provider.ok_or("SWELL function provider not available")?;
+                swell_function_provider.context("SWELL function provider not available")?;
             let swell_func = unsafe { swell_function_provider(c_str!("DefWindowProc").as_ptr()) };
             assert!(!swell_func.is_null());
         }
@@ -2596,7 +2597,7 @@ fn medium_plugin_context() -> TestStep {
     })
 }
 
-type GetFxChain = Rc<dyn Fn() -> Result<FxChain, &'static str>>;
+type GetFxChain = Rc<dyn Fn() -> anyhow::Result<FxChain>>;
 
 fn query_fx_chain(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Query fx chain", move |_, _| {
@@ -2623,7 +2624,7 @@ fn query_fx_chain(get_fx_chain: GetFxChain) -> TestStep {
 }
 fn create_fx_steps(
     prefix: &'static str,
-    get_fx_chain: impl Fn() -> Result<FxChain, &'static str> + 'static + Copy,
+    get_fx_chain: impl Fn() -> anyhow::Result<FxChain> + 'static + Copy,
 ) -> impl Iterator<Item = TestStep> {
     let get_fx_chain = Rc::new(get_fx_chain);
     let steps = vec![
@@ -2667,7 +2668,7 @@ fn query_track_js_fx_by_index(get_fx_chain: GetFxChain) -> TestStep {
             // When
             let fx = fx_chain.fx_by_index(2);
             // Then
-            let fx = fx.ok_or("No FX found")?;
+            let fx = fx.context("No FX found")?;
             assert!(fx.is_available());
             assert_eq!(fx.index(), 2);
             assert_eq!(
@@ -2763,11 +2764,11 @@ fn add_track_js_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
             });
             let fx = fx_chain.add_fx_by_original_name("phaser");
             // Then
-            let fx = fx.ok_or("No FX added")?;
+            let fx = fx.context("No FX added")?;
             assert_eq!(fx_chain.fx_count(), 3);
             assert_eq!(fx_chain.fx_by_index(2), Some(fx.clone()));
             assert_eq!(fx_chain.last_fx(), Some(fx.clone()));
-            let fx_guid = fx.guid().ok_or("No GUID")?;
+            let fx_guid = fx.guid().context("No GUID")?;
             assert!(fx_chain.fx_by_guid(&fx_guid).is_available());
             let guid: Guid = "{E64BB283-FB17-4702-ACFA-2DDB7E38F14F}".parse()?;
             assert!(!fx_chain.fx_by_guid_and_index(&guid, 0).is_available());
@@ -2800,7 +2801,7 @@ fn show_fx_in_floating_window(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Show fx in floating window", move |_, step| {
         // Given
         let fx_chain = get_fx_chain()?;
-        let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
+        let fx = fx_chain.fx_by_index(0).context("Couldn't find first fx")?;
         // When
         let (fx_opened_mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -2845,7 +2846,7 @@ fn query_fx_floating_window(get_fx_chain: GetFxChain) -> TestStep {
         move |_session, _| {
             // Given
             let fx_chain = get_fx_chain()?;
-            let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
+            let fx = fx_chain.fx_by_index(0).context("Couldn't find first fx")?;
             fx.hide_floating_window()?;
             // When
             // Then
@@ -2864,7 +2865,7 @@ fn set_fx_chain_chunk(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Set fx chain chunk", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
-        let track = fx_chain.track().ok_or("no track")?;
+        let track = fx_chain.track().context("no track")?;
         let other_fx_chain = if fx_chain.is_input_fx() {
             track.normal_fx_chain()
         } else {
@@ -2916,12 +2917,12 @@ fn set_fx_state_chunk(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Set fx state chunk", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
-        let midi_fx = fx_chain.fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
-        let synth_fx = fx_chain.fx_by_index(1).ok_or("Couldn't find synth fx")?;
+        let midi_fx = fx_chain.fx_by_index(0).context("Couldn't find MIDI fx")?;
+        let synth_fx = fx_chain.fx_by_index(1).context("Couldn't find synth fx")?;
         let synth_param_5 = synth_fx.parameter_by_index(5);
         synth_param_5
             .set_reaper_normalized_value(ReaperNormalizedFxParamValue::new(0.0))
-            .map_err(|_| "couldn't set parameter value")?;
+            .context("couldn't set parameter value")?;
         assert_ne!(
             synth_param_5
                 .formatted_value()
@@ -2962,8 +2963,8 @@ fn set_fx_tag_chunk(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Set fx tag chunk", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
-        let midi_fx_1 = fx_chain.fx_by_index(0).ok_or("Couldn't find MIDI fx 1")?;
-        let midi_fx_2 = fx_chain.fx_by_index(1).ok_or("Couldn't find MIDI fx 2")?;
+        let midi_fx_1 = fx_chain.fx_by_index(0).context("Couldn't find MIDI fx 1")?;
+        let midi_fx_2 = fx_chain.fx_by_index(1).context("Couldn't find MIDI fx 2")?;
         let fx_tag_chunk = r#"<VST "VSTi: ReaSynth (Cockos)" reasynth.dll 0 "" 1919251321
   eXNlcu9e7f4AAAAAAgAAAAEAAAAAAAAAAgAAAAAAAAA8AAAAAAAAAAAAEAA=
   776t3g3wrd6mm8Q7F7fROgAAAAAAAAAAAAAAAM5NAD/pZ4g9AAAAAAAAAD8AAIA/AACAPwAAAD8AAAAA
@@ -2990,8 +2991,8 @@ fn set_fx_chunk(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Set fx chunk", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
-        let midi_fx = fx_chain.fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
-        let synth_fx = fx_chain.fx_by_index(1).ok_or("Couldn't find synth fx")?;
+        let midi_fx = fx_chain.fx_by_index(0).context("Couldn't find MIDI fx")?;
+        let synth_fx = fx_chain.fx_by_index(1).context("Couldn't find synth fx")?;
         let synth_fx_guid_before = synth_fx.guid();
         // When
         synth_fx.set_chunk(midi_fx.chunk()?)?;
@@ -3056,8 +3057,8 @@ fn remove_fx(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Remove FX", move |_, step| {
         // Given
         let fx_chain = get_fx_chain()?;
-        let synth_fx = fx_chain.fx_by_index(0).ok_or("Couldn't find synth fx")?;
-        let midi_fx = fx_chain.fx_by_index(1).ok_or("Couldn't find MIDI fx")?;
+        let synth_fx = fx_chain.fx_by_index(0).context("Couldn't find synth fx")?;
+        let midi_fx = fx_chain.fx_by_index(1).context("Couldn't find MIDI fx")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -3083,8 +3084,8 @@ fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Move FX", move |_, step| {
         // Given
         let fx_chain = get_fx_chain()?;
-        let midi_fx = fx_chain.fx_by_index(0).ok_or("Couldn't find MIDI fx")?;
-        let synth_fx = fx_chain.fx_by_index(1).ok_or("Couldn't find synth fx")?;
+        let midi_fx = fx_chain.fx_by_index(0).context("Couldn't find MIDI fx")?;
+        let synth_fx = fx_chain.fx_by_index(1).context("Couldn't find synth fx")?;
         let fx_at_index_1 = fx_chain.fx_by_index_untracked(1);
         // When
         let (mock, _) = observe_invocations(|mock| {
@@ -3116,7 +3117,7 @@ fn move_fx(get_fx_chain: GetFxChain) -> TestStep {
             assert_eq!(mock.invocation_count(), 0);
         } else {
             assert_eq!(mock.invocation_count(), 1);
-            assert_eq!(mock.last_arg(), *fx_chain.track().ok_or("no track")?);
+            assert_eq!(mock.last_arg(), *fx_chain.track().context("no track")?);
         }
         Ok(())
     })
@@ -3129,11 +3130,11 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
         move |_, step| {
             // Given
             let fx_chain = get_fx_chain()?;
-            let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find fx")?;
+            let fx = fx_chain.fx_by_index(0).context("Couldn't find fx")?;
             let p = fx.parameter_by_index(0);
             p.set_reaper_normalized_value(ReaperNormalizedFxParamValue::new(0.5))
-                .map_err(|_| "couldn't set parameter value")?;
-            let track = fx.track().ok_or("no track")?;
+                .context("couldn't set parameter value")?;
+            let track = fx.track().context("no track")?;
             let other_fx_chain = if fx_chain.is_input_fx() {
                 track.normal_fx_chain()
             } else {
@@ -3147,7 +3148,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
             // fxChain is input FX chain)
             p_on_other_fx_chain
                 .set_reaper_normalized_value(ReaperNormalizedFxParamValue::new(0.5))
-                .map_err(|_| "couldn't set parameter value")?;
+                .context("couldn't set parameter value")?;
             // When
             let (mock, _) = observe_invocations(|mock| {
                 Test::control_surface_rx()
@@ -3158,7 +3159,7 @@ fn fx_parameter_value_changed_with_heuristic_fail(get_fx_chain: GetFxChain) -> T
                     });
             });
             p.set_reaper_normalized_value(ReaperNormalizedFxParamValue::new(0.5))
-                .map_err(|_| "couldn't set parameter value")?;
+                .context("couldn't set parameter value")?;
             // Then
             assert_eq!(mock.invocation_count(), 2);
             if fx_chain.is_input_fx() && Reaper::get().version() < ReaperVersion::new("5.95") {
@@ -3175,7 +3176,7 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Set fx parameter value", move |_, step| {
         // Given
         let fx_chain = get_fx_chain()?;
-        let fx = fx_chain.fx_by_index(1).ok_or("Couldn't find fx")?;
+        let fx = fx_chain.fx_by_index(1).context("Couldn't find fx")?;
         let p = fx.parameter_by_index(5);
         // When
         let (mock, _) = observe_invocations(|mock| {
@@ -3187,7 +3188,7 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
                 });
         });
         p.set_reaper_normalized_value(ReaperNormalizedFxParamValue::new(0.3))
-            .map_err(|_| "couldn't set parameter value")?;
+            .context("couldn't set parameter value")?;
         // Then
         let last_touched_fx_param = Reaper::get().last_touched_fx_parameter();
         if fx_chain.is_input_fx() && Reaper::get().version() < ReaperVersion::new("5.95") {
@@ -3209,7 +3210,7 @@ fn set_fx_parameter_value(get_fx_chain: GetFxChain) -> TestStep {
         ));
         assert_eq!(
             p.format_reaper_normalized_value(p.reaper_normalized_value())
-                .map_err(|_| "Cockos plug-ins should be able to do that")?
+                .context("Cockos plug-ins should be able to do that")?
                 .into_inner()
                 .as_c_str(),
             c_str!("-4.44 dB")
@@ -3234,7 +3235,7 @@ fn check_fx_presets(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Check fx presets", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
-        let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
+        let fx = fx_chain.fx_by_index(0).context("Couldn't find first fx")?;
         // When
         // Then
         assert_eq!(
@@ -3256,7 +3257,7 @@ fn change_fx_preset(get_fx_chain: GetFxChain) -> TestStep {
         let fx_chain = get_fx_chain()?;
         let fx = fx_chain
             .add_fx_by_original_name("ReaEq (Cockos)")
-            .ok_or("Couldn't add ReaEq")?;
+            .context("Couldn't add ReaEq")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -3278,7 +3279,7 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Check fx parameter", move |_, _| {
         // Given
         let fx_chain = get_fx_chain()?;
-        let fx = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
+        let fx = fx_chain.fx_by_index(0).context("Couldn't find first fx")?;
         // When
         let p = fx.parameter_by_index(5);
         // Then
@@ -3300,7 +3301,7 @@ fn check_fx_parameter(get_fx_chain: GetFxChain) -> TestStep {
         );
         assert_eq!(
             p.format_reaper_normalized_value(p.reaper_normalized_value())
-                .map_err(|_| "Cockos plug-ins should be able to do that")?
+                .context("Cockos plug-ins should be able to do that")?
                 .into_inner()
                 .as_c_str(),
             c_str!("0")
@@ -3328,12 +3329,12 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
         move |_session, _| {
             // Given
             let fx_chain = get_fx_chain()?;
-            let track = fx_chain.track().ok_or("no track")?;
+            let track = fx_chain.track().context("no track")?;
             // When
-            let fx_1 = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
+            let fx_1 = fx_chain.fx_by_index(0).context("Couldn't find first fx")?;
             let fx_2 = fx_chain
                 .add_fx_by_original_name("ReaSynth (Cockos)")
-                .ok_or("Couldn't add ReaSynth")?;
+                .context("Couldn't add ReaSynth")?;
             // Then
             assert!(fx_1.is_available());
             assert!(fx_2.is_available());
@@ -3383,11 +3384,11 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
             let fx_1_file_name = fx_1_info
                 .file_name
                 .file_name()
-                .ok_or("FX 1 has no file name")?;
+                .context("FX 1 has no file name")?;
             let fx_2_file_name = fx_2_info
                 .file_name
                 .file_name()
-                .ok_or("FX 2 has no file name")?;
+                .context("FX 2 has no file name")?;
             assert!(matches!(
                 fx_1_file_name
                     .to_str()
@@ -3406,8 +3407,8 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
             assert_eq!(fx_2_info.sub_type_expression, "VSTi");
             assert_eq!(fx_1_info.effect_name, "VST: ReaControlMIDI (Cockos)");
             assert_eq!(fx_2_info.effect_name, "VSTi: ReaSynth (Cockos)");
-            assert_eq!(fx_1.track().ok_or("no track")?, track);
-            assert_eq!(fx_2.track().ok_or("no track")?, track);
+            assert_eq!(fx_1.track().context("no track")?, track);
+            assert_eq!(fx_2.track().context("no track")?, track);
             assert_eq!(fx_1.is_input_fx(), fx_chain.is_input_fx());
             assert_eq!(fx_2.is_input_fx(), fx_chain.is_input_fx());
             assert_eq!(fx_1.chain(), &fx_chain);
@@ -3449,7 +3450,7 @@ fn check_track_fx_with_2_fx(get_fx_chain: GetFxChain) -> TestStep {
             if !fx_chain.is_input_fx() {
                 let first_instrument_fx = fx_chain
                     .first_instrument_fx()
-                    .ok_or("Couldn't find instrument FX")?;
+                    .context("Couldn't find instrument FX")?;
                 assert_eq!(first_instrument_fx.index(), 1);
             }
             Ok(())
@@ -3461,7 +3462,7 @@ fn enable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Enable track fx", move |_, step| {
         // Given
         let fx_chain = get_fx_chain()?;
-        let fx_1 = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
+        let fx_1 = fx_chain.fx_by_index(0).context("Couldn't find first fx")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -3484,7 +3485,7 @@ fn disable_track_fx(get_fx_chain: GetFxChain) -> TestStep {
     step(AllVersions, "Disable track fx", move |_, step| {
         // Given
         let fx_chain = get_fx_chain()?;
-        let fx_1 = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
+        let fx_1 = fx_chain.fx_by_index(0).context("Couldn't find first fx")?;
         // When
         let (mock, _) = observe_invocations(|mock| {
             Test::control_surface_rx()
@@ -3513,7 +3514,7 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
             let fx_chain = get_fx_chain()?;
             let track = fx_chain.track();
             // When
-            let fx_1 = fx_chain.fx_by_index(0).ok_or("Couldn't find first fx")?;
+            let fx_1 = fx_chain.fx_by_index(0).context("Couldn't find first fx")?;
             // Then
             assert!(fx_1.is_available());
             assert_eq!(fx_1.index(), 0);
@@ -3545,7 +3546,7 @@ fn check_track_fx_with_1_fx(get_fx_chain: GetFxChain) -> TestStep {
             assert!(!state_chunk.contains(">"));
 
             let fx_1_info: FxInfo = fx_1.info()?;
-            let file_name = fx_1_info.file_name.file_name().ok_or("No FX file name")?;
+            let file_name = fx_1_info.file_name.file_name().context("No FX file name")?;
             dbg!("HEY", file_name);
             assert!(matches!(
                 file_name
@@ -3632,9 +3633,9 @@ fn add_track_fx_by_original_name(get_fx_chain: GetFxChain) -> TestStep {
     )
 }
 
-fn get_track(index: u32) -> Result<Track, &'static str> {
+fn get_track(index: u32) -> anyhow::Result<Track> {
     Reaper::get()
         .current_project()
         .track_by_index(index)
-        .ok_or("Track not found")
+        .context("Track not found")
 }

@@ -1,16 +1,14 @@
-use crossbeam_channel::{Receiver, Sender};
-use reaper_high::{MainThreadTask, Reaper, TaskSupport};
+use reaper_high::Reaper;
 use reaper_medium::ReaperVersion;
 use reaper_rx::{ActionRx, ActionRxProvider, ControlSurfaceRx, MainRx};
 use rxrust::prelude::*;
 use std::borrow::Cow;
-use std::error::Error;
 
 type TestStepFinished = LocalSubject<'static, (), ()>;
 pub struct TestStepContext {
     pub finished: TestStepFinished,
 }
-type TestStepResult = Result<(), Box<dyn Error>>;
+type TestStepResult = anyhow::Result<()>;
 
 type TestOperation = dyn FnOnce(&Reaper, TestStepContext) -> TestStepResult;
 
@@ -46,23 +44,9 @@ pub enum VersionRestriction {
     Max(ReaperVersion<'static>),
 }
 
+#[derive(Default)]
 pub(crate) struct Test {
     main_rx: MainRx,
-    task_support: TaskSupport,
-    pub(crate) task_sender: Sender<MainThreadTask>,
-    pub(crate) task_receiver: Receiver<MainThreadTask>,
-}
-
-impl Default for Test {
-    fn default() -> Self {
-        let (sender, receiver) = crossbeam_channel::unbounded();
-        Self {
-            main_rx: Default::default(),
-            task_support: TaskSupport::new(sender.clone()),
-            task_sender: sender,
-            task_receiver: receiver,
-        }
-    }
 }
 
 /// Okay because static getter checks thread.
@@ -72,10 +56,6 @@ unsafe impl Send for Test {}
 impl Test {
     pub fn control_surface_rx() -> &'static ControlSurfaceRx {
         Test::get().main_rx.control_surface()
-    }
-
-    pub fn task_support() -> &'static TaskSupport {
-        &Test::get().task_support
     }
 
     pub(crate) fn get() -> &'static Test {

@@ -122,11 +122,22 @@ impl TestVstPlugin {
     }
 
     fn use_high_level_reaper(&mut self) {
+        let control_surface_rx = ControlSurfaceRx::new();
+        let (spawner, executor) = reaper_high::run_loop_executor::new_spawner_and_executor(
+            DEFAULT_MAIN_THREAD_TASK_BULK_SIZE,
+        );
+        let (local_spawner, local_executor) =
+            reaper_high::local_run_loop_executor::new_spawner_and_executor(
+                DEFAULT_MAIN_THREAD_TASK_BULK_SIZE,
+            );
+        let future_support = FutureSupport::new(spawner, local_spawner);
+        let future_support_clone = future_support.clone();
+        let host = self.host;
         let guard = Reaper::guarded(
             true,
-            || {
+            move || {
                 let context =
-                    PluginContext::from_vst_plugin(&self.host, static_plugin_context()).unwrap();
+                    PluginContext::from_vst_plugin(&host, static_plugin_context()).unwrap();
                 let version = env!("CARGO_PKG_VERSION").to_string();
                 Reaper::setup_with_defaults(
                     context,
@@ -146,7 +157,12 @@ impl TestVstPlugin {
                     "reaperRsVstIntegrationTests",
                     "reaper-rs VST integration tests",
                     None,
-                    || reaper_test::execute_integration_test(|_| ()),
+                    move || {
+                        future_support_clone.spawn_in_main_thread_from_main_thread(async {
+                            reaper_test::execute_integration_test().await?;
+                            Ok(())
+                        });
+                    },
                     ActionKind::NotToggleable,
                 );
             },
@@ -177,15 +193,6 @@ impl TestVstPlugin {
             }
         }
         let mut counter = 0;
-        let control_surface_rx = ControlSurfaceRx::new();
-        let (spawner, executor) = reaper_high::run_loop_executor::new_spawner_and_executor(
-            DEFAULT_MAIN_THREAD_TASK_BULK_SIZE,
-        );
-        let (local_spawner, local_executor) =
-            reaper_high::local_run_loop_executor::new_spawner_and_executor(
-                DEFAULT_MAIN_THREAD_TASK_BULK_SIZE,
-            );
-        let future_support = FutureSupport::new(spawner, local_spawner);
         let control_surface = CustomControlSurface::new(
             ControlSurfaceRxMiddleware::new(control_surface_rx.clone()),
             FutureMiddleware::new(executor, local_executor),

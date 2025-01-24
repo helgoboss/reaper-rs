@@ -3,7 +3,7 @@ macro_rules! assert {
         let result = if ($condition) {
             Ok(())
         } else {
-            Err(stringify!($condition))
+            Err(anyhow::anyhow!(stringify!($condition)))
         };
         result?
     }};
@@ -18,7 +18,7 @@ macro_rules! assert_eq {
                 } else {
                     let actual_expr = stringify!($actual);
                     let expected_expr = stringify!($expected);
-                    Err(format!(
+                    Err(anyhow::anyhow!(format!(
                         "\
 Expression `{actual_expr}`
 
@@ -35,7 +35,7 @@ was expected to be equal to expression `{expected_expr}`
                         expected_expr = expected_expr,
                         expected_val = &*expected_val,
                         actual_val = &*actual_val
-                    ))
+                    )))
                 };
                 result?
             }
@@ -52,7 +52,7 @@ macro_rules! assert_ne {
                 } else {
                     let actual_expr = stringify!($actual);
                     let expected_expr = stringify!($expected);
-                    Err(format!(
+                    Err(anyhow::anyhow!(format!(
                         "\
 Expression `{actual_expr}`
 
@@ -69,7 +69,7 @@ was expected to not be equal to expression `{expected_expr}`
                         expected_expr = expected_expr,
                         expected_val = &*expected_val,
                         actual_val = &*actual_val
-                    ))
+                    )))
                 };
                 result?
             }

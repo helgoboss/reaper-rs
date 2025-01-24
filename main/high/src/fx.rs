@@ -151,7 +151,7 @@ impl Fx {
         Ok(res)
     }
 
-    pub fn state_chunk(&self) -> Result<ChunkRegion, &'static str> {
+    pub fn state_chunk(&self) -> ReaperResult<ChunkRegion> {
         let res = self
             .tag_chunk()?
             .move_left_cursor_right_to_start_of_next_line()
@@ -496,7 +496,7 @@ impl Fx {
     // reconsider the ownership  requirement of ChunkRegions as a whole (but then we need to
     // care about lifetimes).
     // TODO-low Supports track FX only
-    pub fn set_chunk(&self, chunk_region: ChunkRegion) -> Result<(), &'static str> {
+    pub fn set_chunk(&self, chunk_region: ChunkRegion) -> ReaperResult<()> {
         // First replace GUID in chunk with the one of this FX
         let mut parent_chunk = chunk_region.parent_chunk();
         if let Some(fx_id_line) = chunk_region.find_line_starting_with("FXID ") {

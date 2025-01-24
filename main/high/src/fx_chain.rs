@@ -1,7 +1,8 @@
 use crate::fx::{get_fx_guid, Fx};
 use crate::guid::Guid;
 use crate::{
-    get_track_fx_location, Chunk, ChunkRegion, Project, Reaper, Take, Track, MAX_TRACK_CHUNK_SIZE,
+    get_track_fx_location, Chunk, ChunkRegion, Project, Reaper, ReaperError, Take, Track,
+    MAX_TRACK_CHUNK_SIZE,
 };
 
 use crate::error::ReaperResult;
@@ -246,7 +247,7 @@ impl FxChain {
         Ok(())
     }
 
-    pub fn add_fx_from_chunk(&self, chunk: &str) -> Result<Fx, &'static str> {
+    pub fn add_fx_from_chunk(&self, chunk: &str) -> ReaperResult<Fx> {
         let mut track_chunk = self
             .track_fx_track()
             .ok_or("working on track FX only")?
@@ -279,7 +280,7 @@ DOCKED 0
         self.track_fx_track()
             .ok_or("working on track FX only")?
             .set_chunk(track_chunk)?;
-        self.last_fx().ok_or("FX not added")
+        self.last_fx().ok_or(ReaperError::new("FX not added"))
     }
 
     // Returned FX has GUIDs set
@@ -311,7 +312,7 @@ DOCKED 0
 
     // In Track this returns Chunk, here it returns ChunkRegion. Because REAPER always returns
     // the chunk of the complete track, not just of the FX chain.
-    pub fn chunk(&self) -> Result<Option<ChunkRegion>, &'static str> {
+    pub fn chunk(&self) -> ReaperResult<Option<ChunkRegion>> {
         let chunk = self
             .track_fx_track()
             .ok_or("working on track FX only")?
@@ -320,7 +321,7 @@ DOCKED 0
         Ok(res)
     }
 
-    pub fn set_chunk(&self, chunk: &str) -> Result<(), &'static str> {
+    pub fn set_chunk(&self, chunk: &str) -> ReaperResult<()> {
         let mut track_chunk = self
             .track_fx_track()
             .ok_or("works on track FX only")?

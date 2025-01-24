@@ -1,4 +1,4 @@
-use crate::Reaper;
+use crate::{Reaper, ReaperError};
 use reaper_medium::{ReaperPanValue, ReaperWidthValue};
 use std::fmt;
 use std::str::FromStr;
@@ -27,7 +27,7 @@ impl Pan {
 }
 
 impl FromStr for Pan {
-    type Err = &'static str;
+    type Err = ReaperError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         // At the moment this doesn't fail. But in future we could add extra checks.

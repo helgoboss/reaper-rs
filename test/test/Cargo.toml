@@ -19,3 +19,4 @@ helgoboss-midi.workspace = true
 approx.workspace = true
 once_cell.workspace = true
 crossbeam-channel.workspace = true
+anyhow.workspace = true

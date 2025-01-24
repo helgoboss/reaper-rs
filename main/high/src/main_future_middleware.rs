@@ -2,6 +2,7 @@ use crate::{local_run_loop_executor, run_loop_executor, Reaper};
 use std::error::Error;
 use tracing::warn;
 
+#[derive(Clone)]
 pub struct FutureSupport {
     main_thread_future_spawner: run_loop_executor::Spawner,
     local_main_thread_future_spawner: local_run_loop_executor::Spawner,

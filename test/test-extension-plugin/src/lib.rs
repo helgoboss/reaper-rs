@@ -1,6 +1,7 @@
 use reaper_high::{ActionKind, Reaper};
 
 use reaper_macros::reaper_extension_plugin;
+use reaper_test::IntegrationTest;
 use std::error::Error;
 use std::process;
 
@@ -10,35 +11,44 @@ use std::process;
     update_url = "https://www.helgoboss.org/projects/helgobox"
 )]
 fn main() -> Result<(), Box<dyn Error>> {
+    println!("From REAPER: Loaded reaper-rs integration test plugin");
     let run_integration_test = std::env::var("RUN_REAPER_RS_INTEGRATION_TEST").is_ok();
     if run_integration_test {
         println!("From REAPER: Launching reaper-rs reaper-test-extension-plugin...");
     }
     let reaper = Reaper::get();
     reaper.wake_up()?;
-    println!("From REAPER: Loaded reaper-rs integration test plugin");
+    let integration_test = IntegrationTest::setup();
     if run_integration_test {
         println!("From REAPER: Entering reaper-rs integration test...");
-        reaper_test::execute_integration_test(|result| {
-            match result {
+        let future_support_clone = integration_test.future_support().clone();
+        future_support_clone.spawn_in_main_thread_from_main_thread(async {
+            let exit_code = match reaper_test::execute_integration_test().await {
                 Ok(_) => {
                     println!("From REAPER: reaper-rs integration test executed successfully");
-                    process::exit(0)
+                    0
                 }
                 Err(reason) => {
                     // We use a particular exit code to distinguish test failure from other possible
                     // exit paths.
                     eprintln!("From REAPER: reaper-rs integration test failed: {reason}");
-                    process::exit(172)
+                    172
                 }
-            }
+            };
+            process::exit(exit_code);
         });
     }
+    let future_support_clone = integration_test.future_support().clone();
     reaper.register_action(
         "reaperRsIntegrationTests",
         "reaper-rs integration tests",
         None,
-        || reaper_test::execute_integration_test(|_| ()),
+        move || {
+            future_support_clone.spawn_in_main_thread_from_main_thread(async {
+                reaper_test::execute_integration_test().await?;
+                Ok(())
+            });
+        },
         ActionKind::NotToggleable,
     );
     Ok(())

@@ -6,7 +6,8 @@ use crate::guid::Guid;
 use crate::track_route::TrackRoute;
 
 use crate::{
-    Chunk, ChunkRegion, Item, Pan, Project, Reaper, SendPartnerType, TrackRoutePartner, Width,
+    Chunk, ChunkRegion, Item, Pan, Project, Reaper, ReaperError, SendPartnerType,
+    TrackRoutePartner, Width,
 };
 
 use crate::error::ReaperResult;
@@ -898,7 +899,7 @@ impl Track {
         }
     }
 
-    pub fn enable_auto_arm(&self) -> Result<(), &'static str> {
+    pub fn enable_auto_arm(&self) -> ReaperResult<()> {
         let mut chunk = self.chunk(MAX_TRACK_CHUNK_SIZE, ChunkCacheHint::NormalMode)?;
         if get_auto_arm_chunk_line(&chunk).is_some() {
             return Ok(());
@@ -922,7 +923,7 @@ impl Track {
         Ok(())
     }
 
-    pub fn disable_auto_arm(&self) -> Result<(), &'static str> {
+    pub fn disable_auto_arm(&self) -> ReaperResult<()> {
         let chunk = {
             let auto_arm_chunk_line = match self.auto_arm_chunk_line()? {
                 None => return Ok(()),
@@ -1250,8 +1251,10 @@ impl Track {
     }
 
     // TODO-low Report possible error
-    pub fn set_chunk(&self, chunk: Chunk) -> Result<(), &'static str> {
-        let string: String = chunk.try_into().map_err(|_| "unfortunate")?;
+    pub fn set_chunk(&self, chunk: Chunk) -> ReaperResult<()> {
+        let string: String = chunk
+            .try_into()
+            .map_err(|_| ReaperError::new("unfortunate"))?;
         let _ = unsafe {
             Reaper::get().medium_reaper().set_track_state_chunk(
                 self.raw_unchecked(),
