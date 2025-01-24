@@ -22,5 +22,5 @@ jobs:
       - name: cargo build
         uses: houseabsolute/actions-rust-cross@v1
         with:
-          command: cargo build
+          command: build
           target: armv7-unknown-linux-gnueabihf

@@ -24,8 +24,8 @@ jobs:
         with:
           components: clippy
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
+      #      - name: Rust cache
+      #        uses: swatinem/rust-cache@v2
 
       - name: cargo clippy
         run: cargo clippy -- -D warnings
@@ -42,8 +42,8 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@1.84.0
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
+      #      - name: Rust cache
+      #        uses: swatinem/rust-cache@v2
 
       - name: cargo build
         run: cargo build
@@ -65,8 +65,8 @@ jobs:
         with:
           components: rustfmt
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
+      #      - name: Rust cache
+      #        uses: swatinem/rust-cache@v2
 
       - name: cargo fmt
         run: cargo fmt --all -- --check
@@ -85,8 +85,8 @@ jobs:
         with:
           components: rust-docs
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
+      #      - name: Rust cache
+      #        uses: swatinem/rust-cache@v2
 
       - name: cargo doc
         run: cargo doc
@@ -108,8 +108,8 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@1.84.0
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
+      #      - name: Rust cache
+      #        uses: swatinem/rust-cache@v2
 
       - name: cargo build
         run: cargo build --manifest-path main/low/Cargo.toml --features generate

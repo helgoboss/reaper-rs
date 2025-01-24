@@ -22,11 +22,10 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@1.84.0
         with:
-          components: clippy
-          targets: stable-i686-pc-windows-msvc
+          targets: i686-pc-windows-msvc
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
 
       - name: cargo build
-        run: cargo build --target stable-i686-pc-windows-msvc
+        run: cargo build --target i686-pc-windows-msvc
