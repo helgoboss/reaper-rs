@@ -592,36 +592,78 @@ pub(crate) unsafe fn utf8_to_16(raw_utf8: *const std::os::raw::c_char) -> Vec<u1
 /// Creates a UTF-16 buffer (to be filled by the given function) and writes it as UTF-8 to the given
 /// target buffer.
 ///
-/// `max_size` must include nul terminator. The given function must return the actual string length
-/// *without* nul terminator.
+/// - `utf8_target_buffer` must have a capacity of at least `requested_max_size` bytes. It will be
+///   filled with up to `requested_max_size` bytes worth of UTF-8-encoded text, including the nul
+///   terminator.
+/// - `requested_max_size` represents the maximum number of requested **bytes**, including the
+///   nul terminator. In the best case, this also represents the number of characters that you
+///   get. But if you use characters that are encoded as multiple UTF-8 bytes, you get fewer
+///   characters.
+/// - `fill_utf16_source_buffer` receives a UTF-16 buffer as first argument and the length of that
+///   UTF-16 buffer as second argument. It should fill that UTF-16 buffer with UTF-16-encoded text,
+///   not exceeding the size of the UTF-16 buffer. It must return the number of
+///   written characters **excluding** a potentially written nul terminator. The code which looks
+///   at this buffer afterwards will just look at the returned length, it's not interested in
+///   nul terminators.
+///
+/// Returns the number of bytes written to `utf8_target_buffer`, **excluding** the nul terminator.
+/// A return value of 0 means that `utf8_target_buffer` has not been touched.
 #[cfg(target_family = "windows")]
 pub(crate) unsafe fn with_utf16_to_8(
     utf8_target_buffer: *mut std::os::raw::c_char,
     requested_max_size: std::os::raw::c_int,
     fill_utf16_source_buffer: impl FnOnce(*mut u16, std::os::raw::c_int) -> usize,
 ) -> usize {
+    if requested_max_size < 2 {
+        // With a buffer capacity of 1 byte, we can just write the nul terminator. Pointless.
+        return 0;
+    }
     let mut utf16_vec: Vec<u16> = Vec::with_capacity(requested_max_size as usize);
     // Returns length *without* nul terminator.
     let len = fill_utf16_source_buffer(utf16_vec.as_mut_ptr(), requested_max_size);
     if len == 0 {
+        // No characters written to UTF-16 buffer.
         return 0;
     }
     utf16_vec.set_len(len);
     // nul terminator will not be part of the string because len doesn't include it!
-    let string = String::from_utf16_lossy(&utf16_vec);
-    let c_string = match std::ffi::CString::new(string) {
+    let utf8_string = String::from_utf16_lossy(&utf16_vec);
+    // If the UTF-16-encoded string contains characters that need more than one byte when
+    // encoded as UTF-8 (e.g. Chinese), the resulting String will have more bytes than
+    // `requested_max_size`! We will need to truncate the string so that it takes up at most
+    // `requested_max_size - 1` bytes (we still need to add a nul terminator).
+    let max_bytes_excluding_nul = (requested_max_size - 1) as usize;
+    let utf8_string_truncated = truncate_to_bytes(&utf8_string, max_bytes_excluding_nul);
+    let utf8_c_string = match std::ffi::CString::new(utf8_string_truncated) {
         Ok(s) => s,
         Err(_) => {
             // String contained 0 byte. This would end a C-style string abruptly.
             return 0;
         }
     };
-    let source_bytes = c_string.as_bytes_with_nul();
-    let target_bytes =
+    let utf8_source_chars = utf8_c_string.as_bytes_with_nul();
+    let utf8_target_chars =
         std::slice::from_raw_parts_mut(utf8_target_buffer, requested_max_size as usize);
-    let source_bytes_signed = &*(source_bytes as *const [u8] as *const [i8]);
-    target_bytes[..source_bytes.len()].copy_from_slice(source_bytes_signed);
+    let utf8_source_chars = &*(utf8_source_chars as *const [u8] as *const [i8]);
+    utf8_target_chars[..utf8_source_chars.len()].copy_from_slice(utf8_source_chars);
     len
+}
+
+fn truncate_to_bytes(s: &str, max_bytes: usize) -> &str {
+    if s.len() <= max_bytes {
+        return s;
+    }
+    let last_byte_index_lower_than_max = s
+        .char_indices()
+        .map(|(i, _)| i)
+        .take_while(|i| *i < max_bytes)
+        .last();
+    match last_byte_index_lower_than_max {
+        // Edge case: max_bytes too small to take multi-byte character
+        None => "",
+        // Take all bytes NOT including that last byte
+        Some(i) => &s[..i],
+    }
 }
 
 /// For all messages which contain a string payload, convert the string's encoding.
