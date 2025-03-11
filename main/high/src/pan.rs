@@ -9,8 +9,9 @@ pub struct Pan {
 
 impl Pan {
     pub fn from_normalized_value(normalized_value: f64) -> Pan {
-        assert!((0.0..=1.0).contains(&normalized_value));
-        Pan { normalized_value }
+        Pan {
+            normalized_value: normalized_value.clamp(0.0, 1.0),
+        }
     }
 
     pub fn from_reaper_value(reaper_value: ReaperPanValue) -> Pan {
