@@ -32,14 +32,15 @@ impl MidiRxMiddleware {
                     };
                     let evt_list = input.get_read_buf();
                     for evt in evt_list {
-                        let msg = evt.message();
+                        let Ok(msg) = evt.message().to_short_message() else {
+                            continue;
+                        };
                         if msg.r#type() == ShortMessageType::ActiveSensing {
                             // TODO-low We should forward active sensing. Can be filtered out
                             // later.
                             continue;
                         }
-                        let owned_msg: RawShortMessage = msg.to_other();
-                        let owned_evt = MidiEvent::new(evt.frame_offset(), owned_msg);
+                        let owned_evt = MidiEvent::new(evt.frame_offset(), msg);
                         subject.next(owned_evt);
                     }
                 });

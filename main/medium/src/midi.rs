@@ -1,4 +1,4 @@
-use helgoboss_midi::{ShortMessage, U7};
+use helgoboss_midi::{FromBytesError, RawShortMessage, ShortMessage, ShortMessageFactory, U7};
 use reaper_low::raw;
 
 use crate::SendMidiTime;
@@ -337,19 +337,12 @@ impl MidiMessage {
     pub fn as_slice(&self) -> &[u8] {
         unsafe { std::slice::from_raw_parts(self.0.midi_message.as_ptr(), self.0.size as _) }
     }
-}
 
-impl ShortMessage for MidiMessage {
-    fn status_byte(&self) -> u8 {
-        self.0.midi_message[0]
-    }
-
-    fn data_byte_1(&self) -> U7 {
-        unsafe { U7::new_unchecked(self.0.midi_message[1]) }
-    }
-
-    fn data_byte_2(&self) -> U7 {
-        unsafe { U7::new_unchecked(self.0.midi_message[2]) }
+    pub fn to_short_message(&self) -> Result<RawShortMessage, FromBytesError> {
+        let status_byte = self.0.midi_message[0];
+        let data_byte_1 = unsafe { U7::new_unchecked(self.0.midi_message[1]) };
+        let data_byte_2 = unsafe { U7::new_unchecked(self.0.midi_message[2]) };
+        RawShortMessage::from_bytes((status_byte, data_byte_1, data_byte_2))
     }
 }
 
