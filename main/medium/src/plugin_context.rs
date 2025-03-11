@@ -75,7 +75,7 @@ impl<'a, UsageScope> PluginContext<'a, UsageScope> {
     {
         assert!(
             self.is_in_main_thread(),
-            "called main-thread-only function from wrong thread"
+            "Called main-thread-only function from wrong thread. This can happen when 3rd-party plugins use the REAPER API incorrectly. If you think you know which plugin could have caused this, please report this error to the plugin author."
         )
     }
 }
