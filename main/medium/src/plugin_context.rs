@@ -69,9 +69,9 @@ impl<'a, UsageScope> PluginContext<'a, UsageScope> {
         }
     }
 
-    fn require_main_thread(&self)
+    pub fn require_main_thread(&self)
     where
-        UsageScope: MainThreadOnly,
+        UsageScope: AnyThread,
     {
         assert!(
             self.is_in_main_thread(),

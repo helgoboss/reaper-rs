@@ -8887,10 +8887,7 @@ where
     where
         UsageScope: AnyThread,
     {
-        assert!(
-            self.low.plugin_context().is_in_main_thread(),
-            "called main-thread-only function from wrong thread"
-        )
+        self.plugin_context().require_main_thread();
     }
 
     pub(crate) fn require_valid_project(&self, project: ProjectContext)
