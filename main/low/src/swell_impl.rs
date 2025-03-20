@@ -649,6 +649,7 @@ pub(crate) unsafe fn with_utf16_to_8(
     len
 }
 
+#[cfg(target_family = "windows")]
 fn truncate_to_bytes(s: &str, max_bytes: usize) -> &str {
     if s.len() <= max_bytes {
         return s;

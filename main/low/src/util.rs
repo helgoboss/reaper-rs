@@ -97,6 +97,7 @@ pub fn execute_plugin_destroy_hooks() {
     for hook in PLUGIN_DESTROY_HOOKS.get().borrow_mut().drain(..).rev() {
         // We don't use tracing because tracing might not work anymore at this point.
         // We don't use println because it might panic on Windows with PIPE error 232.
+        use std::io::Write;
         let _ = writeln!(
             std::io::stdout(),
             "Executing plug-in destroy hook {}",
