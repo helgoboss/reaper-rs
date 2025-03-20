@@ -95,8 +95,13 @@ pub fn execute_plugin_destroy_hooks() {
     MODULE_IS_ATTACHED.store(false, Ordering::Relaxed);
     // Run destruction in reverse order (recently constructed things will be destroyed first)
     for hook in PLUGIN_DESTROY_HOOKS.get().borrow_mut().drain(..).rev() {
-        // We use println instead of tracing because tracing might not work anymore at this point
-        println!("Executing plug-in destroy hook {}", hook.name);
+        // We don't use tracing because tracing might not work anymore at this point.
+        // We don't use println because it might panic on Windows with PIPE error 232.
+        let _ = writeln!(
+            std::io::stdout(),
+            "Executing plug-in destroy hook {}",
+            hook.name
+        );
         (hook.callback)();
     }
 }
