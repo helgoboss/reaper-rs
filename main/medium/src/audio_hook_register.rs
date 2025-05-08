@@ -1,11 +1,12 @@
 use crate::{decode_user_data, encode_user_data, Hz};
-use reaper_low::raw::audio_hook_register_t;
+use reaper_low::raw::{audio_hook_register_t, ReaSample};
 use reaper_low::{firewall, raw};
 
 use std::fmt;
 use std::fmt::Debug;
 use std::os::raw::c_int;
 use std::ptr::{null_mut, NonNull};
+use std::slice::{from_raw_parts_mut};
 
 /// Consumers need to implement this trait in order to be called back in the real-time audio thread.
 ///
@@ -58,7 +59,35 @@ impl AudioHookRegister {
 
     /// Returns the current number of output channels.
     pub fn output_nch(&self) -> u32 {
-        unsafe { self.0.as_ref() }.input_nch as u32
+        unsafe { self.0.as_ref() }.output_nch as u32
+    }
+
+    /// Get access to the underlying samples of an output channel
+    pub fn output_channel_samples(&self, ch: usize, args: &OnAudioBufferArgs) -> Option<&mut [ReaSample]> {
+        unsafe {
+            if let Some(get_buffer) = self.0.as_ref().GetBuffer {
+                let ptr = get_buffer(true, ch as i32);
+                if ptr != null_mut() {
+                    return Some(from_raw_parts_mut(ptr, args.len as usize));
+                }
+            }
+        }
+
+        None
+    }
+
+    /// Get access to the underlying samples of an input channel
+    pub fn input_channel_samples(&self, ch: usize, args: &OnAudioBufferArgs) -> Option<&mut [ReaSample]> {
+        unsafe {
+            if let Some(get_buffer) = self.0.as_ref().GetBuffer {
+                let ptr = get_buffer(false, ch as i32);
+                if ptr != null_mut() {
+                    return Some(from_raw_parts_mut(ptr, args.len as usize));
+                }
+            }
+        }
+
+        None
     }
 }
 
