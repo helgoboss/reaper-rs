@@ -6,7 +6,7 @@ use std::os::raw::{c_int, c_void};
 
 /// Structs, types and constants defined by REAPER.
 pub use super::bindings::root::{
-    accelerator_register_t, audio_hook_register_t, gaccel_register_t, midi_Input, midi_Output,
+    accelerator_register_t, audio_hook_register_t, gaccel_register_t, custom_action_register_t, midi_Input, midi_Output,
     midi_realtime_write_struct_t, preview_register_t, reaper_plugin_info_t, IReaperControlSurface,
     IReaperPitchShift, KbdCmd, KbdSectionInfo, MIDI_event_t, MIDI_eventlist, MediaItem,
     MediaItem_Take, MediaTrack, PCM_sink, PCM_source, PCM_source_peaktransfer_t,

@@ -1,2 +1,2 @@
-FROM rust:1.69.0
+FROM rustlang/rust:nightly
 RUN apt update && apt install -y llvm-dev libclang-dev clang
