@@ -53,6 +53,25 @@ impl OwnedCustomActionRegister {
             },
         }
     }
+
+    /// Creates an action descriptor with a custom idStr (command name).
+    pub fn with_id_str(
+        desc: impl Into<ReaperStringArg<'static>>,
+        section_id: i32,
+        id_str: &std::ffi::CStr,
+    ) -> OwnedCustomActionRegister {
+        let desc = desc.into().into_inner();
+        let desc_ptr = desc.as_ptr();
+        OwnedCustomActionRegister {
+            owned_desc: desc,
+            inner: raw::custom_action_register_t {
+                uniqueSectionId: section_id,
+                idStr: id_str.as_ptr(),
+                name: desc_ptr,
+                extra: std::ptr::null_mut(),
+            },
+        }
+    }
 }
 
 impl AsRef<raw::custom_action_register_t> for OwnedCustomActionRegister {
