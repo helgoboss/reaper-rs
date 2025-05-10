@@ -839,6 +839,13 @@ pub enum RegistrationObject<'a> {
     /// (IReaperControlSurface*)instance
     /// ```
     CsurfInst(Handle<raw::IReaperControlSurface>),
+    /// A custom action registration.
+    ///
+    /// Extract from `reaper_plugin.h`:
+    /// ```text
+    /// register("custom_action", custom_action_register_t*) registers a custom action in a specific section.
+    /// ```
+    CustomAction(Handle<raw::custom_action_register_t>),
     /// If a variant is missing in this enum, you can use this custom one as a resort.
     ///
     /// Use [`custom()`] to create this variant.
@@ -975,6 +982,10 @@ impl<'a> RegistrationObject<'a> {
             CsurfInst(inst) => PluginRegistration {
                 key: reaper_str!("csurf_inst").into(),
                 value: inst.as_ptr() as _,
+            },
+            CustomAction(reg) => PluginRegistration {
+                key: reaper_str!("custom_action").into(),
+                value: reg.as_ptr() as _,
             },
             Custom(key, value) => PluginRegistration {
                 key: key.into_owned().into(),

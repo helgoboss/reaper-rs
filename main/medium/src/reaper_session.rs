@@ -14,9 +14,10 @@ use crate::{
     FileInProjectCallback, GenericRegistrationHandle, Handle, HookCommand, HookCommand2,
     HookCustomMenu, HookPostCommand, HookPostCommand2, HwndInfo, MainThreadScope, MeasureAlignment,
     OnAudioBuffer, OwnedAcceleratorRegister, OwnedAudioHookRegister, OwnedGaccelRegister,
-    OwnedPreviewRegister, PluginRegistration, ProjectContext, ReaProject, RealTimeAudioThreadScope,
-    Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperMutex, ReaperString, ReaperStringArg,
-    RegistrationHandle, RegistrationObject, ToggleAction, ToolbarIconMap, TranslateAccel,
+    OwnedCustomActionRegister, OwnedPreviewRegister, PluginRegistration, ProjectContext, ReaProject,
+    RealTimeAudioThreadScope, Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperMutex,
+    ReaperString, ReaperStringArg, RegistrationHandle, RegistrationObject, ToggleAction,
+ ToolbarIconMap, TranslateAccel,
 };
 use reaper_low::raw::audio_hook_register_t;
 
@@ -72,6 +73,8 @@ pub struct ReaperSession {
     gaccel_registers: Keeper<OwnedGaccelRegister, raw::gaccel_register_t>,
     /// Provides a safe place in memory for accelerator registers.
     accelerator_registers: Keeper<OwnedAcceleratorRegister, raw::accelerator_register_t>,
+    /// Provides a safe place in memory for custom action registers.
+    custom_action_registers: Keeper<OwnedCustomActionRegister, raw::custom_action_register_t>,
     /// Provides a safe place in memory for file-in-project hooks.
     file_in_project_hooks: SimpleKeeper<OwnedFileInProjectHook>,
     /// Provides a safe place in memory for currently playing preview registers.
@@ -119,6 +122,7 @@ impl ReaperSession {
             reaper: Reaper::new(low),
             gaccel_registers: Default::default(),
             accelerator_registers: Default::default(),
+            custom_action_registers: Default::default(),
             file_in_project_hooks: Default::default(),
             preview_registers: Default::default(),
             command_names: Default::default(),
@@ -1314,6 +1318,30 @@ impl ReaperSession {
         // normal box (Box<T> = thin pointer) ... original type restored.
         let callback = unsafe { handle.restore_original() };
         Some(callback)
+    }
+
+    /// Registers a custom action in a specific section of the action list.
+    ///
+    /// This function takes ownership of the passed struct in order to take complete care of it.
+    /// Compared to the alternative of taking a reference or pointer, that releases the API
+    /// consumer from the responsibilities to guarantee a long enough lifetime and to maintain a
+    /// stable address in memory.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    pub fn plugin_register_custom_action(
+        &mut self,
+        register: OwnedCustomActionRegister,
+    ) -> ReaperFunctionResult<Handle<raw::custom_action_register_t>> {
+        let handle = self.custom_action_registers.keep(register);
+        unsafe { self.plugin_register_add(RegistrationObject::CustomAction(handle))? };
+        Ok(handle)
+    }
+
+    /// Unregisters a custom action.
+    pub fn plugin_register_remove_custom_action(&mut self, handle: Handle<raw::custom_action_register_t>) {
+        unsafe { self.plugin_register_remove(RegistrationObject::CustomAction(handle)) };
     }
 }
 
