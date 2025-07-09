@@ -10,6 +10,7 @@ impl Reaper {
     /// After this has been called, the instance can be queried globally using `get()`.
     ///
     /// This can be called once only. Subsequent calls won't have any effect!
+    #[allow(clippy::result_large_err)]
     pub fn make_available_globally(functions: Reaper) -> Result<(), Reaper> {
         INSTANCE.set(functions)
     }

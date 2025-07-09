@@ -62,6 +62,7 @@ impl ReaperBuilder {
     }
 
     /// This has an effect only if there isn't an instance already.
+    #[allow(clippy::result_large_err)]
     pub fn setup(self) -> Result<(), Reaper> {
         self.require_main_thread();
         // At the moment this is just for logging to console when audio thread panics so
@@ -244,6 +245,7 @@ impl Reaper {
     }
 
     /// This has an effect only if there isn't an instance already.
+    #[allow(clippy::result_large_err)]
     pub fn setup_with_defaults(
         plugin_context: PluginContext,
         plugin_info: PluginInfo,
