@@ -200,6 +200,9 @@ pub type HookPostCommand = extern "C" fn(command_id: c_int, flag: c_int);
 pub type ToolbarIconMap =
     extern "C" fn(toolbar_name: *const c_char, command_id: c_int, state: c_int) -> *const c_char;
 
+/// Function pointer type for at-exit functions.
+pub type AtExitFunction = extern "C" fn();
+
 /// Function pointer type for timers.
 pub type TimerFunction = extern "C" fn();
 
