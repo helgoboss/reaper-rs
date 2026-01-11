@@ -502,6 +502,28 @@ impl ReaperSession {
         }
     }
 
+    /// Registers an at-exit function.
+    ///
+    /// This function will be called immediately prior to the shutdown process closing devices and destroying windows.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the registration failed.
+    pub fn plugin_register_add_at_exit(
+        &mut self,
+        at_exit: extern "C" fn(),
+    ) -> ReaperFunctionResult<()> {
+        unsafe { self.plugin_register_add(RegistrationObject::AtExit(at_exit))? };
+        Ok(())
+    }
+
+    /// Unregisters an at-exit function.
+    pub fn plugin_register_remove_at_ext(&mut self, at_exit: extern "C" fn()) {
+        unsafe {
+            self.plugin_register_remove(RegistrationObject::AtExit(at_exit));
+        }
+    }
+
     /// Registers a timer.
     ///
     /// The given function will be called regularly until removal. Roughly 30 times per second,

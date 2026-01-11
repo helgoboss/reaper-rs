@@ -729,6 +729,8 @@ pub enum RegistrationObject<'a> {
     /// A var-arg function for exposing a function to ReaScript.
     // TODO-medium Documentation
     ApiVararg(Cow<'a, ReaperStr>, raw::ApiVararg),
+    /// This will be called immediately prior to the shutdown process closing devices and destroying windows.
+    AtExit(raw::AtExitFunction),
     /// A hook command.
     ///
     /// Extract from `reaper_plugin_functions.h`:
@@ -909,6 +911,10 @@ impl<'a> RegistrationObject<'a> {
             },
             ApiVararg(func_name, func) => PluginRegistration {
                 key: concat_reaper_strs(reaper_str!("APIvararg_"), func_name.as_ref()).into(),
+                value: func as _,
+            },
+            AtExit(func) => PluginRegistration {
+                key: reaper_str!("atexit").into(),
                 value: func as _,
             },
             HookCommand(func) => PluginRegistration {

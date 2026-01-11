@@ -18,6 +18,7 @@ pub struct Reaper {
 }
 
 impl Reaper {
+    #[allow(clippy::result_large_err)]
     pub fn install_globally(medium_session: ReaperSession) -> Result<(), Self> {
         let reaper = Self {
             medium_reaper: medium_session.reaper().clone(),
