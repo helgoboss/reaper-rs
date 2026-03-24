@@ -11,7 +11,7 @@ edition = "2021"
 categories = ["api-bindings", "multimedia", "multimedia::audio"]
 include = [
     "/lib/reaper/reaper_plugin.h",
-    "/lib/WDL/WDL/swell/*.h",
+    "/lib/WDL/WDL/**",
     "/src",
     "/tests",
     "/build.rs",
