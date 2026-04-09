@@ -1265,6 +1265,20 @@ pub mod root {
     }
     #[repr(C)]
     #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+    pub struct _REAPER_custom_action_register_t {
+        pub uniqueSectionId: ::std::os::raw::c_int,
+        pub idStr: *const ::std::os::raw::c_char,
+        pub name: *const ::std::os::raw::c_char,
+        pub extra: *mut ::std::os::raw::c_void,
+    }
+    impl Default for _REAPER_custom_action_register_t {
+        fn default() -> Self {
+            unsafe { ::std::mem::zeroed() }
+        }
+    }
+    pub type custom_action_register_t = root::_REAPER_custom_action_register_t;
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
     pub struct _REAPER_gaccel_register_t {
         pub accel: root::ACCEL,
         pub desc: *const ::std::os::raw::c_char,
