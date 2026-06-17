@@ -1741,6 +1741,21 @@ where
         self.get_set_media_track_info(track, TrackAttributeKey::ShowInTcp, &show as *const _ as _);
     }
 
+    /// Convenience function which returns the given track's folder depth (I_FOLDERDEPTH).
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn get_set_media_track_info_get_folder_depth(&self, track: MediaTrack) -> i32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::FolderDepth, null_mut());
+        let depth = deref_as::<i32>(ptr).expect("I_FOLDERDEPTH pointer is null");
+        depth
+    }
+
     /// Convenience function which returns the given track's pan mode (I_PANMODE).
     ///
     /// Returns `None` if the track uses the project default.
