@@ -7,17 +7,20 @@ fn main() {
     #[cfg(feature = "generate-stage-two")]
     codegen::stage_two::generate_reaper_and_swell();
 
-    #[cfg(target_family = "unix")]
-    compile_swell_dialog_generator_support();
+    let target_family =
+        std::env::var("CARGO_CFG_TARGET_FAMILY").expect("CARGO_CFG_TARGET_FAMILY not set");
+    if target_family == "unix" {
+        compile_swell_dialog_generator_support();
+    }
 
     compile_glue_code();
 }
 
 /// This makes SWELL dialogs via "swell-dlggen.h" possible (on C++ side only, via cc crate).
 /// See the C++ source file for a detailled explanation.
-#[cfg(target_family = "unix")]
 fn compile_swell_dialog_generator_support() {
-    let modstub_file = if cfg!(target_os = "macos") {
+    let target_os = std::env::var("CARGO_CFG_TARGET_OS").expect("CARGO_CFG_TARGET_OS not set");
+    let modstub_file = if target_os == "macos" {
         "src/swell-modstub-custom.mm"
     } else {
         "src/swell-modstub-generic-custom.cpp"
@@ -28,18 +31,20 @@ fn compile_swell_dialog_generator_support() {
         .warnings(false)
         .define("SWELL_PROVIDED_BY_APP", None)
         .file(modstub_file);
-    if cfg!(target_os = "macos") {
+    if target_os == "macos" {
         build.cpp_set_stdlib("c++");
     }
     build.compile("swell");
 
-    #[cfg(target_os = "macos")]
-    println!("cargo:rustc-link-lib=framework=AppKit");
+    if target_os == "macos" {
+        println!("cargo:rustc-link-lib=framework=AppKit");
+    }
 }
 
 /// Compiles C++ glue code. This is necessary to interact with those parts of the REAPER C++ API
 /// that use pure virtual interface classes and therefore the C++ ABI.
 fn compile_glue_code() {
+    let target_os = std::env::var("CARGO_CFG_TARGET_OS").expect("CARGO_CFG_TARGET_OS not set");
     let mut build = cc::Build::new();
     build
         .cpp(true)
@@ -56,7 +61,7 @@ fn compile_glue_code() {
         .file("src/pitch_shift.cpp")
         .file("src/project_state_context.cpp")
         .file("lib/WDL/WDL/projectcontext.cpp");
-    if cfg!(target_os = "macos") {
+    if target_os == "macos" {
         build.cpp_set_stdlib("c++");
     }
     build.compile("glue");
