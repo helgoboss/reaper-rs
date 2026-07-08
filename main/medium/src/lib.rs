@@ -350,6 +350,9 @@ pub use reaper_pointer::*;
 mod gaccel_register;
 pub use gaccel_register::*;
 
+mod custom_action_register;
+pub use custom_action_register::*;
+
 mod accelerator_register;
 pub use accelerator_register::*;
 
