@@ -8,3 +8,14 @@ error[E0502]: cannot borrow `model` as mutable because it is also borrowed as im
   |     ^^^^^ mutable borrow occurs here
 9 |     track.guid();
   |     ----- immutable borrow later used here
+  |
+note: this call may capture more lifetimes than intended, because Rust 2024 has adjusted the `impl Trait` lifetime capture rules
+ --> tests/ui/prevent_read_after_delete.rs:6:17
+  |
+6 |     let track = project.tracks().next().unwrap();
+  |                 ^^^^^^^^^^^^^^^^
+help: if you can modify this crate, add a precise capturing bound to avoid overcapturing: `+ use<'_, A>`
+ --> src/project.rs
+  |
+  |     ) -> impl ExactSizeIterator<Item = Track<'_, ReadAccess>> + FusedIterator + DoubleEndedIterator
+  |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
