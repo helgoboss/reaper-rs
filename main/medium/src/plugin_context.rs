@@ -9,7 +9,7 @@ use std::ptr::{null_mut, NonNull};
 use vst::api::AEffect;
 
 /// This represents the context in which this REAPER plug-in runs.
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct PluginContext<'a, UsageScope> {
     low: &'a reaper_low::PluginContext,
     p: PhantomData<UsageScope>,
@@ -81,7 +81,7 @@ impl<'a, UsageScope> PluginContext<'a, UsageScope> {
 }
 
 /// Additional stuff available in the plug-in context specific to a certain plug-in type.
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum TypeSpecificPluginContext<'a> {
     /// This is an extension plug-in.
     Extension(ExtensionPluginContext<'a>),
@@ -90,7 +90,7 @@ pub enum TypeSpecificPluginContext<'a> {
 }
 
 /// Additional data available in the context of extension plug-ins.
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct ExtensionPluginContext<'a> {
     low: &'a reaper_low::ExtensionPluginContext,
 }
@@ -108,7 +108,7 @@ impl ExtensionPluginContext<'_> {
 }
 
 /// Additional data available in the context of VST plug-ins.
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct VstPluginContext<'a> {
     low: &'a reaper_low::VstPluginContext,
 }

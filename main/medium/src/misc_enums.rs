@@ -699,7 +699,7 @@ impl ActionValueChange {
 
 /// A thing that you can register at REAPER.
 // TODO-low "Unlock" all uncommented variants as soon as appropriate types are clear
-#[derive(Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Clone, Hash, Debug)]
 pub enum RegistrationObject<'a> {
     /// A function that you want to expose to other extensions or plug-ins.
     ///

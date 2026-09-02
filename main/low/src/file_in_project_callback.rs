@@ -10,7 +10,7 @@ use std::ffi::{c_char, c_int, c_void};
 ///
 /// **Keeping this particular field order is vital!**
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash)]
 pub struct file_in_project_ex2_t {
     pub file_name: *mut c_char,
     pub proj_ptr: *mut ReaProject,
