@@ -346,9 +346,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.GetTrack(project.to_raw(), track_index as i32);
-        MediaTrack::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.GetTrack(project.to_raw(), track_index as i32);
+            MediaTrack::new(ptr)
+        }
     }
 
     /// Returns the item at the given index.
@@ -380,9 +382,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.GetMediaItem(project.to_raw(), item_index as i32);
-        MediaItem::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.GetMediaItem(project.to_raw(), item_index as i32);
+            MediaItem::new(ptr)
+        }
     }
 
     /// Checks if the given pointer is still valid.
@@ -589,9 +593,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .GetSetMediaTrackInfo(track.as_ptr(), attribute_key.into_raw().as_ptr(), new_value)
+        unsafe {
+            self.require_main_thread();
+            self.low.GetSetMediaTrackInfo(
+                track.as_ptr(),
+                attribute_key.into_raw().as_ptr(),
+                new_value,
+            )
+        }
     }
 
     /// Gets or sets a take attribute.
@@ -613,12 +622,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.GetSetMediaItemTakeInfo(
-            take.as_ptr(),
-            attribute_key.into_raw().as_ptr(),
-            new_value,
-        )
+        unsafe {
+            self.require_main_thread();
+            self.low.GetSetMediaItemTakeInfo(
+                take.as_ptr(),
+                attribute_key.into_raw().as_ptr(),
+                new_value,
+            )
+        }
     }
 
     /// Adds an "Extensions" main menu (if not already added), which the extension can populate/modify with
@@ -650,9 +661,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .GetSetMediaItemInfo(item.as_ptr(), attribute_key.into_raw().as_ptr(), new_value)
+        unsafe {
+            self.require_main_thread();
+            self.low.GetSetMediaItemInfo(
+                item.as_ptr(),
+                attribute_key.into_raw().as_ptr(),
+                new_value,
+            )
+        }
     }
 
     /// Gets a media item attribute as numerical value.
@@ -668,9 +684,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .GetMediaItemInfo_Value(item.as_ptr(), attribute_key.into_raw().as_ptr())
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .GetMediaItemInfo_Value(item.as_ptr(), attribute_key.into_raw().as_ptr())
+        }
     }
 
     /// Returns the MIDI tick (PPQ) position corresponding to a specific project time in
@@ -687,9 +705,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let pos = self.low.MIDI_GetPPQPosFromProjQN(take.as_ptr(), qn.get());
-        PositionInPulsesPerQuarterNote::new_panic(pos)
+        unsafe {
+            self.require_main_thread();
+            let pos = self.low.MIDI_GetPPQPosFromProjQN(take.as_ptr(), qn.get());
+            PositionInPulsesPerQuarterNote::new_panic(pos)
+        }
     }
 
     /// Gets a media item take attribute as numerical value.
@@ -705,9 +725,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .GetMediaItemTakeInfo_Value(take.as_ptr(), attribute_key.into_raw().as_ptr())
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .GetMediaItemTakeInfo_Value(take.as_ptr(), attribute_key.into_raw().as_ptr())
+        }
     }
 
     /// Sets a take attribute as numerical value.
@@ -728,18 +750,20 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.SetMediaItemTakeInfo_Value(
-            take.as_ptr(),
-            attribute_key.into_raw().as_ptr(),
-            new_value,
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't set take attribute (maybe attribute key is invalid)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.SetMediaItemTakeInfo_Value(
+                take.as_ptr(),
+                attribute_key.into_raw().as_ptr(),
+                new_value,
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't set take attribute (maybe attribute key is invalid)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Sets an item attribute as numerical value.
@@ -760,18 +784,20 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.SetMediaItemInfo_Value(
-            item.as_ptr(),
-            attribute_key.into_raw().as_ptr(),
-            new_value,
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't set item attribute (maybe attribute key is invalid)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.SetMediaItemInfo_Value(
+                item.as_ptr(),
+                attribute_key.into_raw().as_ptr(),
+                new_value,
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't set item attribute (maybe attribute key is invalid)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Convenience function which sets the take's source (`P_SOURCE`).
@@ -789,21 +815,23 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        // According to the docs we must obtain the old source before setting a new one.
-        // The docs also say that it's now our responsibility to free the old source, which is why
-        // we return it as `OwnedPcmSource`. If the caller does nothing with the old source,
-        // it will be freed automatically (RAII), nice!
-        let previous_source_ptr =
-            self.get_set_media_item_take_info(take, TakeAttributeKey::Source, null_mut())
-                as *mut raw::PCM_source;
-        // We pass ownership of the new source to REAPER, that's what the leak does! If the take
-        // gets deleted, REAPER will free the source accordingly. The only way of getting back
-        // ownership of the old source is to replace it with yet another one. Rust ownership
-        // paradigms at its best!
-        let new_source_ptr = source.leak().as_ptr();
-        self.get_set_media_item_take_info(take, TakeAttributeKey::Source, new_source_ptr as _);
-        NonNull::new(previous_source_ptr).map(|raw| OwnedPcmSource::from_raw(raw))
+        unsafe {
+            self.require_main_thread();
+            // According to the docs we must obtain the old source before setting a new one.
+            // The docs also say that it's now our responsibility to free the old source, which is why
+            // we return it as `OwnedPcmSource`. If the caller does nothing with the old source,
+            // it will be freed automatically (RAII), nice!
+            let previous_source_ptr =
+                self.get_set_media_item_take_info(take, TakeAttributeKey::Source, null_mut())
+                    as *mut raw::PCM_source;
+            // We pass ownership of the new source to REAPER, that's what the leak does! If the take
+            // gets deleted, REAPER will free the source accordingly. The only way of getting back
+            // ownership of the old source is to replace it with yet another one. Rust ownership
+            // paradigms at its best!
+            let new_source_ptr = source.leak().as_ptr();
+            self.get_set_media_item_take_info(take, TakeAttributeKey::Source, new_source_ptr as _);
+            NonNull::new(previous_source_ptr).map(|raw| OwnedPcmSource::from_raw(raw))
+        }
     }
 
     /// Convenience function which returns the take's custom color (`I_CUSTOMCOLOR`).
@@ -818,11 +846,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr =
-            self.get_set_media_item_take_info(take, TakeAttributeKey::CustomColor, null_mut());
-        let raw = deref_as::<i32>(ptr).expect("I_CUSTOMCOLOR pointer is null");
-        NativeColorValue::from_raw(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr =
+                self.get_set_media_item_take_info(take, TakeAttributeKey::CustomColor, null_mut());
+            let raw = deref_as::<i32>(ptr).expect("I_CUSTOMCOLOR pointer is null");
+            NativeColorValue::from_raw(raw)
+        }
     }
 
     /// Convenience function which sets the take's custom color (`I_CUSTOMCOLOR`).
@@ -837,12 +867,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_item_take_info(
-            take,
-            TakeAttributeKey::CustomColor,
-            &value.to_raw() as *const _ as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_item_take_info(
+                take,
+                TakeAttributeKey::CustomColor,
+                &value.to_raw() as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the take's pitch shift mode (`I_PITCHMODE`).
@@ -857,10 +889,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_take_info(take, TakeAttributeKey::PitchMode, null_mut());
-        let raw = deref_as::<i32>(ptr).expect("I_PITCHMODE pointer is null");
-        FullPitchShiftMode::from_raw(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr =
+                self.get_set_media_item_take_info(take, TakeAttributeKey::PitchMode, null_mut());
+            let raw = deref_as::<i32>(ptr).expect("I_PITCHMODE pointer is null");
+            FullPitchShiftMode::from_raw(raw)
+        }
     }
 
     /// Convenience function which sets the take's pitch shift mode (`I_PITCHMODE`).
@@ -875,9 +910,15 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = value.map(FullPitchShiftMode::to_raw).unwrap_or(-1);
-        self.get_set_media_item_take_info(take, TakeAttributeKey::PitchMode, &raw as *const _ as _);
+        unsafe {
+            self.require_main_thread();
+            let raw = value.map(FullPitchShiftMode::to_raw).unwrap_or(-1);
+            self.get_set_media_item_take_info(
+                take,
+                TakeAttributeKey::PitchMode,
+                &raw as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the take's pitch adjustment (`D_PITCH`).
@@ -889,10 +930,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_take_info(take, TakeAttributeKey::Pitch, null_mut());
-        let raw = deref_as::<f64>(ptr).expect("I_PITCH pointer is null");
-        Semitones::new_panic(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_item_take_info(take, TakeAttributeKey::Pitch, null_mut());
+            let raw = deref_as::<f64>(ptr).expect("I_PITCH pointer is null");
+            Semitones::new_panic(raw)
+        }
     }
 
     /// Convenience function which sets the take's pitch adjustment (`D_PITCH`).
@@ -907,9 +950,11 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = value.get();
-        self.get_set_media_item_take_info(take, TakeAttributeKey::Pitch, &raw as *const _ as _);
+        unsafe {
+            self.require_main_thread();
+            let raw = value.get();
+            self.get_set_media_item_take_info(take, TakeAttributeKey::Pitch, &raw as *const _ as _);
+        }
     }
 
     /// Convenience function which returns the given track's parent track (`P_PARTRACK`).
@@ -924,10 +969,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::ParTrack, null_mut())
-            as *mut raw::MediaTrack;
-        MediaTrack::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::ParTrack, null_mut())
+                as *mut raw::MediaTrack;
+            MediaTrack::new(ptr)
+        }
     }
 
     /// Convenience function which returns the given track's parent project (`P_PROJECT`).
@@ -944,10 +991,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Project, null_mut())
-            as *mut raw::ReaProject;
-        ReaProject::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Project, null_mut())
+                as *mut raw::ReaProject;
+            ReaProject::new(ptr)
+        }
     }
 
     /// Convenience function which grants temporary access to the given track's name (`P_NAME`).
@@ -986,9 +1035,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Name, null_mut());
-        create_passing_c_str(ptr as *const c_char).map(use_name)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Name, null_mut());
+            create_passing_c_str(ptr as *const c_char).map(use_name)
+        }
     }
 
     /// Convenience function which sets the track's name (`P_NAME`).
@@ -1016,8 +1067,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_track_info(track, TrackAttributeKey::Name, name.into().as_ptr() as _);
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_track_info(
+                track,
+                TrackAttributeKey::Name,
+                name.into().as_ptr() as _,
+            );
+        }
     }
 
     /// Convenience function which returns the item's beat attach mode (`C_BEATATTACHMODE`).
@@ -1032,12 +1089,15 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::BeatAttachMode, null_mut());
-        let raw = deref_as::<i8>(ptr).expect("C_BEATATTACHMODE pointer is null");
-        match raw {
-            -1 => None,
-            x => Some(BeatAttachMode::from_raw(x)),
+        unsafe {
+            self.require_main_thread();
+            let ptr =
+                self.get_set_media_item_info(item, ItemAttributeKey::BeatAttachMode, null_mut());
+            let raw = deref_as::<i8>(ptr).expect("C_BEATATTACHMODE pointer is null");
+            match raw {
+                -1 => None,
+                x => Some(BeatAttachMode::from_raw(x)),
+            }
         }
     }
 
@@ -1053,13 +1113,15 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr =
-            self.get_set_media_track_info(track, TrackAttributeKey::BeatAttachMode, null_mut());
-        let raw = deref_as::<i8>(ptr).expect("C_BEATATTACHMODE pointer is null");
-        match raw {
-            -1 => None,
-            x => Some(BeatAttachMode::from_raw(x)),
+        unsafe {
+            self.require_main_thread();
+            let ptr =
+                self.get_set_media_track_info(track, TrackAttributeKey::BeatAttachMode, null_mut());
+            let raw = deref_as::<i8>(ptr).expect("C_BEATATTACHMODE pointer is null");
+            match raw {
+                -1 => None,
+                x => Some(BeatAttachMode::from_raw(x)),
+            }
         }
     }
 
@@ -1075,13 +1137,15 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = mode.map(BeatAttachMode::to_raw).unwrap_or(-1i8);
-        self.get_set_media_item_info(
-            item,
-            ItemAttributeKey::BeatAttachMode,
-            &raw as *const _ as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            let raw = mode.map(BeatAttachMode::to_raw).unwrap_or(-1i8);
+            self.get_set_media_item_info(
+                item,
+                ItemAttributeKey::BeatAttachMode,
+                &raw as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the item's volume (`D_VOL`).
@@ -1093,10 +1157,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::Vol, null_mut());
-        let raw = deref_as::<f64>(ptr).expect("D_VOL pointer is null");
-        ReaperVolumeValue::new_panic(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_item_info(item, ItemAttributeKey::Vol, null_mut());
+            let raw = deref_as::<f64>(ptr).expect("D_VOL pointer is null");
+            ReaperVolumeValue::new_panic(raw)
+        }
     }
 
     /// Convenience function which sets the item's volume (`D_VOL`).
@@ -1108,8 +1174,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_item_info(item, ItemAttributeKey::Vol, &volume.get() as *const _ as _);
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_item_info(
+                item,
+                ItemAttributeKey::Vol,
+                &volume.get() as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the item's snap offset (`D_SNAPOFFSET`).
@@ -1124,10 +1196,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::SnapOffset, null_mut());
-        let raw = deref_as::<f64>(ptr).expect("D_VOL pointer is null");
-        DurationInSeconds::new_panic(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_item_info(item, ItemAttributeKey::SnapOffset, null_mut());
+            let raw = deref_as::<f64>(ptr).expect("D_VOL pointer is null");
+            DurationInSeconds::new_panic(raw)
+        }
     }
 
     /// Convenience function which sets the item's snap offset (`D_SNAPOFFSET`).
@@ -1142,12 +1216,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_item_info(
-            item,
-            ItemAttributeKey::SnapOffset,
-            &value.get() as *const _ as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_item_info(
+                item,
+                ItemAttributeKey::SnapOffset,
+                &value.get() as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the item's fade-in length (`D_FADEINLEN`).
@@ -1162,10 +1238,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeInLen, null_mut());
-        let raw = deref_as::<f64>(ptr).expect("D_FADEINLEN pointer is null");
-        DurationInSeconds::new_panic(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeInLen, null_mut());
+            let raw = deref_as::<f64>(ptr).expect("D_FADEINLEN pointer is null");
+            DurationInSeconds::new_panic(raw)
+        }
     }
 
     /// Convenience function which sets the item's fade-in length (`D_FADEINLEN`).
@@ -1180,12 +1258,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_item_info(
-            item,
-            ItemAttributeKey::FadeInLen,
-            &value.get() as *const _ as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_item_info(
+                item,
+                ItemAttributeKey::FadeInLen,
+                &value.get() as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the item's fade-out length (`D_FADEOUTLEN`).
@@ -1200,10 +1280,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeOutLen, null_mut());
-        let raw = deref_as::<f64>(ptr).expect("D_FADEOUTLEN pointer is null");
-        DurationInSeconds::new_panic(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeOutLen, null_mut());
+            let raw = deref_as::<f64>(ptr).expect("D_FADEOUTLEN pointer is null");
+            DurationInSeconds::new_panic(raw)
+        }
     }
 
     /// Convenience function which sets the item's fade-out length (`D_FADEOUTLEN`).
@@ -1218,12 +1300,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_item_info(
-            item,
-            ItemAttributeKey::FadeOutLen,
-            &value.get() as *const _ as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_item_info(
+                item,
+                ItemAttributeKey::FadeOutLen,
+                &value.get() as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the item's auto fade-in length (`D_FADEINLEN_AUTO`).
@@ -1238,10 +1322,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeInLenAuto, null_mut());
-        let raw = deref_as::<f64>(ptr).expect("D_FADEINLEN_AUTO pointer is null");
-        raw.try_into().ok()
+        unsafe {
+            self.require_main_thread();
+            let ptr =
+                self.get_set_media_item_info(item, ItemAttributeKey::FadeInLenAuto, null_mut());
+            let raw = deref_as::<f64>(ptr).expect("D_FADEINLEN_AUTO pointer is null");
+            raw.try_into().ok()
+        }
     }
 
     /// Convenience function which sets the item's auto fade-in length (`D_FADEINLEN_AUTO`).
@@ -1256,9 +1343,15 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = value.map(|v| v.get()).unwrap_or(-1.0);
-        self.get_set_media_item_info(item, ItemAttributeKey::FadeInLenAuto, &raw as *const _ as _);
+        unsafe {
+            self.require_main_thread();
+            let raw = value.map(|v| v.get()).unwrap_or(-1.0);
+            self.get_set_media_item_info(
+                item,
+                ItemAttributeKey::FadeInLenAuto,
+                &raw as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the item's auto fade-out length (`D_FADEOUTLEN_AUTO`).
@@ -1273,10 +1366,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeOutLenAuto, null_mut());
-        let raw = deref_as::<f64>(ptr).expect("D_FADEOUTLEN_AUTO pointer is null");
-        raw.try_into().ok()
+        unsafe {
+            self.require_main_thread();
+            let ptr =
+                self.get_set_media_item_info(item, ItemAttributeKey::FadeOutLenAuto, null_mut());
+            let raw = deref_as::<f64>(ptr).expect("D_FADEOUTLEN_AUTO pointer is null");
+            raw.try_into().ok()
+        }
     }
 
     /// Convenience function which sets the item's auto fade-out length (`D_FADEOUTLEN_AUTO`).
@@ -1291,13 +1387,15 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = value.map(|v| v.get()).unwrap_or(-1.0);
-        self.get_set_media_item_info(
-            item,
-            ItemAttributeKey::FadeOutLenAuto,
-            &raw as *const _ as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            let raw = value.map(|v| v.get()).unwrap_or(-1.0);
+            self.get_set_media_item_info(
+                item,
+                ItemAttributeKey::FadeOutLenAuto,
+                &raw as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the item's fade-in shape (`C_FADEINSHAPE`).
@@ -1309,10 +1407,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeInShape, null_mut());
-        let raw = deref_as::<i32>(ptr).expect("C_FADEINSHAPE pointer is null");
-        FadeShape::from_raw(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeInShape, null_mut());
+            let raw = deref_as::<i32>(ptr).expect("C_FADEINSHAPE pointer is null");
+            FadeShape::from_raw(raw)
+        }
     }
 
     /// Convenience function which sets the item's fade-in shape (`C_FADEINSHAPE`).
@@ -1327,12 +1427,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_item_info(
-            item,
-            ItemAttributeKey::FadeInShape,
-            &value.to_raw() as *const _ as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_item_info(
+                item,
+                ItemAttributeKey::FadeInShape,
+                &value.to_raw() as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the item's fade-out shape (`C_FADEOUTSHAPE`).
@@ -1344,10 +1446,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeOutShape, null_mut());
-        let raw = deref_as::<i32>(ptr).expect("C_FADEOUTSHAPE pointer is null");
-        FadeShape::from_raw(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr =
+                self.get_set_media_item_info(item, ItemAttributeKey::FadeOutShape, null_mut());
+            let raw = deref_as::<i32>(ptr).expect("C_FADEOUTSHAPE pointer is null");
+            FadeShape::from_raw(raw)
+        }
     }
 
     /// Convenience function which sets the item's fade-out shape (`C_FADEOUTSHAPE`).
@@ -1362,12 +1467,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_item_info(
-            item,
-            ItemAttributeKey::FadeOutShape,
-            &value.to_raw() as *const _ as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_item_info(
+                item,
+                ItemAttributeKey::FadeOutShape,
+                &value.to_raw() as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the item's auto fade-in curvature (`D_FADEINDIR`).
@@ -1379,10 +1486,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeInDir, null_mut());
-        let raw = deref_as::<f64>(ptr).expect("D_FADEINDIR pointer is null");
-        FadeCurvature::new(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeInDir, null_mut());
+            let raw = deref_as::<f64>(ptr).expect("D_FADEINDIR pointer is null");
+            FadeCurvature::new(raw)
+        }
     }
 
     /// Convenience function which sets the item's fade-in curvature (`D_FADEINDIR`).
@@ -1397,12 +1506,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_item_info(
-            item,
-            ItemAttributeKey::FadeInDir,
-            &value.get() as *const _ as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_item_info(
+                item,
+                ItemAttributeKey::FadeInDir,
+                &value.get() as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the item's auto fade-out curvature (`D_FADEOUTDIR`).
@@ -1414,10 +1525,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeOutDir, null_mut());
-        let raw = deref_as::<f64>(ptr).expect("D_FADEOUTDIR pointer is null");
-        FadeCurvature::new(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_item_info(item, ItemAttributeKey::FadeOutDir, null_mut());
+            let raw = deref_as::<f64>(ptr).expect("D_FADEOUTDIR pointer is null");
+            FadeCurvature::new(raw)
+        }
     }
 
     /// Convenience function which sets the item's fade-out curvature (`D_FADEOUTDIR`).
@@ -1432,12 +1545,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_item_info(
-            item,
-            ItemAttributeKey::FadeOutDir,
-            &value.get() as *const _ as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_item_info(
+                item,
+                ItemAttributeKey::FadeOutDir,
+                &value.get() as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the item's group ID (`I_GROUPID`).
@@ -1452,10 +1567,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::GroupId, null_mut());
-        let raw = deref_as::<i32>(ptr).expect("I_GROUPID pointer is null");
-        ItemGroupId::new(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_item_info(item, ItemAttributeKey::GroupId, null_mut());
+            let raw = deref_as::<i32>(ptr).expect("I_GROUPID pointer is null");
+            ItemGroupId::new(raw)
+        }
     }
 
     /// Convenience function which sets the item's group ID (`D_GROUPID`).
@@ -1470,9 +1587,11 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = if let Some(v) = value { v.get() } else { 0 };
-        self.get_set_media_item_info(item, ItemAttributeKey::GroupId, &raw as *const _ as _);
+        unsafe {
+            self.require_main_thread();
+            let raw = if let Some(v) = value { v.get() } else { 0 };
+            self.get_set_media_item_info(item, ItemAttributeKey::GroupId, &raw as *const _ as _);
+        }
     }
 
     /// Convenience function which returns the track's custom color (`I_CUSTOMCOLOR`).
@@ -1487,10 +1606,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::CustomColor, null_mut());
-        let raw = deref_as::<i32>(ptr).expect("I_CUSTOMCOLOR pointer is null");
-        NativeColorValue::from_raw(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr =
+                self.get_set_media_track_info(track, TrackAttributeKey::CustomColor, null_mut());
+            let raw = deref_as::<i32>(ptr).expect("I_CUSTOMCOLOR pointer is null");
+            NativeColorValue::from_raw(raw)
+        }
     }
 
     /// Convenience function which sets the track's custom color (`I_CUSTOMCOLOR`).
@@ -1505,12 +1627,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_track_info(
-            track,
-            TrackAttributeKey::CustomColor,
-            &value.to_raw() as *const _ as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_track_info(
+                track,
+                TrackAttributeKey::CustomColor,
+                &value.to_raw() as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the item's custom color (`I_CUSTOMCOLOR`).
@@ -1525,10 +1649,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_item_info(item, ItemAttributeKey::CustomColor, null_mut());
-        let raw = deref_as::<i32>(ptr).expect("I_CUSTOMCOLOR pointer is null");
-        NativeColorValue::from_raw(raw)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_item_info(item, ItemAttributeKey::CustomColor, null_mut());
+            let raw = deref_as::<i32>(ptr).expect("I_CUSTOMCOLOR pointer is null");
+            NativeColorValue::from_raw(raw)
+        }
     }
 
     /// Convenience function which sets the item's custom color (`I_CUSTOMCOLOR`).
@@ -1543,12 +1669,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_item_info(
-            item,
-            ItemAttributeKey::CustomColor,
-            &value.to_raw() as *const _ as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_item_info(
+                item,
+                ItemAttributeKey::CustomColor,
+                &value.to_raw() as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which sets the take's name (`P_NAME`).
@@ -1563,8 +1691,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_item_take_info(take, TakeAttributeKey::Name, name.into().as_ptr() as _);
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_item_take_info(
+                take,
+                TakeAttributeKey::Name,
+                name.into().as_ptr() as _,
+            );
+        }
     }
 
     /// Convenience function which grants temporary access to extension-specific data associated
@@ -1582,13 +1716,15 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(
-            track,
-            TrackAttributeKey::Ext(data_id.into().into_inner()),
-            null_mut(),
-        );
-        create_passing_c_str(ptr as *const c_char).map(use_data)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(
+                track,
+                TrackAttributeKey::Ext(data_id.into().into_inner()),
+                null_mut(),
+            );
+            create_passing_c_str(ptr as *const c_char).map(use_data)
+        }
     }
 
     /// Convenience function which sets extension-specific data associated with a track
@@ -1605,12 +1741,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_track_info(
-            track,
-            TrackAttributeKey::Ext(data_id.into().into_inner()),
-            data.into().as_ptr() as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_track_info(
+                track,
+                TrackAttributeKey::Ext(data_id.into().into_inner()),
+                data.into().as_ptr() as _,
+            );
+        }
     }
 
     /// Sets a project info string attribute.
@@ -1647,17 +1785,19 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.GetSetProjectInfo_String(
-            project.to_raw(),
-            attribute_key.into_raw().as_ptr(),
-            value.into().as_ptr() as _,
-            true,
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new("couldn't set project info string"));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.GetSetProjectInfo_String(
+                project.to_raw(),
+                attribute_key.into_raw().as_ptr(),
+                value.into().as_ptr() as _,
+                true,
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new("couldn't set project info string"));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Convenience function which returns the given track's input monitoring mode (`I_RECMON`).
@@ -1672,10 +1812,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMon, null_mut());
-        let irecmon = deref_as::<i32>(ptr).expect("I_RECMON pointer is null");
-        InputMonitoringMode::from_raw(irecmon)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMon, null_mut());
+            let irecmon = deref_as::<i32>(ptr).expect("I_RECMON pointer is null");
+            InputMonitoringMode::from_raw(irecmon)
+        }
     }
 
     /// Convenience function which returns the given track's solo mode (`I_SOLO`).
@@ -1687,10 +1829,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Solo, null_mut());
-        let isolo = deref_as::<i32>(ptr).expect("I_SOLO pointer is null");
-        SoloMode::from_raw(isolo)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Solo, null_mut());
+            let isolo = deref_as::<i32>(ptr).expect("I_SOLO pointer is null");
+            SoloMode::from_raw(isolo)
+        }
     }
 
     /// Convenience function which sets the track's solo state (`I_SOLO`).
@@ -1702,9 +1846,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let value = mode.to_raw();
-        self.get_set_media_track_info(track, TrackAttributeKey::Solo, &value as *const _ as _);
+        unsafe {
+            self.require_main_thread();
+            let value = mode.to_raw();
+            self.get_set_media_track_info(track, TrackAttributeKey::Solo, &value as *const _ as _);
+        }
     }
 
     /// Convenience function which sets whether the track is shown in the mixer (`B_SHOWINMIXER`).
@@ -1718,12 +1864,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_track_info(
-            track,
-            TrackAttributeKey::ShowInMixer,
-            &show as *const _ as _,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_track_info(
+                track,
+                TrackAttributeKey::ShowInMixer,
+                &show as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which sets whether the track is shown in the arrange view (`B_SHOWINTCP`).
@@ -1737,8 +1885,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_track_info(track, TrackAttributeKey::ShowInTcp, &show as *const _ as _);
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_track_info(
+                track,
+                TrackAttributeKey::ShowInTcp,
+                &show as *const _ as _,
+            );
+        }
     }
 
     /// Convenience function which returns the given track's pan mode (I_PANMODE).
@@ -1752,13 +1906,15 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::PanMode, null_mut());
-        let ipanmode = deref_as::<i32>(ptr).expect("I_PANMODE pointer is null");
-        if ipanmode == -1 {
-            return None;
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::PanMode, null_mut());
+            let ipanmode = deref_as::<i32>(ptr).expect("I_PANMODE pointer is null");
+            if ipanmode == -1 {
+                return None;
+            }
+            Some(PanMode::from_raw(ipanmode))
         }
-        Some(PanMode::from_raw(ipanmode))
     }
 
     /// Convenience function which returns the given track's pan (D_PAN).
@@ -1770,10 +1926,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Pan, null_mut());
-        let pan = deref_as::<f64>(ptr).expect("I_PAN pointer is null");
-        ReaperPanValue::new_panic(pan)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Pan, null_mut());
+            let pan = deref_as::<f64>(ptr).expect("I_PAN pointer is null");
+            ReaperPanValue::new_panic(pan)
+        }
     }
 
     /// Convenience function which returns the given track's dual-pan position 1 (D_DUALPANL).
@@ -1788,10 +1946,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::DualPanL, null_mut());
-        let pan = deref_as::<f64>(ptr).expect("D_DUALPANL pointer is null");
-        ReaperPanValue::new_panic(pan)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::DualPanL, null_mut());
+            let pan = deref_as::<f64>(ptr).expect("D_DUALPANL pointer is null");
+            ReaperPanValue::new_panic(pan)
+        }
     }
 
     /// Convenience function which returns the given track's dual-pan position 2 (D_DUALPANR).
@@ -1806,10 +1966,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::DualPanR, null_mut());
-        let pan = deref_as::<f64>(ptr).expect("D_DUALPANR pointer is null");
-        ReaperPanValue::new_panic(pan)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::DualPanR, null_mut());
+            let pan = deref_as::<f64>(ptr).expect("D_DUALPANR pointer is null");
+            ReaperPanValue::new_panic(pan)
+        }
     }
 
     /// Convenience function which returns the given track's width (D_WIDTH).
@@ -1821,10 +1983,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Width, null_mut());
-        let width = deref_as::<f64>(ptr).expect("I_WIDTH pointer is null");
-        ReaperWidthValue::new(width)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Width, null_mut());
+            let width = deref_as::<f64>(ptr).expect("I_WIDTH pointer is null");
+            ReaperWidthValue::new(width)
+        }
     }
 
     /// Convenience function which returns the given track's recording input (I_RECINPUT).
@@ -1839,10 +2003,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecInput, null_mut());
-        let rec_input_index = deref_as::<i32>(ptr).expect("rec_input_index pointer is null");
-        RecordingInput::from_raw(rec_input_index)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecInput, null_mut());
+            let rec_input_index = deref_as::<i32>(ptr).expect("rec_input_index pointer is null");
+            RecordingInput::from_raw(rec_input_index)
+        }
     }
 
     /// Convenience function which returns the given track's recording mode (I_RECMODE).
@@ -1854,10 +2020,12 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMode, null_mut());
-        let rec_mode_index = deref_as::<i32>(ptr).expect("rec_mode_index pointer is null");
-        RecordingMode::from_raw(rec_mode_index)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::RecMode, null_mut());
+            let rec_mode_index = deref_as::<i32>(ptr).expect("rec_mode_index pointer is null");
+            RecordingMode::from_raw(rec_mode_index)
+        }
     }
 
     /// Convenience function which returns the type and location of the given track
@@ -1873,15 +2041,17 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        use TrackLocation::*;
-        match self.get_set_media_track_info(track, TrackAttributeKey::TrackNumber, null_mut())
-            as i32
-        {
-            -1 => Some(MasterTrack),
-            0 => None,
-            n if n > 0 => Some(NormalTrack(n as u32 - 1)),
-            _ => unreachable!(),
+        unsafe {
+            self.require_main_thread();
+            use TrackLocation::*;
+            match self.get_set_media_track_info(track, TrackAttributeKey::TrackNumber, null_mut())
+                as i32
+            {
+                -1 => Some(MasterTrack),
+                0 => None,
+                n if n > 0 => Some(NormalTrack(n as u32 - 1)),
+                _ => unreachable!(),
+            }
         }
     }
 
@@ -1894,8 +2064,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.get_set_media_track_info(track, TrackAttributeKey::Guid, guid as *const _ as *mut _);
+        unsafe {
+            self.require_main_thread();
+            self.get_set_media_track_info(
+                track,
+                TrackAttributeKey::Guid,
+                guid as *const _ as *mut _,
+            );
+        }
     }
 
     /// Convenience function which sets the given track's GUID (GUID).
@@ -1907,9 +2083,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Guid, null_mut());
-        deref_as::<GUID>(ptr).expect("GUID pointer is null")
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Guid, null_mut());
+            deref_as::<GUID>(ptr).expect("GUID pointer is null")
+        }
     }
 
     /// Returns whether we are in the real-time audio thread.
@@ -1996,9 +2174,11 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .CSurf_SetRepeatState(repeat_state, notification_behavior.to_raw());
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .CSurf_SetRepeatState(repeat_state, notification_behavior.to_raw());
+        }
     }
 
     /// Returns `true` if any track in the given project is soloed.
@@ -2025,8 +2205,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.AnyTrackSolo(project.to_raw())
+        unsafe {
+            self.require_main_thread();
+            self.low.AnyTrackSolo(project.to_raw())
+        }
     }
 
     /// Directly simulates a play button hit.
@@ -2053,8 +2235,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.OnPlayButtonEx(project.to_raw());
+        unsafe {
+            self.require_main_thread();
+            self.low.OnPlayButtonEx(project.to_raw());
+        }
     }
 
     /// Directly simulates a stop button hit.
@@ -2082,8 +2266,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.OnStopButtonEx(project.to_raw());
+        unsafe {
+            self.require_main_thread();
+            self.low.OnStopButtonEx(project.to_raw());
+        }
     }
 
     /// Directly simulates a pause button hit.
@@ -2111,8 +2297,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.OnPauseButtonEx(project.to_raw());
+        unsafe {
+            self.require_main_thread();
+            self.low.OnPauseButtonEx(project.to_raw());
+        }
     }
 
     /// Queries the current play state.
@@ -2139,11 +2327,13 @@ where
     where
         UsageScope: AnyThread,
     {
-        let result = self.low.GetPlayStateEx(project.to_raw()) as u32;
-        PlayState {
-            is_playing: result & 1 > 0,
-            is_paused: result & 2 > 0,
-            is_recording: result & 4 > 0,
+        unsafe {
+            let result = self.low.GetPlayStateEx(project.to_raw()) as u32;
+            PlayState {
+                is_playing: result & 1 > 0,
+                is_paused: result & 2 > 0,
+                is_recording: result & 4 > 0,
+            }
         }
     }
 
@@ -2172,8 +2362,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.GetSetRepeatEx(project.to_raw(), -1) > 0
+        unsafe {
+            self.require_main_thread();
+            self.low.GetSetRepeatEx(project.to_raw(), -1) > 0
+        }
     }
 
     /// Sets the repeat state.
@@ -2203,8 +2395,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.GetSetRepeatEx(project.to_raw(), i32::from(repeat));
+        unsafe {
+            self.require_main_thread();
+            self.low.GetSetRepeatEx(project.to_raw(), i32::from(repeat));
+        }
     }
 
     /// Grants temporary access to the data of the given marker/region.
@@ -2246,38 +2440,40 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let mut is_region = MaybeUninit::zeroed();
-        let mut pos = MaybeUninit::zeroed();
-        let mut region_end = MaybeUninit::zeroed();
-        let mut name = MaybeUninit::zeroed();
-        let mut id = MaybeUninit::zeroed();
-        let mut color = MaybeUninit::zeroed();
-        let successful = self.low.EnumProjectMarkers3(
-            project.to_raw(),
-            index as _,
-            is_region.as_mut_ptr(),
-            pos.as_mut_ptr(),
-            region_end.as_mut_ptr(),
-            name.as_mut_ptr(),
-            id.as_mut_ptr(),
-            color.as_mut_ptr(),
-        );
-        if successful == 0 {
-            return use_result(None);
+        unsafe {
+            self.require_main_thread();
+            let mut is_region = MaybeUninit::zeroed();
+            let mut pos = MaybeUninit::zeroed();
+            let mut region_end = MaybeUninit::zeroed();
+            let mut name = MaybeUninit::zeroed();
+            let mut id = MaybeUninit::zeroed();
+            let mut color = MaybeUninit::zeroed();
+            let successful = self.low.EnumProjectMarkers3(
+                project.to_raw(),
+                index as _,
+                is_region.as_mut_ptr(),
+                pos.as_mut_ptr(),
+                region_end.as_mut_ptr(),
+                name.as_mut_ptr(),
+                id.as_mut_ptr(),
+                color.as_mut_ptr(),
+            );
+            if successful == 0 {
+                return use_result(None);
+            }
+            let result = EnumProjectMarkers3Result {
+                position: PositionInSeconds::new_panic(pos.assume_init()),
+                region_end_position: if is_region.assume_init() {
+                    Some(PositionInSeconds::new_panic(region_end.assume_init()))
+                } else {
+                    None
+                },
+                name: create_passing_c_str(name.assume_init()).unwrap(),
+                id: BookmarkId(id.assume_init() as _),
+                color: NativeColor(color.assume_init() as _),
+            };
+            use_result(Some(result))
         }
-        let result = EnumProjectMarkers3Result {
-            position: PositionInSeconds::new_panic(pos.assume_init()),
-            region_end_position: if is_region.assume_init() {
-                Some(PositionInSeconds::new_panic(region_end.assume_init()))
-            } else {
-                None
-            },
-            name: create_passing_c_str(name.assume_init()).unwrap(),
-            id: BookmarkId(id.assume_init() as _),
-            color: NativeColor(color.assume_init() as _),
-        };
-        use_result(Some(result))
     }
 
     /// Creates a PCM source from the given file name.
@@ -2364,12 +2560,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.GoToMarker(
-            project.to_raw(),
-            marker.to_raw(),
-            marker.uses_timeline_order(),
-        );
+        unsafe {
+            self.require_main_thread();
+            self.low.GoToMarker(
+                project.to_raw(),
+                marker.to_raw(),
+                marker.uses_timeline_order(),
+            );
+        }
     }
 
     /// Seeks to the given region after the current one finishes playing (smooth seek).
@@ -2398,12 +2596,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.GoToRegion(
-            project.to_raw(),
-            region.to_raw(),
-            region.uses_timeline_order(),
-        );
+        unsafe {
+            self.require_main_thread();
+            self.low.GoToRegion(
+                project.to_raw(),
+                region.to_raw(),
+                region.uses_timeline_order(),
+            );
+        }
     }
 
     /// Converts the given time into beats.
@@ -2438,26 +2638,28 @@ where
     where
         UsageScope: AnyThread,
     {
-        let mut measures = MaybeUninit::zeroed();
-        let mut measure_length = MaybeUninit::zeroed();
-        let mut full_beats = MaybeUninit::zeroed();
-        let mut common_denom = MaybeUninit::zeroed();
-        let beats_within_measure = self.low.TimeMap2_timeToBeats(
-            project.to_raw(),
-            tpos.get(),
-            measures.as_mut_ptr(),
-            measure_length.as_mut_ptr(),
-            full_beats.as_mut_ptr(),
-            common_denom.as_mut_ptr(),
-        );
-        TimeMap2TimeToBeatsResult {
-            full_beats: PositionInBeats::new_panic(full_beats.assume_init()),
-            measure_index: measures.assume_init(),
-            beats_since_measure: PositionInBeats::new_panic(beats_within_measure),
-            time_signature: TimeSignature {
-                numerator: NonZeroU32::new(measure_length.assume_init() as _).unwrap(),
-                denominator: NonZeroU32::new(common_denom.assume_init() as _).unwrap(),
-            },
+        unsafe {
+            let mut measures = MaybeUninit::zeroed();
+            let mut measure_length = MaybeUninit::zeroed();
+            let mut full_beats = MaybeUninit::zeroed();
+            let mut common_denom = MaybeUninit::zeroed();
+            let beats_within_measure = self.low.TimeMap2_timeToBeats(
+                project.to_raw(),
+                tpos.get(),
+                measures.as_mut_ptr(),
+                measure_length.as_mut_ptr(),
+                full_beats.as_mut_ptr(),
+                common_denom.as_mut_ptr(),
+            );
+            TimeMap2TimeToBeatsResult {
+                full_beats: PositionInBeats::new_panic(full_beats.assume_init()),
+                measure_index: measures.assume_init(),
+                beats_since_measure: PositionInBeats::new_panic(beats_within_measure),
+                time_signature: TimeSignature {
+                    numerator: NonZeroU32::new(measure_length.assume_init() as _).unwrap(),
+                    denominator: NonZeroU32::new(common_denom.assume_init() as _).unwrap(),
+                },
+            }
         }
     }
 
@@ -2493,29 +2695,31 @@ where
     where
         UsageScope: AnyThread,
     {
-        let mut start_qn = MaybeUninit::zeroed();
-        let mut end_qn = MaybeUninit::zeroed();
-        let mut num = MaybeUninit::zeroed();
-        let mut denom = MaybeUninit::zeroed();
-        let mut bpm = MaybeUninit::zeroed();
-        let start_time = self.low.TimeMap_GetMeasureInfo(
-            project.to_raw(),
-            measure_index,
-            start_qn.as_mut_ptr(),
-            end_qn.as_mut_ptr(),
-            num.as_mut_ptr(),
-            denom.as_mut_ptr(),
-            bpm.as_mut_ptr(),
-        );
-        TimeMapGetMeasureInfoResult {
-            start_time: PositionInSeconds::new_panic(start_time),
-            start_qn: PositionInQuarterNotes::new_panic(start_qn.assume_init()),
-            end_qn: PositionInQuarterNotes::new_panic(end_qn.assume_init()),
-            time_signature: TimeSignature {
-                numerator: NonZeroU32::new(num.assume_init() as _).unwrap(),
-                denominator: NonZeroU32::new(denom.assume_init() as _).unwrap(),
-            },
-            tempo: Bpm::new_panic(bpm.assume_init()),
+        unsafe {
+            let mut start_qn = MaybeUninit::zeroed();
+            let mut end_qn = MaybeUninit::zeroed();
+            let mut num = MaybeUninit::zeroed();
+            let mut denom = MaybeUninit::zeroed();
+            let mut bpm = MaybeUninit::zeroed();
+            let start_time = self.low.TimeMap_GetMeasureInfo(
+                project.to_raw(),
+                measure_index,
+                start_qn.as_mut_ptr(),
+                end_qn.as_mut_ptr(),
+                num.as_mut_ptr(),
+                denom.as_mut_ptr(),
+                bpm.as_mut_ptr(),
+            );
+            TimeMapGetMeasureInfoResult {
+                start_time: PositionInSeconds::new_panic(start_time),
+                start_qn: PositionInQuarterNotes::new_panic(start_qn.assume_init()),
+                end_qn: PositionInQuarterNotes::new_panic(end_qn.assume_init()),
+                time_signature: TimeSignature {
+                    numerator: NonZeroU32::new(num.assume_init() as _).unwrap(),
+                    denominator: NonZeroU32::new(denom.assume_init() as _).unwrap(),
+                },
+                tempo: Bpm::new_panic(bpm.assume_init()),
+            }
         }
     }
 
@@ -2553,16 +2757,18 @@ where
     where
         UsageScope: AnyThread,
     {
-        use MeasureMode::*;
-        let tpos = self.low.TimeMap2_beatsToTime(
-            project.to_raw(),
-            bpos.get(),
-            match measure_mode {
-                IgnoreMeasure => null(),
-                FromMeasureAtIndex(i) => &i as *const _,
-            },
-        );
-        PositionInSeconds::new_panic(tpos)
+        unsafe {
+            use MeasureMode::*;
+            let tpos = self.low.TimeMap2_beatsToTime(
+                project.to_raw(),
+                bpos.get(),
+                match measure_mode {
+                    IgnoreMeasure => null(),
+                    FromMeasureAtIndex(i) => &i as *const _,
+                },
+            );
+            PositionInSeconds::new_panic(tpos)
+        }
     }
 
     /// Converts the given quarter-note position to a measure index and returns the measure bounds
@@ -2598,18 +2804,20 @@ where
     where
         UsageScope: AnyThread,
     {
-        let mut start_qn = MaybeUninit::zeroed();
-        let mut end_qn = MaybeUninit::zeroed();
-        let measure = self.low.TimeMap_QNToMeasures(
-            project.to_raw(),
-            qn.get(),
-            start_qn.as_mut_ptr(),
-            end_qn.as_mut_ptr(),
-        );
-        TimeMapQnToMeasuresResult {
-            measure_index: measure,
-            start: PositionInQuarterNotes::new_panic(start_qn.assume_init()),
-            end: PositionInQuarterNotes::new_panic(end_qn.assume_init()),
+        unsafe {
+            let mut start_qn = MaybeUninit::zeroed();
+            let mut end_qn = MaybeUninit::zeroed();
+            let measure = self.low.TimeMap_QNToMeasures(
+                project.to_raw(),
+                qn.get(),
+                start_qn.as_mut_ptr(),
+                end_qn.as_mut_ptr(),
+            );
+            TimeMapQnToMeasuresResult {
+                measure_index: measure,
+                start: PositionInQuarterNotes::new_panic(start_qn.assume_init()),
+                end: PositionInQuarterNotes::new_panic(end_qn.assume_init()),
+            }
         }
     }
 
@@ -2645,8 +2853,10 @@ where
     where
         UsageScope: AnyThread,
     {
-        let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.get());
-        PositionInSeconds::new_panic(tpos)
+        unsafe {
+            let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.get());
+            PositionInSeconds::new_panic(tpos)
+        }
     }
 
     /// Converts the given time to a quarter-note position.
@@ -2681,8 +2891,10 @@ where
     where
         UsageScope: AnyThread,
     {
-        let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.get());
-        PositionInQuarterNotes::new_panic(qn)
+        unsafe {
+            let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.get());
+            PositionInQuarterNotes::new_panic(qn)
+        }
     }
 
     /// Converts the given quarter-note position to time.
@@ -2719,8 +2931,10 @@ where
     where
         UsageScope: AnyThread,
     {
-        let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.get());
-        PositionInSeconds::new_panic(tpos)
+        unsafe {
+            let tpos = self.low.TimeMap2_QNToTime(project.to_raw(), qn.get());
+            PositionInSeconds::new_panic(tpos)
+        }
     }
 
     /// Converts the given time to a quarter-note position.
@@ -2757,8 +2971,10 @@ where
     where
         UsageScope: AnyThread,
     {
-        let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.get());
-        PositionInQuarterNotes::new_panic(qn)
+        unsafe {
+            let qn = self.low.TimeMap2_timeToQN(project.to_raw(), tpos.get());
+            PositionInQuarterNotes::new_panic(qn)
+        }
     }
 
     /// Gets the arrange view start/end time for the given screen coordinates.
@@ -2798,20 +3014,22 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let mut start_time = MaybeUninit::zeroed();
-        let mut end_time = MaybeUninit::zeroed();
-        self.low.GetSet_ArrangeView2(
-            project.to_raw(),
-            false,
-            screen_x_start as _,
-            screen_x_end as _,
-            start_time.as_mut_ptr(),
-            end_time.as_mut_ptr(),
-        );
-        GetSetArrangeView2Result {
-            start_time: PositionInSeconds::new_panic(start_time.assume_init()),
-            end_time: PositionInSeconds::new_panic(end_time.assume_init()),
+        unsafe {
+            self.require_main_thread();
+            let mut start_time = MaybeUninit::zeroed();
+            let mut end_time = MaybeUninit::zeroed();
+            self.low.GetSet_ArrangeView2(
+                project.to_raw(),
+                false,
+                screen_x_start as _,
+                screen_x_end as _,
+                start_time.as_mut_ptr(),
+                end_time.as_mut_ptr(),
+            );
+            GetSetArrangeView2Result {
+                start_time: PositionInSeconds::new_panic(start_time.assume_init()),
+                end_time: PositionInSeconds::new_panic(end_time.assume_init()),
+            }
         }
     }
 
@@ -2847,10 +3065,12 @@ where
     where
         UsageScope: AnyThread,
     {
-        let bpm = self
-            .low
-            .TimeMap2_GetDividedBpmAtTime(project.to_raw(), tpos.get());
-        Bpm::new_panic(bpm)
+        unsafe {
+            let bpm = self
+                .low
+                .TimeMap2_GetDividedBpmAtTime(project.to_raw(), tpos.get());
+            Bpm::new_panic(bpm)
+        }
     }
 
     /// Returns the current position of the edit cursor.
@@ -2888,8 +3108,10 @@ where
     where
         UsageScope: AnyThread,
     {
-        let res = self.low.GetCursorPositionEx(project.to_raw());
-        PositionInSeconds::new(res).map_err(|_| "returned cursor position was invalid".into())
+        unsafe {
+            let res = self.low.GetCursorPositionEx(project.to_raw());
+            PositionInSeconds::new(res).map_err(|_| "returned cursor position was invalid".into())
+        }
     }
 
     /// Returns the latency-compensated actual-what-you-hear position.
@@ -2919,8 +3141,10 @@ where
     where
         UsageScope: AnyThread,
     {
-        let res = self.low.GetPlayPositionEx(project.to_raw());
-        PositionInSeconds::new_panic(res)
+        unsafe {
+            let res = self.low.GetPlayPositionEx(project.to_raw());
+            PositionInSeconds::new_panic(res)
+        }
     }
 
     /// Returns the position of the next audio block being processed.
@@ -2950,8 +3174,10 @@ where
     where
         UsageScope: AnyThread,
     {
-        let res = self.low.GetPlayPosition2Ex(project.to_raw());
-        PositionInSeconds::new_panic(res)
+        unsafe {
+            let res = self.low.GetPlayPosition2Ex(project.to_raw());
+            PositionInSeconds::new_panic(res)
+        }
     }
 
     /// Returns the number of markers and regions in the given project.
@@ -2982,18 +3208,20 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let mut num_markers = MaybeUninit::zeroed();
-        let mut num_regions = MaybeUninit::zeroed();
-        let total_count = self.low.CountProjectMarkers(
-            project.to_raw(),
-            num_markers.as_mut_ptr(),
-            num_regions.as_mut_ptr(),
-        );
-        CountProjectMarkersResult {
-            total_count: total_count as _,
-            marker_count: num_markers.assume_init() as _,
-            region_count: num_regions.assume_init() as _,
+        unsafe {
+            self.require_main_thread();
+            let mut num_markers = MaybeUninit::zeroed();
+            let mut num_regions = MaybeUninit::zeroed();
+            let total_count = self.low.CountProjectMarkers(
+                project.to_raw(),
+                num_markers.as_mut_ptr(),
+                num_regions.as_mut_ptr(),
+            );
+            CountProjectMarkersResult {
+                total_count: total_count as _,
+                marker_count: num_markers.assume_init() as _,
+                region_count: num_regions.assume_init() as _,
+            }
         }
     }
 
@@ -3031,18 +3259,20 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let mut marker_idx = MaybeUninit::zeroed();
-        let mut region_idx = MaybeUninit::zeroed();
-        self.low.GetLastMarkerAndCurRegion(
-            project.to_raw(),
-            time.get(),
-            marker_idx.as_mut_ptr(),
-            region_idx.as_mut_ptr(),
-        );
-        GetLastMarkerAndCurRegionResult {
-            marker_index: make_some_if_not_negative(marker_idx.assume_init()),
-            region_index: make_some_if_not_negative(region_idx.assume_init()),
+        unsafe {
+            self.require_main_thread();
+            let mut marker_idx = MaybeUninit::zeroed();
+            let mut region_idx = MaybeUninit::zeroed();
+            self.low.GetLastMarkerAndCurRegion(
+                project.to_raw(),
+                time.get(),
+                marker_idx.as_mut_ptr(),
+                region_idx.as_mut_ptr(),
+            );
+            GetLastMarkerAndCurRegionResult {
+                marker_index: make_some_if_not_negative(marker_idx.assume_init()),
+                region_index: make_some_if_not_negative(region_idx.assume_init()),
+            }
         }
     }
 
@@ -3080,9 +3310,11 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .Main_OnCommandEx(command_id.to_raw(), flag, project.to_raw());
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .Main_OnCommandEx(command_id.to_raw(), flag, project.to_raw());
+        }
     }
 
     /// Sends an action command to the last focused MIDI editor.
@@ -3165,9 +3397,11 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .CSurf_SetSurfaceMute(track.as_ptr(), mute, notification_behavior.to_raw());
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .CSurf_SetSurfaceMute(track.as_ptr(), mute, notification_behavior.to_raw());
+        }
     }
 
     /// Informs control surfaces that the given track's solo state has changed.
@@ -3185,9 +3419,11 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .CSurf_SetSurfaceSolo(track.as_ptr(), solo, notification_behavior.to_raw());
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .CSurf_SetSurfaceSolo(track.as_ptr(), solo, notification_behavior.to_raw());
+        }
     }
 
     /// Generates a random GUID.
@@ -3280,16 +3516,18 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let (val, valhw, relmode) = value_change.to_raw();
-        self.low.KBD_OnMainActionEx(
-            command_id.to_raw(),
-            val,
-            valhw,
-            relmode,
-            window.to_raw(),
-            project.to_raw(),
-        )
+        unsafe {
+            self.require_main_thread();
+            let (val, valhw, relmode) = value_change.to_raw();
+            self.low.KBD_OnMainActionEx(
+                command_id.to_raw(),
+                val,
+                valhw,
+                relmode,
+                window.to_raw(),
+                project.to_raw(),
+            )
+        }
     }
 
     /// Opens an action picker window for prompting the user to select an action.
@@ -3419,11 +3657,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self
-            .low
-            .projectconfig_var_addr(project.to_raw(), index as _);
-        NonNull::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self
+                .low
+                .projectconfig_var_addr(project.to_raw(), index as _);
+            NonNull::new(ptr)
+        }
     }
 
     /// Opens a file picker.
@@ -3521,8 +3761,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.CountTracks(project.to_raw()) as u32
+        unsafe {
+            self.require_main_thread();
+            self.low.CountTracks(project.to_raw()) as u32
+        }
     }
 
     /// Returns an integer that changes when the project state changes.
@@ -3549,8 +3791,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.GetProjectStateChangeCount(project.to_raw()) as u32
+        unsafe {
+            self.require_main_thread();
+            self.low.GetProjectStateChangeCount(project.to_raw()) as u32
+        }
     }
 
     /// Returns the number of items in the given project.
@@ -3577,8 +3821,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.CountMediaItems(project.to_raw()) as u32
+        unsafe {
+            self.require_main_thread();
+            self.low.CountMediaItems(project.to_raw()) as u32
+        }
     }
 
     /// Returns the length of the given project.
@@ -3607,9 +3853,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let res = self.low.GetProjectLength(project.to_raw());
-        DurationInSeconds::new_panic(res)
+        unsafe {
+            self.require_main_thread();
+            let res = self.low.GetProjectLength(project.to_raw());
+            DurationInSeconds::new_panic(res)
+        }
     }
 
     /// Sets the position of the edit cursor and optionally moves the view and/or seeks.
@@ -3646,13 +3894,15 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.SetEditCurPos2(
-            project.to_raw(),
-            time.get(),
-            options.move_view,
-            options.seek_play,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.low.SetEditCurPos2(
+                project.to_raw(),
+                time.get(),
+                options.move_view,
+                options.seek_play,
+            );
+        }
     }
 
     /// Returns the loop point or time selection time range that's currently set in the given
@@ -3688,30 +3938,32 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let mut start = MaybeUninit::zeroed();
-        let mut end = MaybeUninit::zeroed();
-        use TimeRangeType::*;
-        self.low.GetSet_LoopTimeRange2(
-            project.to_raw(),
-            false,
-            match time_range_type {
-                LoopPoints => true,
-                TimeSelection => false,
-            },
-            start.as_mut_ptr(),
-            end.as_mut_ptr(),
-            false,
-        );
-        let (start, end) = (start.assume_init(), end.assume_init());
-        if start == 0.0 && end == 0.0 {
-            return None;
+        unsafe {
+            self.require_main_thread();
+            let mut start = MaybeUninit::zeroed();
+            let mut end = MaybeUninit::zeroed();
+            use TimeRangeType::*;
+            self.low.GetSet_LoopTimeRange2(
+                project.to_raw(),
+                false,
+                match time_range_type {
+                    LoopPoints => true,
+                    TimeSelection => false,
+                },
+                start.as_mut_ptr(),
+                end.as_mut_ptr(),
+                false,
+            );
+            let (start, end) = (start.assume_init(), end.assume_init());
+            if start == 0.0 && end == 0.0 {
+                return None;
+            }
+            let res = GetLoopTimeRange2Result {
+                start: PositionInSeconds::new_panic(start),
+                end: PositionInSeconds::new_panic(end),
+            };
+            Some(res)
         }
-        let res = GetLoopTimeRange2Result {
-            start: PositionInSeconds::new_panic(start),
-            end: PositionInSeconds::new_panic(end),
-        };
-        Some(res)
     }
 
     /// Sets the loop point or time selection time range for the given project.
@@ -3758,23 +4010,25 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        use AutoSeekBehavior::*;
-        use TimeRangeType::*;
-        self.low.GetSet_LoopTimeRange2(
-            project.to_raw(),
-            true,
-            match time_range_type {
-                LoopPoints => true,
-                TimeSelection => false,
-            },
-            &mut start.get() as _,
-            &mut end.get() as _,
-            match auto_seek_behavior {
-                DenyAutoSeek => false,
-                AllowAutoSeek => true,
-            },
-        );
+        unsafe {
+            self.require_main_thread();
+            use AutoSeekBehavior::*;
+            use TimeRangeType::*;
+            self.low.GetSet_LoopTimeRange2(
+                project.to_raw(),
+                true,
+                match time_range_type {
+                    LoopPoints => true,
+                    TimeSelection => false,
+                },
+                &mut start.get() as _,
+                &mut end.get() as _,
+                match auto_seek_behavior {
+                    DenyAutoSeek => false,
+                    AllowAutoSeek => true,
+                },
+            );
+        }
     }
 
     /// Creates a new track at the given index.
@@ -3811,12 +4065,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.InsertTrackInProject(
-            project.to_raw(),
-            index as i32,
-            (defaults_behavior == TrackDefaultsBehavior::AddDefaultEnvAndFx).into(),
-        );
+        unsafe {
+            self.require_main_thread();
+            self.low.InsertTrackInProject(
+                project.to_raw(),
+                index as i32,
+                (defaults_behavior == TrackDefaultsBehavior::AddDefaultEnvAndFx).into(),
+            );
+        }
     }
 
     /// Creates a new track at the given index.
@@ -4064,13 +4320,15 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.TrackFX_AddByName(
-            track.as_ptr(),
-            fx_name.into().as_ptr(),
-            fx_chain_type == TrackFxChainType::InputFxChain,
-            behavior.to_raw(),
-        )
+        unsafe {
+            self.require_main_thread();
+            self.low.TrackFX_AddByName(
+                track.as_ptr(),
+                fx_name.into().as_ptr(),
+                fx_chain_type == TrackFxChainType::InputFxChain,
+                behavior.to_raw(),
+            )
+        }
     }
 
     /// Returns the index of the first FX instance in a track or monitoring FX chain.
@@ -4090,11 +4348,18 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        match self.track_fx_add_by_name(track, fx_name, fx_chain_type, FxAddByNameBehavior::Query) {
-            -1 => None,
-            idx if idx >= 0 => Some(idx as u32),
-            _ => unreachable!(),
+        unsafe {
+            self.require_main_thread();
+            match self.track_fx_add_by_name(
+                track,
+                fx_name,
+                fx_chain_type,
+                FxAddByNameBehavior::Query,
+            ) {
+                -1 => None,
+                idx if idx >= 0 => Some(idx as u32),
+                _ => unreachable!(),
+            }
         }
     }
 
@@ -4112,15 +4377,17 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        match self.low.TrackFX_GetParamFromIdent(
-            track.as_ptr(),
-            fx_location.to_raw(),
-            ident.into_raw().as_ptr(),
-        ) {
-            -1 => None,
-            idx if idx >= 0 => Some(idx as u32),
-            _ => unreachable!(),
+        unsafe {
+            self.require_main_thread();
+            match self.low.TrackFX_GetParamFromIdent(
+                track.as_ptr(),
+                fx_location.to_raw(),
+                ident.into_raw().as_ptr(),
+            ) {
+                -1 => None,
+                idx if idx >= 0 => Some(idx as u32),
+                _ => unreachable!(),
+            }
         }
     }
 
@@ -4147,11 +4414,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        match self.track_fx_add_by_name(track, fx_name, fx_chain_type, behavior.into()) {
-            -1 => Err(ReaperFunctionError::new("FX couldn't be added")),
-            idx if idx >= 0 => Ok(idx as u32),
-            _ => unreachable!(),
+        unsafe {
+            self.require_main_thread();
+            match self.track_fx_add_by_name(track, fx_name, fx_chain_type, behavior.into()) {
+                -1 => Err(ReaperFunctionError::new("FX couldn't be added")),
+                idx if idx >= 0 => Ok(idx as u32),
+                _ => unreachable!(),
+            }
         }
     }
 
@@ -4168,9 +4437,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .TrackFX_GetEnabled(track.as_ptr(), fx_location.to_raw())
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .TrackFX_GetEnabled(track.as_ptr(), fx_location.to_raw())
+        }
     }
 
     /// Returns whether the given track FX is offline.
@@ -4186,9 +4457,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .TrackFX_GetOffline(track.as_ptr(), fx_location.to_raw())
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .TrackFX_GetOffline(track.as_ptr(), fx_location.to_raw())
+        }
     }
 
     /// Returns the name of the given FX.
@@ -4215,18 +4488,20 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        assert!(buffer_size > 0);
-        let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
-            self.low
-                .TrackFX_GetFXName(track.as_ptr(), fx_location.to_raw(), buffer, max_size)
-        });
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't get FX name (probably FX doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            assert!(buffer_size > 0);
+            let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
+                self.low
+                    .TrackFX_GetFXName(track.as_ptr(), fx_location.to_raw(), buffer, max_size)
+            });
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't get FX name (probably FX doesn't exist)",
+                ));
+            }
+            Ok(name)
         }
-        Ok(name)
     }
 
     /// Returns the name of the given track send or hardware output send.
@@ -4256,18 +4531,20 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        assert!(buffer_size > 0);
-        let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
-            self.low
-                .GetTrackSendName(track.as_ptr(), send_index as i32, buffer, max_size)
-        });
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't get send name (probably send doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            assert!(buffer_size > 0);
+            let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
+                self.low
+                    .GetTrackSendName(track.as_ptr(), send_index as i32, buffer, max_size)
+            });
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't get send name (probably send doesn't exist)",
+                ));
+            }
+            Ok(name)
         }
-        Ok(name)
     }
 
     /// Returns the name of the given track receive.
@@ -4294,18 +4571,20 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        assert!(buffer_size > 0);
-        let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
-            self.low
-                .GetTrackReceiveName(track.as_ptr(), receive_index as i32, buffer, max_size)
-        });
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't get receive name (probably receive doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            assert!(buffer_size > 0);
+            let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
+                self.low
+                    .GetTrackReceiveName(track.as_ptr(), receive_index as i32, buffer, max_size)
+            });
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't get receive name (probably receive doesn't exist)",
+                ));
+            }
+            Ok(name)
         }
-        Ok(name)
     }
 
     /// Returns the index of the first track FX that is a virtual instrument.
@@ -4319,12 +4598,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let index = self.low.TrackFX_GetInstrument(track.as_ptr());
-        if index == -1 {
-            return None;
+        unsafe {
+            self.require_main_thread();
+            let index = self.low.TrackFX_GetInstrument(track.as_ptr());
+            if index == -1 {
+                return None;
+            }
+            Some(index as u32)
         }
-        Some(index as u32)
     }
 
     /// Enables or disables a track FX.
@@ -4340,9 +4621,11 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .TrackFX_SetEnabled(track.as_ptr(), fx_location.to_raw(), enabled);
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .TrackFX_SetEnabled(track.as_ptr(), fx_location.to_raw(), enabled);
+        }
     }
 
     /// Sets the given track FX offline or online.
@@ -4358,9 +4641,11 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .TrackFX_SetOffline(track.as_ptr(), fx_location.to_raw(), offline);
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .TrackFX_SetOffline(track.as_ptr(), fx_location.to_raw(), offline);
+        }
     }
 
     /// Returns the number of parameters of given track FX.
@@ -4376,9 +4661,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .TrackFX_GetNumParams(track.as_ptr(), fx_location.to_raw()) as u32
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .TrackFX_GetNumParams(track.as_ptr(), fx_location.to_raw()) as u32
+        }
     }
 
     /// Returns the audio device input/output latency in samples.
@@ -4436,23 +4723,25 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        assert!(buffer_size > 0);
-        let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
-            self.low.TrackFX_GetParamName(
-                track.as_ptr(),
-                fx_location.to_raw(),
-                param_index as i32,
-                buffer,
-                max_size,
-            )
-        });
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't get FX parameter name (probably FX or parameter doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            assert!(buffer_size > 0);
+            let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
+                self.low.TrackFX_GetParamName(
+                    track.as_ptr(),
+                    fx_location.to_raw(),
+                    param_index as i32,
+                    buffer,
+                    max_size,
+                )
+            });
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't get FX parameter name (probably FX or parameter doesn't exist)",
+                ));
+            }
+            Ok(name)
         }
-        Ok(name)
     }
 
     /// Returns the current value of the given track FX parameter formatted as string.
@@ -4481,23 +4770,25 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        assert!(buffer_size > 0);
-        let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
-            self.low.TrackFX_GetFormattedParamValue(
-                track.as_ptr(),
-                fx_location.to_raw(),
-                param_index as i32,
-                buffer,
-                max_size,
-            )
-        });
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't format current FX parameter value (probably FX or parameter doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            assert!(buffer_size > 0);
+            let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
+                self.low.TrackFX_GetFormattedParamValue(
+                    track.as_ptr(),
+                    fx_location.to_raw(),
+                    param_index as i32,
+                    buffer,
+                    max_size,
+                )
+            });
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't format current FX parameter value (probably FX or parameter doesn't exist)",
+                ));
+            }
+            Ok(name)
         }
-        Ok(name)
     }
 
     /// Returns the given value formatted as string according to the given track FX parameter.
@@ -4534,24 +4825,26 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        assert!(buffer_size > 0);
-        let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
-            self.low.TrackFX_FormatParamValueNormalized(
-                track.as_ptr(),
-                fx_location.to_raw(),
-                param_index as i32,
-                param_value.get(),
-                buffer,
-                max_size,
-            )
-        });
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't format FX parameter value (FX maybe doesn't support Cockos extensions or FX or parameter doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            assert!(buffer_size > 0);
+            let (name, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
+                self.low.TrackFX_FormatParamValueNormalized(
+                    track.as_ptr(),
+                    fx_location.to_raw(),
+                    param_index as i32,
+                    param_value.get(),
+                    buffer,
+                    max_size,
+                )
+            });
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't format FX parameter value (FX maybe doesn't support Cockos extensions or FX or parameter doesn't exist)",
+                ));
+            }
+            Ok(name)
         }
-        Ok(name)
     }
 
     /// Sets the value of the given track FX parameter.
@@ -4578,18 +4871,20 @@ where
     where
         UsageScope: AnyThread,
     {
-        let successful = self.low.TrackFX_SetParamNormalized(
-            track.as_ptr(),
-            fx_location.to_raw(),
-            param_index as i32,
-            param_value.get(),
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't set FX parameter value (probably FX or parameter doesn't exist)",
-            ));
+        unsafe {
+            let successful = self.low.TrackFX_SetParamNormalized(
+                track.as_ptr(),
+                fx_location.to_raw(),
+                param_index as i32,
+                param_value.get(),
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't set FX parameter value (probably FX or parameter doesn't exist)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Notifies REAPER that we are done changing parameter values
@@ -4617,15 +4912,19 @@ where
     where
         UsageScope: AnyThread,
     {
-        let successful =
-            self.low
-                .TrackFX_EndParamEdit(track.as_ptr(), fx_location.to_raw(), param_index as i32);
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't end FX parameter edit (probably FX or parameter doesn't exist)",
-            ));
+        unsafe {
+            let successful = self.low.TrackFX_EndParamEdit(
+                track.as_ptr(),
+                fx_location.to_raw(),
+                param_index as i32,
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't end FX parameter edit (probably FX or parameter doesn't exist)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Returns information about the (last) focused FX window.
@@ -4852,14 +5151,16 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.TrackFX_CopyToTrack(
-            source.0.as_ptr(),
-            source.1.to_raw(),
-            destination.0.as_ptr(),
-            destination.1.to_raw(),
-            transfer_behavior == TransferBehavior::Move,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.low.TrackFX_CopyToTrack(
+                source.0.as_ptr(),
+                source.1.to_raw(),
+                destination.0.as_ptr(),
+                destination.1.to_raw(),
+                transfer_behavior == TransferBehavior::Move,
+            );
+        }
     }
 
     /// Removes the given FX from the track FX chain.
@@ -4879,16 +5180,18 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let succesful = self
-            .low
-            .TrackFX_Delete(track.as_ptr(), fx_location.to_raw());
-        if !succesful {
-            return Err(ReaperFunctionError::new(
-                "couldn't delete FX (probably FX doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let succesful = self
+                .low
+                .TrackFX_Delete(track.as_ptr(), fx_location.to_raw());
+            if !succesful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't delete FX (probably FX doesn't exist)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Returns information about the given FX parameter's step sizes.
@@ -4915,34 +5218,36 @@ where
     where
         UsageScope: AnyThread,
     {
-        // It's important to zero these variables (could also do that without MaybeUninit) because
-        // if REAPER returns true, that doesn't always mean that it initialized all of the variables
-        // correctly. Learned this the hard way with some super random results coming up.
-        let mut step = MaybeUninit::zeroed();
-        let mut small_step = MaybeUninit::zeroed();
-        let mut large_step = MaybeUninit::zeroed();
-        let mut is_toggle = MaybeUninit::zeroed();
-        let successful = self.low.TrackFX_GetParameterStepSizes(
-            track.as_ptr(),
-            fx_location.to_raw(),
-            param_index as i32,
-            step.as_mut_ptr(),
-            small_step.as_mut_ptr(),
-            large_step.as_mut_ptr(),
-            is_toggle.as_mut_ptr(),
-        );
-        if !successful {
-            return None;
-        }
-        let is_toggle = is_toggle.assume_init();
-        if is_toggle {
-            Some(GetParameterStepSizesResult::Toggle)
-        } else {
-            Some(GetParameterStepSizesResult::Normal {
-                normal_step: step.assume_init(),
-                small_step: make_some_if_greater_than_zero(small_step.assume_init()),
-                large_step: make_some_if_greater_than_zero(large_step.assume_init()),
-            })
+        unsafe {
+            // It's important to zero these variables (could also do that without MaybeUninit) because
+            // if REAPER returns true, that doesn't always mean that it initialized all of the variables
+            // correctly. Learned this the hard way with some super random results coming up.
+            let mut step = MaybeUninit::zeroed();
+            let mut small_step = MaybeUninit::zeroed();
+            let mut large_step = MaybeUninit::zeroed();
+            let mut is_toggle = MaybeUninit::zeroed();
+            let successful = self.low.TrackFX_GetParameterStepSizes(
+                track.as_ptr(),
+                fx_location.to_raw(),
+                param_index as i32,
+                step.as_mut_ptr(),
+                small_step.as_mut_ptr(),
+                large_step.as_mut_ptr(),
+                is_toggle.as_mut_ptr(),
+            );
+            if !successful {
+                return None;
+            }
+            let is_toggle = is_toggle.assume_init();
+            if is_toggle {
+                Some(GetParameterStepSizesResult::Toggle)
+            } else {
+                Some(GetParameterStepSizesResult::Normal {
+                    normal_step: step.assume_init(),
+                    small_step: make_some_if_greater_than_zero(small_step.assume_init()),
+                    large_step: make_some_if_greater_than_zero(large_step.assume_init()),
+                })
+            }
         }
     }
 
@@ -4963,22 +5268,24 @@ where
     where
         UsageScope: AnyThread,
     {
-        let mut min_val = MaybeUninit::uninit();
-        let mut max_val = MaybeUninit::uninit();
-        let mut mid_val = MaybeUninit::uninit();
-        let value = self.low.TrackFX_GetParamEx(
-            track.as_ptr(),
-            fx_location.to_raw(),
-            param_index as i32,
-            min_val.as_mut_ptr(),
-            max_val.as_mut_ptr(),
-            mid_val.as_mut_ptr(),
-        );
-        GetParamExResult {
-            current_value: value,
-            min_value: min_val.assume_init(),
-            mid_value: mid_val.assume_init(),
-            max_value: max_val.assume_init(),
+        unsafe {
+            let mut min_val = MaybeUninit::uninit();
+            let mut max_val = MaybeUninit::uninit();
+            let mut mid_val = MaybeUninit::uninit();
+            let value = self.low.TrackFX_GetParamEx(
+                track.as_ptr(),
+                fx_location.to_raw(),
+                param_index as i32,
+                min_val.as_mut_ptr(),
+                max_val.as_mut_ptr(),
+                mid_val.as_mut_ptr(),
+            );
+            GetParamExResult {
+                current_value: value,
+                min_value: min_val.assume_init(),
+                mid_value: mid_val.assume_init(),
+                max_value: max_val.assume_init(),
+            }
         }
     }
 
@@ -5007,22 +5314,24 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let (buffer, successful) = with_buffer(buffer_size, |buffer, max_size| {
-            self.low.TrackFX_GetNamedConfigParm(
-                track.as_ptr(),
-                fx_location.to_raw(),
-                param_name.into().as_ptr(),
-                buffer,
-                max_size,
-            )
-        });
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't get named parameter value",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let (buffer, successful) = with_buffer(buffer_size, |buffer, max_size| {
+                self.low.TrackFX_GetNamedConfigParm(
+                    track.as_ptr(),
+                    fx_location.to_raw(),
+                    param_name.into().as_ptr(),
+                    buffer,
+                    max_size,
+                )
+            });
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't get named parameter value",
+                ));
+            }
+            Ok(buffer)
         }
-        Ok(buffer)
     }
 
     /// Like [`track_fx_get_named_config_parm`](Self::track_fx_get_named_config_parm)
@@ -5046,14 +5355,16 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        let mut bytes =
-            self.track_fx_get_named_config_parm(track, fx_location, param_name, buffer_size)?;
-        if let Some(nul_byte_index) = bytes.iter().position(|b| *b == 0) {
-            // Crop end of vector so that it doesn't include the nul terminator anymore.
-            bytes.resize(nul_byte_index, 0);
-            Ok(ReaperString::new(CString::from_vec_unchecked(bytes)))
-        } else {
-            Err(ReaperFunctionError::new("result is not a string"))
+        unsafe {
+            let mut bytes =
+                self.track_fx_get_named_config_parm(track, fx_location, param_name, buffer_size)?;
+            if let Some(nul_byte_index) = bytes.iter().position(|b| *b == 0) {
+                // Crop end of vector so that it doesn't include the nul terminator anymore.
+                bytes.resize(nul_byte_index, 0);
+                Ok(ReaperString::new(CString::from_vec_unchecked(bytes)))
+            } else {
+                Err(ReaperFunctionError::new("result is not a string"))
+            }
         }
     }
 
@@ -5080,19 +5391,21 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.TrackFX_SetNamedConfigParm(
-            track.as_ptr(),
-            fx_location.to_raw(),
-            param_name.into().as_ptr(),
-            value,
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't set named parameter value",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.TrackFX_SetNamedConfigParm(
+                track.as_ptr(),
+                fx_location.to_raw(),
+                param_name.into().as_ptr(),
+                value,
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't set named parameter value",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Starts a new undo block.
@@ -5131,8 +5444,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.Undo_BeginBlock2(project.to_raw());
+        unsafe {
+            self.require_main_thread();
+            self.low.Undo_BeginBlock2(project.to_raw());
+        }
     }
 
     /// Ends the current undo block.
@@ -5170,12 +5485,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.Undo_EndBlock2(
-            project.to_raw(),
-            description.into().as_ptr(),
-            scope.to_raw(),
-        );
+        unsafe {
+            self.require_main_thread();
+            self.low.Undo_EndBlock2(
+                project.to_raw(),
+                description.into().as_ptr(),
+                scope.to_raw(),
+            );
+        }
     }
 
     /// Grants temporary access to the the description of the last undoable operation, if any.
@@ -5211,9 +5528,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.Undo_CanUndo2(project.to_raw());
-        create_passing_c_str(ptr).map(use_description)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.Undo_CanUndo2(project.to_raw());
+            create_passing_c_str(ptr).map(use_description)
+        }
     }
 
     /// Grants temporary access to the description of the next redoable operation, if any.
@@ -5249,9 +5568,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.Undo_CanRedo2(project.to_raw());
-        create_passing_c_str(ptr).map(use_description)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.Undo_CanRedo2(project.to_raw());
+            create_passing_c_str(ptr).map(use_description)
+        }
     }
 
     /// Makes the last undoable operation undone.
@@ -5281,8 +5602,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.Undo_DoUndo2(project.to_raw()) != 0
+        unsafe {
+            self.require_main_thread();
+            self.low.Undo_DoUndo2(project.to_raw()) != 0
+        }
     }
 
     /// Executes the next redoable action.
@@ -5312,8 +5635,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.Undo_DoRedo2(project.to_raw()) != 0
+        unsafe {
+            self.require_main_thread();
+            self.low.Undo_DoRedo2(project.to_raw()) != 0
+        }
     }
 
     /// Marks the given project as dirty.
@@ -5346,8 +5671,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.MarkProjectDirty(project.to_raw());
+        unsafe {
+            self.require_main_thread();
+            self.low.MarkProjectDirty(project.to_raw());
+        }
     }
 
     /// Returns whether the given project is dirty.
@@ -5381,8 +5708,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.IsProjectDirty(project.to_raw()) != 0
+        unsafe {
+            self.require_main_thread();
+            self.low.IsProjectDirty(project.to_raw()) != 0
+        }
     }
 
     /// Notifies all control surfaces that something in the track list has changed.
@@ -5415,9 +5744,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let result = self.low.GetTrackAutomationMode(track.as_ptr());
-        AutomationMode::from_raw(result)
+        unsafe {
+            self.require_main_thread();
+            let result = self.low.GetTrackAutomationMode(track.as_ptr());
+            AutomationMode::from_raw(result)
+        }
     }
 
     /// Extracts an RGB color from the given OS-dependent color.
@@ -5490,9 +5821,11 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .SetTrackAutomationMode(track.as_ptr(), automation_mode.to_raw());
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .SetTrackAutomationMode(track.as_ptr(), automation_mode.to_raw());
+        }
     }
 
     /// Returns the global track automation override, if any.
@@ -5540,11 +5873,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self
-            .low
-            .GetTrackEnvelopeByChunkName(track.as_ptr(), chunk_name.into_raw().as_ptr());
-        TrackEnvelope::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self
+                .low
+                .GetTrackEnvelopeByChunkName(track.as_ptr(), chunk_name.into_raw().as_ptr());
+            TrackEnvelope::new(ptr)
+        }
     }
 
     /// Returns the track envelope for the given track and envelope display name.
@@ -5565,11 +5900,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self
-            .low
-            .GetTrackEnvelopeByName(track.as_ptr(), env_name.into().as_ptr());
-        TrackEnvelope::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self
+                .low
+                .GetTrackEnvelopeByName(track.as_ptr(), env_name.into().as_ptr());
+            TrackEnvelope::new(ptr)
+        }
     }
 
     /// Returns the current peak volume for the given track channel.
@@ -5581,9 +5918,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let result = self.low.Track_GetPeakInfo(track.as_ptr(), channel as _);
-        ReaperVolumeValue::new_panic(result)
+        unsafe {
+            self.require_main_thread();
+            let result = self.low.Track_GetPeakInfo(track.as_ptr(), channel as _);
+            ReaperVolumeValue::new_panic(result)
+        }
     }
 
     /// Gets a track attribute as numerical value.
@@ -5599,9 +5938,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .GetMediaTrackInfo_Value(track.as_ptr(), attribute_key.into_raw().as_ptr())
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .GetMediaTrackInfo_Value(track.as_ptr(), attribute_key.into_raw().as_ptr())
+        }
     }
 
     /// Gets a track track send, hardware output send or track receive attribute as numerical value.
@@ -5619,13 +5960,15 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.GetTrackSendInfo_Value(
-            track.as_ptr(),
-            category.to_raw(),
-            send_index as i32,
-            attribute_key.into_raw().as_ptr(),
-        )
+        unsafe {
+            self.require_main_thread();
+            self.low.GetTrackSendInfo_Value(
+                track.as_ptr(),
+                category.to_raw(),
+                send_index as i32,
+                attribute_key.into_raw().as_ptr(),
+            )
+        }
     }
 
     /// Counts the number of items in the given track.
@@ -5637,8 +5980,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.CountTrackMediaItems(track.as_ptr()) as u32
+        unsafe {
+            self.require_main_thread();
+            self.low.CountTrackMediaItems(track.as_ptr()) as u32
+        }
     }
 
     /// Counts the number of FX parameter knobs displayed on the track control panel.
@@ -5650,8 +5995,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.CountTCPFXParms(project.to_raw(), track.as_ptr()) as u32
+        unsafe {
+            self.require_main_thread();
+            self.low.CountTCPFXParms(project.to_raw(), track.as_ptr()) as u32
+        }
     }
 
     /// Returns information about a specific FX parameter knob displayed on the track control panel.
@@ -5668,25 +6015,27 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let mut fx_index = MaybeUninit::uninit();
-        let mut param_index = MaybeUninit::uninit();
-        let successful = self.low.GetTCPFXParm(
-            project.to_raw(),
-            track.as_ptr(),
-            index as _,
-            fx_index.as_mut_ptr(),
-            param_index.as_mut_ptr(),
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new("couldn't get TCP FX param info"));
+        unsafe {
+            self.require_main_thread();
+            let mut fx_index = MaybeUninit::uninit();
+            let mut param_index = MaybeUninit::uninit();
+            let successful = self.low.GetTCPFXParm(
+                project.to_raw(),
+                track.as_ptr(),
+                index as _,
+                fx_index.as_mut_ptr(),
+                param_index.as_mut_ptr(),
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new("couldn't get TCP FX param info"));
+            }
+            let fx_index = fx_index.assume_init();
+            let result = GetTcpFxParmResult {
+                fx_location: TrackFxLocation::from_raw(fx_index),
+                param_index: param_index.assume_init() as u32,
+            };
+            Ok(result)
         }
-        let fx_index = fx_index.assume_init();
-        let result = GetTcpFxParmResult {
-            fx_location: TrackFxLocation::from_raw(fx_index),
-            param_index: param_index.assume_init() as u32,
-        };
-        Ok(result)
     }
 
     /// Returns the media item on the given track at the given index.
@@ -5698,9 +6047,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.GetTrackMediaItem(track.as_ptr(), item_idx as _);
-        MediaItem::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.GetTrackMediaItem(track.as_ptr(), item_idx as _);
+            MediaItem::new(ptr)
+        }
     }
 
     /// Gets the number of FX instances on the given track's normal FX chain.
@@ -5712,8 +6063,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.TrackFX_GetCount(track.as_ptr()) as u32
+        unsafe {
+            self.require_main_thread();
+            self.low.TrackFX_GetCount(track.as_ptr()) as u32
+        }
     }
 
     /// Gets the number of FX instances on the given track's input FX chain.
@@ -5727,8 +6080,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.TrackFX_GetRecCount(track.as_ptr()) as u32
+        unsafe {
+            self.require_main_thread();
+            self.low.TrackFX_GetRecCount(track.as_ptr()) as u32
+        }
     }
 
     /// Returns the GUID of the given track FX.
@@ -5748,13 +6103,15 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self
-            .low
-            .TrackFX_GetFXGUID(track.as_ptr(), fx_location.to_raw());
-        deref(ptr).ok_or_else(|| {
-            ReaperFunctionError::new("couldn't get FX GUID (probably FX doesn't exist)")
-        })
+        unsafe {
+            self.require_main_thread();
+            let ptr = self
+                .low
+                .TrackFX_GetFXGUID(track.as_ptr(), fx_location.to_raw());
+            deref(ptr).ok_or_else(|| {
+                ReaperFunctionError::new("couldn't get FX GUID (probably FX doesn't exist)")
+            })
+        }
     }
 
     /// Returns the current value of the given track FX in REAPER-normalized form.
@@ -5780,12 +6137,14 @@ where
     where
         UsageScope: AnyThread,
     {
-        let raw_value = self.low.TrackFX_GetParamNormalized(
-            track.as_ptr(),
-            fx_location.to_raw(),
-            param_index as i32,
-        );
-        ReaperNormalizedFxParamValue::new(raw_value)
+        unsafe {
+            let raw_value = self.low.TrackFX_GetParamNormalized(
+                track.as_ptr(),
+                fx_location.to_raw(),
+                param_index as i32,
+            );
+            ReaperNormalizedFxParamValue::new(raw_value)
+        }
     }
 
     /// Returns the master track of the given project.
@@ -5813,9 +6172,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.GetMasterTrack(project.to_raw());
-        require_media_track_panic(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.GetMasterTrack(project.to_raw());
+            require_media_track_panic(ptr)
+        }
     }
 
     /// Converts the given GUID to a string (including braces).
@@ -5871,13 +6232,15 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let (reaper_string, _) = with_string_buffer(buffer_size, |buffer, max_size| {
-            self.low
-                .GetProjectPathEx(project.to_raw(), buffer, max_size)
-        });
-        let owned_string = reaper_string.into_string();
-        Utf8PathBuf::from(owned_string)
+        unsafe {
+            self.require_main_thread();
+            let (reaper_string, _) = with_string_buffer(buffer_size, |buffer, max_size| {
+                self.low
+                    .GetProjectPathEx(project.to_raw(), buffer, max_size)
+            });
+            let owned_string = reaper_string.into_string();
+            Utf8PathBuf::from(owned_string)
+        }
     }
 
     /// Creates a marker or region.
@@ -5920,24 +6283,26 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let (is_region, start, end) = match pos {
-            MarkerOrRegionPosition::Marker(p) => (false, p.get(), 0.0),
-            MarkerOrRegionPosition::Region(s, e) => (true, s.get(), e.get()),
-        };
-        let index = self.low.AddProjectMarker2(
-            project.to_raw(),
-            is_region,
-            start,
-            end,
-            name.into().as_ptr(),
-            at_index.map(|i| i as i32).unwrap_or(-1),
-            color.map(|c| c.to_raw()).unwrap_or(0),
-        );
-        if index < 0 {
-            return Err(ReaperFunctionError::new("failed to add project marker"));
+        unsafe {
+            self.require_main_thread();
+            let (is_region, start, end) = match pos {
+                MarkerOrRegionPosition::Marker(p) => (false, p.get(), 0.0),
+                MarkerOrRegionPosition::Region(s, e) => (true, s.get(), e.get()),
+            };
+            let index = self.low.AddProjectMarker2(
+                project.to_raw(),
+                is_region,
+                start,
+                end,
+                name.into().as_ptr(),
+                at_index.map(|i| i as i32).unwrap_or(-1),
+                color.map(|c| c.to_raw()).unwrap_or(0),
+            );
+            if index < 0 {
+                return Err(ReaperFunctionError::new("failed to add project marker"));
+            }
+            Ok(index as u32)
         }
-        Ok(index as u32)
     }
 
     /// Returns the master tempo of the current project.
@@ -5979,12 +6344,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.SetCurrentBPM(
-            project.to_raw(),
-            tempo.get(),
-            undo_behavior == UndoBehavior::AddUndoPoint,
-        );
+        unsafe {
+            self.require_main_thread();
+            self.low.SetCurrentBPM(
+                project.to_raw(),
+                tempo.get(),
+                undo_behavior == UndoBehavior::AddUndoPoint,
+            );
+        }
     }
 
     /// Count the number of tempo/time signature markers in the project.
@@ -6011,8 +6378,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.CountTempoTimeSigMarkers(project.to_raw()) as u32
+        unsafe {
+            self.require_main_thread();
+            self.low.CountTempoTimeSigMarkers(project.to_raw()) as u32
+        }
     }
 
     /// Converts the given playback speed factor to a normalized play rate.
@@ -6068,9 +6437,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self.low.Master_GetPlayRate(project.to_raw());
-        PlaybackSpeedFactor(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self.low.Master_GetPlayRate(project.to_raw());
+            PlaybackSpeedFactor(raw)
+        }
     }
 
     /// Returns the master play rate of the given project at the given time.
@@ -6105,10 +6476,12 @@ where
     where
         UsageScope: AnyThread,
     {
-        let raw = self
-            .low
-            .Master_GetPlayRateAtTime(time.get(), project.to_raw());
-        PlaybackSpeedFactor(raw)
+        unsafe {
+            let raw = self
+                .low
+                .Master_GetPlayRateAtTime(time.get(), project.to_raw());
+            PlaybackSpeedFactor(raw)
+        }
     }
 
     /// Sets the master play rate of the current project.
@@ -6189,13 +6562,15 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self.low.CSurf_OnInputMonitorChangeEx(
-            track.as_ptr(),
-            mode.to_raw(),
-            gang_behavior == GangBehavior::AllowGang,
-        );
-        InputMonitoringMode::from_raw(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self.low.CSurf_OnInputMonitorChangeEx(
+                track.as_ptr(),
+                mode.to_raw(),
+                gang_behavior == GangBehavior::AllowGang,
+            );
+            InputMonitoringMode::from_raw(raw)
+        }
     }
 
     /// Sets the input monitoring mode of the given track.
@@ -6215,11 +6590,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self
-            .low
-            .SetTrackUIInputMonitor(track.as_ptr(), mode.to_raw(), flags.bits() as _);
-        InputMonitoringMode::from_raw(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw =
+                self.low
+                    .SetTrackUIInputMonitor(track.as_ptr(), mode.to_raw(), flags.bits() as _);
+            InputMonitoringMode::from_raw(raw)
+        }
     }
 
     /// Scrolls the mixer so that the given track is the leftmost visible track.
@@ -6235,9 +6612,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.SetMixerScroll(track.as_ptr());
-        MediaTrack::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.SetMixerScroll(track.as_ptr());
+            MediaTrack::new(ptr)
+        }
     }
 
     /// Creates a new media item.
@@ -6252,9 +6631,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.AddMediaItemToTrack(track.as_ptr());
-        MediaItem::new(ptr).ok_or(ReaperFunctionError::new("couldn't add item to track"))
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.AddMediaItemToTrack(track.as_ptr());
+            MediaItem::new(ptr).ok_or(ReaperFunctionError::new("couldn't add item to track"))
+        }
     }
 
     /// Deletes the given media item.
@@ -6274,14 +6655,16 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.DeleteTrackMediaItem(track.as_ptr(), item.as_ptr());
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "deletion of media item not successful",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.DeleteTrackMediaItem(track.as_ptr(), item.as_ptr());
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "deletion of media item not successful",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Creates a new take in an item.
@@ -6296,9 +6679,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.AddTakeToMediaItem(item.as_ptr());
-        MediaItemTake::new(ptr).ok_or(ReaperFunctionError::new("couldn't add take to item"))
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.AddTakeToMediaItem(item.as_ptr());
+            MediaItemTake::new(ptr).ok_or(ReaperFunctionError::new("couldn't add take to item"))
+        }
     }
 
     /// Sets the position of the given item.
@@ -6319,16 +6704,18 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.SetMediaItemPosition(
-            item.as_ptr(),
-            pos.get(),
-            refresh_behavior == UiRefreshBehavior::Refresh,
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new("couldn't set item position"));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.SetMediaItemPosition(
+                item.as_ptr(),
+                pos.get(),
+                refresh_behavior == UiRefreshBehavior::Refresh,
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new("couldn't set item position"));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Sets the length of the given item.
@@ -6349,16 +6736,18 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.SetMediaItemLength(
-            item.as_ptr(),
-            length.get(),
-            refresh_behavior == UiRefreshBehavior::Refresh,
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new("couldn't set item length"));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.SetMediaItemLength(
+                item.as_ptr(),
+                length.get(),
+                refresh_behavior == UiRefreshBehavior::Refresh,
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new("couldn't set item length"));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Selects or unselects the given media item.
@@ -6370,8 +6759,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.SetMediaItemSelected(item.as_ptr(), selected);
+        unsafe {
+            self.require_main_thread();
+            self.low.SetMediaItemSelected(item.as_ptr(), selected);
+        }
     }
 
     /// Sets a track attribute as numerical value.
@@ -6392,18 +6783,20 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.SetMediaTrackInfo_Value(
-            track.as_ptr(),
-            attribute_key.into_raw().as_ptr(),
-            new_value,
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't set track attribute (maybe attribute key is invalid)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.SetMediaTrackInfo_Value(
+                track.as_ptr(),
+                attribute_key.into_raw().as_ptr(),
+                new_value,
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't set track attribute (maybe attribute key is invalid)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Sets a track track send, hardware output send or track receive attribute as numerical value.
@@ -6426,20 +6819,22 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.SetTrackSendInfo_Value(
-            track.as_ptr(),
-            category.to_raw(),
-            send_index as i32,
-            attribute_key.into_raw().as_ptr(),
-            new_value,
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't set track send attribute (maybe attribute key is invalid)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.SetTrackSendInfo_Value(
+                track.as_ptr(),
+                category.to_raw(),
+                send_index as i32,
+                attribute_key.into_raw().as_ptr(),
+                new_value,
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't set track send attribute (maybe attribute key is invalid)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Stuffs a 3-byte MIDI message into a queue or send it to an external MIDI hardware.
@@ -6500,22 +6895,24 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        // We zero them just for being safe.
-        let mut volume = MaybeUninit::zeroed();
-        let mut pan = MaybeUninit::zeroed();
-        let successful =
-            self.low
-                .GetTrackUIVolPan(track.as_ptr(), volume.as_mut_ptr(), pan.as_mut_ptr());
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't get track volume and pan",
-            ));
+        unsafe {
+            self.require_main_thread();
+            // We zero them just for being safe.
+            let mut volume = MaybeUninit::zeroed();
+            let mut pan = MaybeUninit::zeroed();
+            let successful =
+                self.low
+                    .GetTrackUIVolPan(track.as_ptr(), volume.as_mut_ptr(), pan.as_mut_ptr());
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't get track volume and pan",
+                ));
+            }
+            Ok(VolumeAndPan {
+                volume: ReaperVolumeValue::new_panic(volume.assume_init()),
+                pan: ReaperPanValue::new_panic(pan.assume_init()),
+            })
         }
-        Ok(VolumeAndPan {
-            volume: ReaperVolumeValue::new_panic(volume.assume_init()),
-            pan: ReaperPanValue::new_panic(pan.assume_init()),
-        })
     }
 
     /// Returns the given track's mute state. Also returns the correct value during the process of
@@ -6532,14 +6929,16 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        // We zero them just for being safe.
-        let mut mute = MaybeUninit::zeroed();
-        let successful = self.low.GetTrackUIMute(track.as_ptr(), mute.as_mut_ptr());
-        if !successful {
-            return Err(ReaperFunctionError::new("couldn't get track mute"));
+        unsafe {
+            self.require_main_thread();
+            // We zero them just for being safe.
+            let mut mute = MaybeUninit::zeroed();
+            let successful = self.low.GetTrackUIMute(track.as_ptr(), mute.as_mut_ptr());
+            if !successful {
+                return Err(ReaperFunctionError::new("couldn't get track mute"));
+            }
+            Ok(mute.assume_init())
         }
-        Ok(mute.assume_init())
     }
 
     /// Returns the given track's complete pan. Also returns the correct value during the process of
@@ -6559,27 +6958,29 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        // We zero them just for being safe.
-        let mut pan_1 = MaybeUninit::zeroed();
-        let mut pan_2 = MaybeUninit::zeroed();
-        let mut pan_mode = MaybeUninit::zeroed();
-        let successful = self.low.GetTrackUIPan(
-            track.as_ptr(),
-            pan_1.as_mut_ptr(),
-            pan_2.as_mut_ptr(),
-            pan_mode.as_mut_ptr(),
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new("couldn't get track pan"));
+        unsafe {
+            self.require_main_thread();
+            // We zero them just for being safe.
+            let mut pan_1 = MaybeUninit::zeroed();
+            let mut pan_2 = MaybeUninit::zeroed();
+            let mut pan_mode = MaybeUninit::zeroed();
+            let successful = self.low.GetTrackUIPan(
+                track.as_ptr(),
+                pan_1.as_mut_ptr(),
+                pan_2.as_mut_ptr(),
+                pan_mode.as_mut_ptr(),
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new("couldn't get track pan"));
+            }
+            let pan_mode = PanMode::from_raw(pan_mode.assume_init());
+            let res = GetTrackUiPanResult {
+                pan_mode,
+                pan_1: ReaperPanLikeValue(pan_1.assume_init()),
+                pan_2: ReaperPanLikeValue(pan_2.assume_init()),
+            };
+            Ok(res)
         }
-        let pan_mode = PanMode::from_raw(pan_mode.assume_init());
-        let res = GetTrackUiPanResult {
-            pan_mode,
-            pan_1: ReaperPanLikeValue(pan_1.assume_init()),
-            pan_2: ReaperPanLikeValue(pan_2.assume_init()),
-        };
-        Ok(res)
     }
 
     /// Informs control surfaces that the given track's volume has changed.
@@ -6597,12 +6998,14 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.CSurf_SetSurfaceVolume(
-            track.as_ptr(),
-            volume.get(),
-            notification_behavior.to_raw(),
-        );
+        unsafe {
+            self.require_main_thread();
+            self.low.CSurf_SetSurfaceVolume(
+                track.as_ptr(),
+                volume.get(),
+                notification_behavior.to_raw(),
+            );
+        }
     }
 
     /// Sets the given track's volume, also supports relative changes and gang.
@@ -6622,14 +7025,16 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self.low.CSurf_OnVolumeChangeEx(
-            track.as_ptr(),
-            value_change.value(),
-            value_change.is_relative(),
-            gang_behavior == GangBehavior::AllowGang,
-        );
-        ReaperVolumeValue::new_panic(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self.low.CSurf_OnVolumeChangeEx(
+                track.as_ptr(),
+                value_change.value(),
+                value_change.is_relative(),
+                gang_behavior == GangBehavior::AllowGang,
+            );
+            ReaperVolumeValue::new_panic(raw)
+        }
     }
 
     /// Sets the given track's volume, also supports relative changes and gang.
@@ -6653,15 +7058,17 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self.low.SetTrackUIVolume(
-            track.as_ptr(),
-            value_change.value(),
-            value_change.is_relative(),
-            progress.to_raw(),
-            flags.bits() as _,
-        );
-        ReaperVolumeValue::new_panic(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self.low.SetTrackUIVolume(
+                track.as_ptr(),
+                value_change.value(),
+                value_change.is_relative(),
+                progress.to_raw(),
+                flags.bits() as _,
+            );
+            ReaperVolumeValue::new_panic(raw)
+        }
     }
 
     /// Informs control surfaces that the given track's pan has been changed.
@@ -6679,9 +7086,11 @@ where
     ) where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .CSurf_SetSurfacePan(track.as_ptr(), pan.get(), notification_behavior.to_raw());
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .CSurf_SetSurfacePan(track.as_ptr(), pan.get(), notification_behavior.to_raw());
+        }
     }
 
     /// Sets the given track's pan. Also supports relative changes and gang.
@@ -6700,14 +7109,16 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self.low.CSurf_OnPanChangeEx(
-            track.as_ptr(),
-            value_change.value(),
-            value_change.is_relative(),
-            gang_behavior == GangBehavior::AllowGang,
-        );
-        ReaperPanValue::new_panic(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self.low.CSurf_OnPanChangeEx(
+                track.as_ptr(),
+                value_change.value(),
+                value_change.is_relative(),
+                gang_behavior == GangBehavior::AllowGang,
+            );
+            ReaperPanValue::new_panic(raw)
+        }
     }
 
     /// Sets the given track's pan. Also supports relative changes and gang.
@@ -6730,15 +7141,17 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self.low.SetTrackUIPan(
-            track.as_ptr(),
-            value_change.value(),
-            value_change.is_relative(),
-            progress.to_raw(),
-            flags.bits() as _,
-        );
-        ReaperPanValue::new_panic(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self.low.SetTrackUIPan(
+                track.as_ptr(),
+                value_change.value(),
+                value_change.is_relative(),
+                progress.to_raw(),
+                flags.bits() as _,
+            );
+            ReaperPanValue::new_panic(raw)
+        }
     }
 
     /// Sets the given track's polarity (phase).
@@ -6757,11 +7170,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self
-            .low
-            .SetTrackUIPolarity(track.as_ptr(), value.to_raw(), flags.bits() as _);
-        TrackPolarity::from_raw(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw =
+                self.low
+                    .SetTrackUIPolarity(track.as_ptr(), value.to_raw(), flags.bits() as _);
+            TrackPolarity::from_raw(raw)
+        }
     }
 
     /// Sets the given track's width. Also supports relative changes and gang.
@@ -6780,14 +7195,16 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self.low.CSurf_OnWidthChangeEx(
-            track.as_ptr(),
-            value_change.value(),
-            value_change.is_relative(),
-            gang_behavior == GangBehavior::AllowGang,
-        );
-        ReaperWidthValue::new(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self.low.CSurf_OnWidthChangeEx(
+                track.as_ptr(),
+                value_change.value(),
+                value_change.is_relative(),
+                gang_behavior == GangBehavior::AllowGang,
+            );
+            ReaperWidthValue::new(raw)
+        }
     }
 
     /// Sets the given track's width. Also supports relative changes and gang.
@@ -6810,15 +7227,17 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self.low.SetTrackUIWidth(
-            track.as_ptr(),
-            value_change.value(),
-            value_change.is_relative(),
-            progress.to_raw(),
-            flags.bits() as _,
-        );
-        ReaperWidthValue::new(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self.low.SetTrackUIWidth(
+                track.as_ptr(),
+                value_change.value(),
+                value_change.is_relative(),
+                progress.to_raw(),
+                flags.bits() as _,
+            );
+            ReaperWidthValue::new(raw)
+        }
     }
 
     /// Counts the number of selected tracks in the given project.
@@ -6853,11 +7272,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.CountSelectedTracks2(
-            project.to_raw(),
-            master_track_behavior == MasterTrackBehavior::IncludeMasterTrack,
-        ) as u32
+        unsafe {
+            self.require_main_thread();
+            self.low.CountSelectedTracks2(
+                project.to_raw(),
+                master_track_behavior == MasterTrackBehavior::IncludeMasterTrack,
+            ) as u32
+        }
     }
 
     /// Selects or unselects all media items in the given project.
@@ -6886,8 +7307,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.SelectAllMediaItems(project.to_raw(), selected);
+        unsafe {
+            self.require_main_thread();
+            self.low.SelectAllMediaItems(project.to_raw(), selected);
+        }
     }
 
     /// Counts the number of selected items in the given project.
@@ -6915,8 +7338,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.CountSelectedMediaItems(project.to_raw()) as u32
+        unsafe {
+            self.require_main_thread();
+            self.low.CountSelectedMediaItems(project.to_raw()) as u32
+        }
     }
 
     /// Selects or deselects the given track.
@@ -6928,8 +7353,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.SetTrackSelected(track.as_ptr(), is_selected);
+        unsafe {
+            self.require_main_thread();
+            self.low.SetTrackSelected(track.as_ptr(), is_selected);
+        }
     }
 
     /// Returns a selected track from the given project.
@@ -6972,13 +7399,15 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.GetSelectedTrack2(
-            project.to_raw(),
-            selected_track_index as i32,
-            master_track_behavior == MasterTrackBehavior::IncludeMasterTrack,
-        );
-        MediaTrack::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.GetSelectedTrack2(
+                project.to_raw(),
+                selected_track_index as i32,
+                master_track_behavior == MasterTrackBehavior::IncludeMasterTrack,
+            );
+            MediaTrack::new(ptr)
+        }
     }
 
     /// Returns a selected item from the given project.
@@ -7013,11 +7442,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self
-            .low
-            .GetSelectedMediaItem(project.to_raw(), selected_item_index as i32);
-        MediaItem::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self
+                .low
+                .GetSelectedMediaItem(project.to_raw(), selected_item_index as i32);
+            MediaItem::new(ptr)
+        }
     }
 
     /// Returns the media source of the given media item take.
@@ -7029,9 +7460,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.GetMediaItemTake_Source(take.as_ptr());
-        NonNull::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.GetMediaItemTake_Source(take.as_ptr());
+            NonNull::new(ptr)
+        }
     }
 
     /// Returns the project which contains this item.
@@ -7043,9 +7476,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.GetItemProjectContext(item.as_ptr());
-        ReaProject::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.GetItemProjectContext(item.as_ptr());
+            ReaProject::new(ptr)
+        }
     }
 
     /// Returns the track which contains this item.
@@ -7057,9 +7492,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.GetMediaItem_Track(item.as_ptr());
-        MediaTrack::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.GetMediaItem_Track(item.as_ptr());
+            MediaTrack::new(ptr)
+        }
     }
 
     /// Returns the active take in this item.
@@ -7071,9 +7508,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.GetActiveTake(item.as_ptr());
-        MediaItemTake::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.GetActiveTake(item.as_ptr());
+            MediaItemTake::new(ptr)
+        }
     }
 
     /// Returns the take that is currently being edited in the given MIDI editor.
@@ -7088,9 +7527,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.low.MIDIEditor_GetTake(midi_editor.as_ptr());
-        MediaItemTake::new(ptr).ok_or(ReaperFunctionError::new("couldn't get MIDI editor take"))
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.low.MIDIEditor_GetTake(midi_editor.as_ptr());
+            MediaItemTake::new(ptr).ok_or(ReaperFunctionError::new("couldn't get MIDI editor take"))
+        }
     }
 
     /// Selects exactly one track and deselects all others.
@@ -7104,12 +7545,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = match track {
-            None => null_mut(),
-            Some(t) => t.as_ptr(),
-        };
-        self.low.SetOnlyTrackSelected(ptr);
+        unsafe {
+            self.require_main_thread();
+            let ptr = match track {
+                None => null_mut(),
+                Some(t) => t.as_ptr(),
+            };
+            self.low.SetOnlyTrackSelected(ptr);
+        }
     }
 
     /// Deletes the given track.
@@ -7121,8 +7564,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.DeleteTrack(track.as_ptr());
+        unsafe {
+            self.require_main_thread();
+            self.low.DeleteTrack(track.as_ptr());
+        }
     }
 
     /// Returns the number of track sends, hardware output sends or track receives of the given
@@ -7135,8 +7580,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.GetTrackNumSends(track.as_ptr(), category.to_raw()) as u32
+        unsafe {
+            self.require_main_thread();
+            self.low.GetTrackNumSends(track.as_ptr(), category.to_raw()) as u32
+        }
     }
 
     /// Gets or sets an attribute of the given track send, hardware output send or track receive.
@@ -7157,14 +7604,16 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.GetSetTrackSendInfo(
-            track.as_ptr(),
-            category.to_raw(),
-            send_index as i32,
-            attribute_key.into_raw().as_ptr(),
-            new_value,
-        )
+        unsafe {
+            self.require_main_thread();
+            self.low.GetSetTrackSendInfo(
+                track.as_ptr(),
+                category.to_raw(),
+                send_index as i32,
+                attribute_key.into_raw().as_ptr(),
+                new_value,
+            )
+        }
     }
 
     /// Convenience function which returns the destination track (`P_SRCTRACK`) of the given track
@@ -7188,17 +7637,19 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_track_send_info(
-            track,
-            direction.into(),
-            send_index,
-            TrackSendAttributeKey::SrcTrack,
-            null_mut(),
-        ) as *mut raw::MediaTrack;
-        MediaTrack::new(ptr).ok_or_else(|| {
-            ReaperFunctionError::new("couldn't get source track (maybe send doesn't exist)")
-        })
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_track_send_info(
+                track,
+                direction.into(),
+                send_index,
+                TrackSendAttributeKey::SrcTrack,
+                null_mut(),
+            ) as *mut raw::MediaTrack;
+            MediaTrack::new(ptr).ok_or_else(|| {
+                ReaperFunctionError::new("couldn't get source track (maybe send doesn't exist)")
+            })
+        }
     }
 
     /// Convenience function which returns the destination track (`P_DESTTRACK`) of the given track
@@ -7222,17 +7673,21 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self.get_set_track_send_info(
-            track,
-            direction.into(),
-            send_index,
-            TrackSendAttributeKey::DestTrack,
-            null_mut(),
-        ) as *mut raw::MediaTrack;
-        MediaTrack::new(ptr).ok_or_else(|| {
-            ReaperFunctionError::new("couldn't get destination track (maybe send doesn't exist)")
-        })
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_track_send_info(
+                track,
+                direction.into(),
+                send_index,
+                TrackSendAttributeKey::DestTrack,
+                null_mut(),
+            ) as *mut raw::MediaTrack;
+            MediaTrack::new(ptr).ok_or_else(|| {
+                ReaperFunctionError::new(
+                    "couldn't get destination track (maybe send doesn't exist)",
+                )
+            })
+        }
     }
 
     /// Returns the RPPXML state of the given track.
@@ -7259,20 +7714,23 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        assert!(buffer_size > 0);
-        let (chunk_content, successful) = with_string_buffer(buffer_size, |buffer, max_size| {
-            self.low.GetTrackStateChunk(
-                track.as_ptr(),
-                buffer,
-                max_size,
-                cache_hint == ChunkCacheHint::UndoMode,
-            )
-        });
-        if !successful {
-            return Err(ReaperFunctionError::new("couldn't get track chunk"));
+        unsafe {
+            self.require_main_thread();
+            assert!(buffer_size > 0);
+            let (chunk_content, successful) =
+                with_string_buffer(buffer_size, |buffer, max_size| {
+                    self.low.GetTrackStateChunk(
+                        track.as_ptr(),
+                        buffer,
+                        max_size,
+                        cache_hint == ChunkCacheHint::UndoMode,
+                    )
+                });
+            if !successful {
+                return Err(ReaperFunctionError::new("couldn't get track chunk"));
+            }
+            Ok(chunk_content)
         }
-        Ok(chunk_content)
     }
 
     /// Prompts the user for string values.
@@ -7352,12 +7810,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let result = self.low.CreateTrackSend(track.as_ptr(), target.to_raw());
-        if result < 0 {
-            return Err(ReaperFunctionError::new("couldn't create track send"));
+        unsafe {
+            self.require_main_thread();
+            let result = self.low.CreateTrackSend(track.as_ptr(), target.to_raw());
+            if result < 0 {
+                return Err(ReaperFunctionError::new("couldn't create track send"));
+            }
+            Ok(result as u32)
         }
-        Ok(result as u32)
     }
 
     /// Removes a track send, track receive or hardware output send from the given track.
@@ -7378,14 +7838,16 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful =
-            self.low
-                .RemoveTrackSend(track.as_ptr(), category.to_raw(), send_index as i32);
-        if !successful {
-            return Err(ReaperFunctionError::new("couldn't remove track send"));
+        unsafe {
+            self.require_main_thread();
+            let successful =
+                self.low
+                    .RemoveTrackSend(track.as_ptr(), category.to_raw(), send_index as i32);
+            if !successful {
+                return Err(ReaperFunctionError::new("couldn't remove track send"));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Arms or disarms the given track for recording.
@@ -7404,12 +7866,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.CSurf_OnRecArmChangeEx(
-            track.as_ptr(),
-            mode.to_raw(),
-            gang_behavior == GangBehavior::AllowGang,
-        )
+        unsafe {
+            self.require_main_thread();
+            self.low.CSurf_OnRecArmChangeEx(
+                track.as_ptr(),
+                mode.to_raw(),
+                gang_behavior == GangBehavior::AllowGang,
+            )
+        }
     }
 
     /// Arms or disarms the given track for recording.
@@ -7431,11 +7895,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self
-            .low
-            .SetTrackUIRecArm(track.as_ptr(), value.to_raw(), flags.bits() as _);
-        RecordArmMode::from_raw(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self
+                .low
+                .SetTrackUIRecArm(track.as_ptr(), value.to_raw(), flags.bits() as _);
+            RecordArmMode::from_raw(raw)
+        }
     }
 
     /// Mutes or unmutes the given track.
@@ -7454,12 +7920,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.CSurf_OnMuteChangeEx(
-            track.as_ptr(),
-            i32::from(mute),
-            gang_behavior == GangBehavior::AllowGang,
-        )
+        unsafe {
+            self.require_main_thread();
+            self.low.CSurf_OnMuteChangeEx(
+                track.as_ptr(),
+                i32::from(mute),
+                gang_behavior == GangBehavior::AllowGang,
+            )
+        }
     }
 
     /// Mutes or unmutes the given track.
@@ -7481,11 +7949,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self
-            .low
-            .SetTrackUIMute(track.as_ptr(), mute.to_raw(), flags.bits() as _);
-        TrackMuteState::from_raw(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self
+                .low
+                .SetTrackUIMute(track.as_ptr(), mute.to_raw(), flags.bits() as _);
+            TrackMuteState::from_raw(raw)
+        }
     }
 
     /// Soloes or unsoloes the given track.
@@ -7504,12 +7974,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.CSurf_OnSoloChangeEx(
-            track.as_ptr(),
-            i32::from(solo),
-            gang_behavior == GangBehavior::AllowGang,
-        )
+        unsafe {
+            self.require_main_thread();
+            self.low.CSurf_OnSoloChangeEx(
+                track.as_ptr(),
+                i32::from(solo),
+                gang_behavior == GangBehavior::AllowGang,
+            )
+        }
     }
 
     /// Soloes or unsoloes the given track.
@@ -7533,9 +8005,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .SetTrackUISolo(track.as_ptr(), value.to_raw(), flags.bits() as _)
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .SetTrackUISolo(track.as_ptr(), value.to_raw(), flags.bits() as _)
+        }
     }
 
     /// Sets the RPPXML state of the given track.
@@ -7556,18 +8030,20 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.SetTrackStateChunk(
-            track.as_ptr(),
-            chunk.into().as_ptr(),
-            cache_hint == ChunkCacheHint::UndoMode,
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't set track chunk (maybe chunk was invalid)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.SetTrackStateChunk(
+                track.as_ptr(),
+                chunk.into().as_ptr(),
+                cache_hint == ChunkCacheHint::UndoMode,
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't set track chunk (maybe chunk was invalid)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Shows or hides an FX user interface.
@@ -7579,12 +8055,14 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.TrackFX_Show(
-            track.as_ptr(),
-            instruction.location_to_raw(),
-            instruction.instruction_to_raw(),
-        );
+        unsafe {
+            self.require_main_thread();
+            self.low.TrackFX_Show(
+                track.as_ptr(),
+                instruction.location_to_raw(),
+                instruction.instruction_to_raw(),
+            );
+        }
     }
 
     /// Returns the floating window handle of the given FX, if there is any.
@@ -7600,11 +8078,13 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self
-            .low
-            .TrackFX_GetFloatingWindow(track.as_ptr(), fx_location.to_raw());
-        Hwnd::new(ptr)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self
+                .low
+                .TrackFX_GetFloatingWindow(track.as_ptr(), fx_location.to_raw());
+            Hwnd::new(ptr)
+        }
     }
 
     /// Returns whether the user interface of the given FX is open.
@@ -7618,9 +8098,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low
-            .TrackFX_GetOpen(track.as_ptr(), fx_location.to_raw())
+        unsafe {
+            self.require_main_thread();
+            self.low
+                .TrackFX_GetOpen(track.as_ptr(), fx_location.to_raw())
+        }
     }
 
     /// Returns the visibility state of the given track's normal FX chain.
@@ -7632,9 +8114,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self.low.TrackFX_GetChainVisible(track.as_ptr());
-        FxChainVisibility::from_raw(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self.low.TrackFX_GetChainVisible(track.as_ptr());
+            FxChainVisibility::from_raw(raw)
+        }
     }
 
     /// Returns the visibility state of the master track.
@@ -7674,9 +8158,11 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self.low.TrackFX_GetRecChainVisible(track.as_ptr());
-        FxChainVisibility::from_raw(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self.low.TrackFX_GetRecChainVisible(track.as_ptr());
+            FxChainVisibility::from_raw(raw)
+        }
     }
 
     /// Sets the volume of the given track send or hardware output send.
@@ -7699,14 +8185,16 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self.low.CSurf_OnSendVolumeChange(
-            track.as_ptr(),
-            send_index as i32,
-            value_change.value(),
-            value_change.is_relative(),
-        );
-        ReaperVolumeValue::new_panic(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self.low.CSurf_OnSendVolumeChange(
+                track.as_ptr(),
+                send_index as i32,
+                value_change.value(),
+                value_change.is_relative(),
+            );
+            ReaperVolumeValue::new_panic(raw)
+        }
     }
 
     /// Sets the pan of the given track send or hardware output send.
@@ -7728,14 +8216,16 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let raw = self.low.CSurf_OnSendPanChange(
-            track.as_ptr(),
-            send_index as i32,
-            value_change.value(),
-            value_change.is_relative(),
-        );
-        ReaperPanValue::new_panic(raw)
+        unsafe {
+            self.require_main_thread();
+            let raw = self.low.CSurf_OnSendPanChange(
+                track.as_ptr(),
+                send_index as i32,
+                value_change.value(),
+                value_change.is_relative(),
+            );
+            ReaperPanValue::new_panic(raw)
+        }
     }
 
     /// Grants temporary access to the name of the action registered under the given command ID
@@ -7755,14 +8245,16 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let ptr = self
-            .low
-            .kbd_getTextFromCmd(command_id.get() as _, section.to_raw());
-        create_passing_c_str(ptr)
-            // Removed action returns empty string for some reason. We want None in this case!
-            .filter(|s| !s.as_c_str().to_bytes().is_empty())
-            .map(use_action_name)
+        unsafe {
+            self.require_main_thread();
+            let ptr = self
+                .low
+                .kbd_getTextFromCmd(command_id.get() as _, section.to_raw());
+            create_passing_c_str(ptr)
+                // Removed action returns empty string for some reason. We want None in this case!
+                .filter(|s| !s.as_c_str().to_bytes().is_empty())
+                .map(use_action_name)
+        }
     }
 
     /// Grants temporary access to the name of the given input channel.
@@ -7842,14 +8334,16 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let result = self
-            .low
-            .GetToggleCommandState2(section.to_raw(), command_id.to_raw());
-        if result == -1 {
-            return None;
+        unsafe {
+            self.require_main_thread();
+            let result = self
+                .low
+                .GetToggleCommandState2(section.to_raw(), command_id.to_raw());
+            if result == -1 {
+                return None;
+            }
+            Some(result != 0)
         }
-        Some(result != 0)
     }
 
     /// Returns the current on/off state of a toggleable action, taking the section ID.
@@ -7912,25 +8406,27 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        // We zero them just for being safe
-        let mut volume = MaybeUninit::zeroed();
-        let mut pan = MaybeUninit::zeroed();
-        let successful = self.low.GetTrackSendUIVolPan(
-            track.as_ptr(),
-            send_index as i32,
-            volume.as_mut_ptr(),
-            pan.as_mut_ptr(),
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't get track send volume and pan (probably send doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            // We zero them just for being safe
+            let mut volume = MaybeUninit::zeroed();
+            let mut pan = MaybeUninit::zeroed();
+            let successful = self.low.GetTrackSendUIVolPan(
+                track.as_ptr(),
+                send_index as i32,
+                volume.as_mut_ptr(),
+                pan.as_mut_ptr(),
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't get track send volume and pan (probably send doesn't exist)",
+                ));
+            }
+            Ok(VolumeAndPan {
+                volume: ReaperVolumeValue::new_panic(volume.assume_init()),
+                pan: ReaperPanValue::new_panic(pan.assume_init()),
+            })
         }
-        Ok(VolumeAndPan {
-            volume: ReaperVolumeValue::new_panic(volume.assume_init()),
-            pan: ReaperPanValue::new_panic(pan.assume_init()),
-        })
     }
 
     /// Returns the volume and pan of the given track receive. Also returns the correct value during
@@ -7951,25 +8447,27 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        // We zero them just for being safe
-        let mut volume = MaybeUninit::zeroed();
-        let mut pan = MaybeUninit::zeroed();
-        let successful = self.low.GetTrackReceiveUIVolPan(
-            track.as_ptr(),
-            receive_index as i32,
-            volume.as_mut_ptr(),
-            pan.as_mut_ptr(),
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't get track receive volume and pan (probably receive doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            // We zero them just for being safe
+            let mut volume = MaybeUninit::zeroed();
+            let mut pan = MaybeUninit::zeroed();
+            let successful = self.low.GetTrackReceiveUIVolPan(
+                track.as_ptr(),
+                receive_index as i32,
+                volume.as_mut_ptr(),
+                pan.as_mut_ptr(),
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't get track receive volume and pan (probably receive doesn't exist)",
+                ));
+            }
+            Ok(VolumeAndPan {
+                volume: ReaperVolumeValue::new_panic(volume.assume_init()),
+                pan: ReaperPanValue::new_panic(pan.assume_init()),
+            })
         }
-        Ok(VolumeAndPan {
-            volume: ReaperVolumeValue::new_panic(volume.assume_init()),
-            pan: ReaperPanValue::new_panic(pan.assume_init()),
-        })
     }
 
     /// Returns whether the given track send or hardware output send is muted. Also returns the
@@ -7993,18 +8491,20 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        // We zero them just for being safe
-        let mut muted = MaybeUninit::zeroed();
-        let successful =
-            self.low
-                .GetTrackSendUIMute(track.as_ptr(), send_index as i32, muted.as_mut_ptr());
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't get track send mute state (probably send doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            // We zero them just for being safe
+            let mut muted = MaybeUninit::zeroed();
+            let successful =
+                self.low
+                    .GetTrackSendUIMute(track.as_ptr(), send_index as i32, muted.as_mut_ptr());
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't get track send mute state (probably send doesn't exist)",
+                ));
+            }
+            Ok(muted.assume_init())
         }
-        Ok(muted.assume_init())
     }
 
     /// Returns whether the given track receive is muted. Also returns the correct value during the
@@ -8025,20 +8525,22 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        // We zero them just for being safe
-        let mut muted = MaybeUninit::zeroed();
-        let successful = self.low.GetTrackReceiveUIMute(
-            track.as_ptr(),
-            receive_index as i32,
-            muted.as_mut_ptr(),
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't get track receive mute state (probably receive doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            // We zero them just for being safe
+            let mut muted = MaybeUninit::zeroed();
+            let successful = self.low.GetTrackReceiveUIMute(
+                track.as_ptr(),
+                receive_index as i32,
+                muted.as_mut_ptr(),
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't get track receive mute state (probably receive doesn't exist)",
+                ));
+            }
+            Ok(muted.assume_init())
         }
-        Ok(muted.assume_init())
     }
 
     /// Toggles the mute state of the given track send, hardware output send or track receive.
@@ -8058,16 +8560,18 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self
-            .low
-            .ToggleTrackSendUIMute(track.as_ptr(), send.to_raw());
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't toggle track send mute state (probably send doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let successful = self
+                .low
+                .ToggleTrackSendUIMute(track.as_ptr(), send.to_raw());
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't toggle track send mute state (probably send doesn't exist)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Sets the volume of the given track send, hardware output send or track receive.
@@ -8089,19 +8593,21 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.SetTrackSendUIVol(
-            track.as_ptr(),
-            send.to_raw(),
-            volume.get(),
-            edit_mode.to_raw(),
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't set track send volume (probably send doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.SetTrackSendUIVol(
+                track.as_ptr(),
+                send.to_raw(),
+                volume.get(),
+                edit_mode.to_raw(),
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't set track send volume (probably send doesn't exist)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Sets the pan of the given track send, hardware output send or track receive.
@@ -8123,19 +8629,21 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.SetTrackSendUIPan(
-            track.as_ptr(),
-            send.to_raw(),
-            pan.get(),
-            edit_mode.to_raw(),
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't set track send pan (probably send doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.SetTrackSendUIPan(
+                track.as_ptr(),
+                send.to_raw(),
+                pan.get(),
+                edit_mode.to_raw(),
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't set track send pan (probably send doesn't exist)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Returns the index of the currently selected FX preset as well as the total preset count.
@@ -8152,28 +8660,30 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        // We zero this just for being safe
-        let mut num_presets = MaybeUninit::zeroed();
-        let index = self.low.TrackFX_GetPresetIndex(
-            track.as_ptr(),
-            fx_location.to_raw(),
-            num_presets.as_mut_ptr(),
-        );
-        let num_presets = num_presets.assume_init();
-        TrackFxGetPresetIndexResult {
-            index: if index == -1 {
-                // This either means the FX doesn't exist or it's a VST3 plug-in and the factory
-                // preset is active. We can't distinguish between that. Justin says that querying of
-                // the active VST3 presets is poorly defined by the spec so this can happen.
-                None
-            } else if index == num_presets {
-                // For VST2 this means the factory preset is active.
-                None
-            } else {
-                Some(index as u32)
-            },
-            count: num_presets as u32,
+        unsafe {
+            self.require_main_thread();
+            // We zero this just for being safe
+            let mut num_presets = MaybeUninit::zeroed();
+            let index = self.low.TrackFX_GetPresetIndex(
+                track.as_ptr(),
+                fx_location.to_raw(),
+                num_presets.as_mut_ptr(),
+            );
+            let num_presets = num_presets.assume_init();
+            TrackFxGetPresetIndexResult {
+                index: if index == -1 {
+                    // This either means the FX doesn't exist or it's a VST3 plug-in and the factory
+                    // preset is active. We can't distinguish between that. Justin says that querying of
+                    // the active VST3 presets is poorly defined by the spec so this can happen.
+                    None
+                } else if index == num_presets {
+                    // For VST2 this means the factory preset is active.
+                    None
+                } else {
+                    Some(index as u32)
+                },
+                count: num_presets as u32,
+            }
         }
     }
 
@@ -8195,18 +8705,20 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.TrackFX_SetPresetByIndex(
-            track.as_ptr(),
-            fx_location.to_raw(),
-            preset.to_raw(),
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't activate FX preset by index (maybe FX or preset doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.TrackFX_SetPresetByIndex(
+                track.as_ptr(),
+                fx_location.to_raw(),
+                preset.to_raw(),
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't activate FX preset by index (maybe FX or preset doesn't exist)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Activates a preset with the name shown in the REAPER dropdown.
@@ -8229,18 +8741,20 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful = self.low.TrackFX_SetPreset(
-            track.as_ptr(),
-            fx_location.to_raw(),
-            presetname.into().as_ptr(),
-        );
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't select FX preset by its name (maybe FX or preset doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let successful = self.low.TrackFX_SetPreset(
+                track.as_ptr(),
+                fx_location.to_raw(),
+                presetname.into().as_ptr(),
+            );
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't select FX preset by its name (maybe FX or preset doesn't exist)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Navigates within the presets of the given track FX.
@@ -8276,16 +8790,18 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        let successful =
-            self.low
-                .TrackFX_NavigatePresets(track.as_ptr(), fx_location.to_raw(), increment);
-        if !successful {
-            return Err(ReaperFunctionError::new(
-                "couldn't navigate FX presets (maybe FX doesn't exist)",
-            ));
+        unsafe {
+            self.require_main_thread();
+            let successful =
+                self.low
+                    .TrackFX_NavigatePresets(track.as_ptr(), fx_location.to_raw(), increment);
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't navigate FX presets (maybe FX doesn't exist)",
+                ));
+            }
+            Ok(())
         }
-        Ok(())
     }
 
     /// Returns information about the currently selected preset of the given FX.
@@ -8307,34 +8823,36 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        if buffer_size == 0 {
-            let state_matches_preset =
-                self.low
-                    .TrackFX_GetPreset(track.as_ptr(), fx_location.to_raw(), null_mut(), 0);
-            TrackFxGetPresetResult {
-                state_matches_preset,
-                name: None,
-            }
-        } else {
-            let (name, state_matches_preset) =
-                with_string_buffer(buffer_size, |buffer, max_size| {
-                    self.low.TrackFX_GetPreset(
-                        track.as_ptr(),
-                        fx_location.to_raw(),
-                        buffer,
-                        max_size,
-                    )
-                });
-            if name.is_empty() {
-                return TrackFxGetPresetResult {
+        unsafe {
+            self.require_main_thread();
+            if buffer_size == 0 {
+                let state_matches_preset =
+                    self.low
+                        .TrackFX_GetPreset(track.as_ptr(), fx_location.to_raw(), null_mut(), 0);
+                TrackFxGetPresetResult {
                     state_matches_preset,
                     name: None,
-                };
-            }
-            TrackFxGetPresetResult {
-                state_matches_preset,
-                name: Some(name),
+                }
+            } else {
+                let (name, state_matches_preset) =
+                    with_string_buffer(buffer_size, |buffer, max_size| {
+                        self.low.TrackFX_GetPreset(
+                            track.as_ptr(),
+                            fx_location.to_raw(),
+                            buffer,
+                            max_size,
+                        )
+                    });
+                if name.is_empty() {
+                    return TrackFxGetPresetResult {
+                        state_matches_preset,
+                        name: None,
+                    };
+                }
+                TrackFxGetPresetResult {
+                    state_matches_preset,
+                    name: Some(name),
+                }
             }
         }
     }
@@ -8609,7 +9127,7 @@ where
     where
         UsageScope: AnyThread,
     {
-        self.low.GetPlayLoopCnt(project.to_raw(), null_mut())
+        unsafe { self.low.GetPlayLoopCnt(project.to_raw(), null_mut()) }
     }
 
     /// You can use this to step through times ahead of the current playback time, loopcnt will get updated on a loop or autoseek etc.
@@ -8645,18 +9163,20 @@ where
     where
         UsageScope: AnyThread,
     {
-        let mut raw_next_pos = next_pos.get();
-        let ret = self.low.AdvancePlaybackPosition(
-            project.to_raw(),
-            old_pos.get(),
-            &mut raw_next_pos as *mut _,
-            loop_count as *mut _,
-            sample_rate.get(),
-            max_slps as *mut _,
-            sf as *mut _,
-        );
-        *next_pos = PositionInSeconds::new_panic(raw_next_pos);
-        BitFlags::from_bits_truncate(ret as u32)
+        unsafe {
+            let mut raw_next_pos = next_pos.get();
+            let ret = self.low.AdvancePlaybackPosition(
+                project.to_raw(),
+                old_pos.get(),
+                &mut raw_next_pos as *mut _,
+                loop_count as *mut _,
+                sample_rate.get(),
+                max_slps as *mut _,
+                sf as *mut _,
+            );
+            *next_pos = PositionInSeconds::new_panic(raw_next_pos);
+            BitFlags::from_bits_truncate(ret as u32)
+        }
     }
 
     /// Returns `true` if the given window is a text field or should behave as such (JSFX editor, hooked via
@@ -8669,8 +9189,10 @@ where
     where
         UsageScope: MainThreadOnly,
     {
-        self.require_main_thread();
-        self.low.IsWindowTextField(window.as_ptr())
+        unsafe {
+            self.require_main_thread();
+            self.low.IsWindowTextField(window.as_ptr())
+        }
     }
 
     // TODO-high document
@@ -9289,14 +9811,16 @@ fn make_some_if_not_negative(value: i32) -> Option<u32> {
 }
 
 unsafe fn deref<T: Copy>(ptr: *const T) -> Option<T> {
-    if ptr.is_null() {
-        return None;
+    unsafe {
+        if ptr.is_null() {
+            return None;
+        }
+        Some(*ptr)
     }
-    Some(*ptr)
 }
 
 unsafe fn deref_as<T: Copy>(ptr: *mut c_void) -> Option<T> {
-    deref(ptr as *const T)
+    unsafe { deref(ptr as *const T) }
 }
 
 fn convert_tracknumber_to_track_location(tracknumber: u32) -> TrackLocation {
