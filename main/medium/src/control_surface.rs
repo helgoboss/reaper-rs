@@ -2,9 +2,9 @@
 
 use super::MediaTrack;
 use crate::{
-    require_media_track_panic, AutomationMode, Bpm, Hidden, InputMonitoringMode, Pan, PanMode,
-    PlaybackSpeedFactor, ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion,
-    ReaperVolumeValue, TrackFxChainType, TrackFxLocation,
+    AutomationMode, Bpm, Hidden, InputMonitoringMode, Pan, PanMode, PlaybackSpeedFactor,
+    ReaperNormalizedFxParamValue, ReaperPanValue, ReaperStr, ReaperVersion, ReaperVolumeValue,
+    TrackFxChainType, TrackFxLocation, require_media_track_panic,
 };
 use std::borrow::Cow;
 

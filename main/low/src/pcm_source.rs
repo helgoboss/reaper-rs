@@ -5,7 +5,7 @@
 use super::bindings::root::reaper_pcm_source::*;
 use crate::{firewall, raw};
 use std::os::raw::{c_char, c_int, c_void};
-use std::ptr::{null, null_mut, NonNull};
+use std::ptr::{NonNull, null, null_mut};
 
 impl raw::PCM_source {
     pub fn GetLength(&self) -> f64 {

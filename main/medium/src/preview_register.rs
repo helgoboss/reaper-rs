@@ -1,7 +1,7 @@
 use crate::mutex::ReaperMutex;
 use crate::{
-    destroy_mutex_primitive, initialize_mutex_primitive, FlexibleOwnedPcmSource, MediaTrack,
-    PositionInSeconds, ReaperMutexPrimitive, ReaperVolumeValue,
+    FlexibleOwnedPcmSource, MediaTrack, PositionInSeconds, ReaperMutexPrimitive, ReaperVolumeValue,
+    destroy_mutex_primitive, initialize_mutex_primitive,
 };
 use reaper_low::raw;
 use std::fmt;

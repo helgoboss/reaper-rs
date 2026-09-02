@@ -5,7 +5,7 @@
 use super::bindings::root::reaper_pcm_sink::*;
 use crate::{firewall, raw};
 use std::os::raw::c_void;
-use std::ptr::{null, NonNull};
+use std::ptr::{NonNull, null};
 
 impl raw::PCM_sink {
     /// # Safety

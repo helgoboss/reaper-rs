@@ -1,4 +1,4 @@
-use crate::{decode_user_data, encode_user_data, ReaProject, ReaperStr, ReaperString};
+use crate::{ReaProject, ReaperStr, ReaperString, decode_user_data, encode_user_data};
 use reaper_low::raw::INT_PTR;
 use reaper_low::{firewall, raw};
 use std::ffi::c_void;

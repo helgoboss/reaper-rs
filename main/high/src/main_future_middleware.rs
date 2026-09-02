@@ -1,4 +1,4 @@
-use crate::{local_run_loop_executor, run_loop_executor, Reaper};
+use crate::{Reaper, local_run_loop_executor, run_loop_executor};
 use std::error::Error;
 use tracing::warn;
 

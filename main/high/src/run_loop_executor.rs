@@ -5,7 +5,7 @@ use std::error::Error;
 use {
     futures::{
         future::{BoxFuture, FutureExt},
-        task::{waker_ref, ArcWake},
+        task::{ArcWake, waker_ref},
     },
     std::{
         future::Future,

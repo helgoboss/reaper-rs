@@ -1,12 +1,12 @@
 use crate::{Pan, Reaper, Track};
 
 use crate::error::ReaperResult;
+use TrackSendDirection::*;
 use reaper_medium::{
     AutomationMode, EditMode, MediaTrack, ReaperFunctionError, ReaperString, ReaperVolumeValue,
     TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, VolumeAndPan,
 };
 use std::fmt;
-use TrackSendDirection::*;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TrackRoute {

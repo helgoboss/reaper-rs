@@ -5,7 +5,7 @@ use crate::{
 use reaper_low::raw;
 use std::marker::PhantomData;
 use std::os::raw::c_void;
-use std::ptr::{null_mut, NonNull};
+use std::ptr::{NonNull, null_mut};
 use vst::api::AEffect;
 
 /// This represents the context in which this REAPER plug-in runs.

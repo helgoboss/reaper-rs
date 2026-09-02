@@ -6,7 +6,7 @@ use reaper_low::raw::{HWND, INT_PTR, MSG};
 use reaper_low::{firewall, raw};
 use std::ffi::c_char;
 use std::os::raw::c_int;
-use std::ptr::{null, NonNull};
+use std::ptr::{NonNull, null};
 
 /// Consumers need to implement this trait in order to define what should happen when a certain
 /// action is invoked.

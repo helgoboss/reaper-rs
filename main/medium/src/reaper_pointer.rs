@@ -1,5 +1,5 @@
 use super::{MediaItem, MediaItemTake, MediaTrack, ReaProject, TrackEnvelope};
-use crate::{concat_reaper_strs, PcmSource, ReaperStr, ReaperStringArg};
+use crate::{PcmSource, ReaperStr, ReaperStringArg, concat_reaper_strs};
 
 use std::borrow::Cow;
 use std::os::raw::c_void;

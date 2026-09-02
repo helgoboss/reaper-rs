@@ -10,14 +10,14 @@ use crate::{
     ReaperFunctionResult, ReaperStr, ReaperString,
 };
 use camino::Utf8Path;
-use reaper_low::raw::{PCM_source, PCM_source_peaktransfer_t, PCM_source_transfer_t, HWND__};
+use reaper_low::raw::{HWND__, PCM_source, PCM_source_peaktransfer_t, PCM_source_transfer_t};
 use std::borrow::Borrow;
 use std::error::Error;
 use std::fmt;
 use std::mem::MaybeUninit;
 use std::ops::{Deref, DerefMut};
 use std::os::raw::{c_char, c_void};
-use std::ptr::{null, null_mut, NonNull};
+use std::ptr::{NonNull, null, null_mut};
 
 /// PCM source transfer.
 //

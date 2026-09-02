@@ -1,4 +1,4 @@
-use crate::{raw, GetSwellFunc, StaticPluginContext};
+use crate::{GetSwellFunc, StaticPluginContext, raw};
 use fragile::Fragile;
 use std::ptr::null_mut;
 

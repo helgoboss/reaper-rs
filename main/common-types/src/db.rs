@@ -1,5 +1,5 @@
-use crate::constants::LN10_OVER_TWENTY;
 use crate::LinearVolumeValue;
+use crate::constants::LN10_OVER_TWENTY;
 use nutype::nutype;
 
 /// Represents a volume measured in decibel.

@@ -1,12 +1,12 @@
-use super::raw::{reaper_plugin_info_t, HINSTANCE};
 use super::PluginContext;
+use super::raw::{HINSTANCE, reaper_plugin_info_t};
 use crate::StaticPluginContext;
 use fragile::Fragile;
 use std::cell::RefCell;
 use std::error::Error;
-use std::panic::{catch_unwind, AssertUnwindSafe};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::sync::LazyLock;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 /// This function catches panics before they reach REAPER.
 ///

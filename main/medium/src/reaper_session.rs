@@ -1,15 +1,13 @@
 use std::ptr::NonNull;
 
 use reaper_low::{
-    create_cpp_to_rust_control_surface, delete_cpp_control_surface, raw, IReaperControlSurface,
-    PluginContext,
+    IReaperControlSurface, PluginContext, create_cpp_to_rust_control_surface,
+    delete_cpp_control_surface, raw,
 };
 
 use crate::keeper::{Keeper, SharedKeeper, SimpleKeeper};
 
 use crate::{
-    concat_reaper_strs, delegating_hook_command, delegating_hook_command_2,
-    delegating_hook_post_command, delegating_hook_post_command_2, delegating_toggle_action,
     AcceleratorPosition, BufferingBehavior, CommandId, ControlSurface, ControlSurfaceAdapter,
     FileInProjectCallback, GenericRegistrationHandle, Handle, HookCommand, HookCommand2,
     HookCustomMenu, HookPostCommand, HookPostCommand2, HwndInfo, MainThreadScope, MeasureAlignment,
@@ -17,6 +15,8 @@ use crate::{
     OwnedPreviewRegister, PluginRegistration, ProjectContext, ReaProject, RealTimeAudioThreadScope,
     Reaper, ReaperFunctionError, ReaperFunctionResult, ReaperMutex, ReaperString, ReaperStringArg,
     RegistrationHandle, RegistrationObject, ToggleAction, ToolbarIconMap, TranslateAccel,
+    concat_reaper_strs, delegating_hook_command, delegating_hook_command_2,
+    delegating_hook_post_command, delegating_hook_post_command_2, delegating_toggle_action,
 };
 use reaper_low::raw::audio_hook_register_t;
 

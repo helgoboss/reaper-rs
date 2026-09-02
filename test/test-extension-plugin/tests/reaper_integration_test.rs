@@ -7,7 +7,7 @@ use std::time::Duration;
 use std::{fs, io};
 use wait_timeout::ChildExt;
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 
 const REAPER_VERSION: &str = "7.30";
 
@@ -88,7 +88,10 @@ fn run_integration_test_in_reaper(reaper_executable: &Path) -> Result<()> {
             bail!("Integration test failed because REAPER process returned exit code {x}");
         }
         None => {
-            bail!("Integration test failed because REAPER process didn't return any exit code. Unix signal: {:?}", exit_status.unix_signal());
+            bail!(
+                "Integration test failed because REAPER process didn't return any exit code. Unix signal: {:?}",
+                exit_status.unix_signal()
+            );
         }
     }
 }

@@ -1,6 +1,6 @@
 use crossbeam_channel::{Receiver, Sender};
 
-use crate::{Reaper, DEFAULT_MAIN_THREAD_TASK_BULK_SIZE};
+use crate::{DEFAULT_MAIN_THREAD_TASK_BULK_SIZE, Reaper};
 use fragile::Fragile;
 use futures::channel::oneshot;
 use std::time::{Duration, SystemTime};

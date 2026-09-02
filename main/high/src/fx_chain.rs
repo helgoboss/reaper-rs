@@ -1,8 +1,8 @@
-use crate::fx::{get_fx_guid, Fx};
+use crate::fx::{Fx, get_fx_guid};
 use crate::guid::Guid;
 use crate::{
-    get_track_fx_location, Chunk, ChunkRegion, Project, Reaper, ReaperError, Take, Track,
-    MAX_TRACK_CHUNK_SIZE,
+    Chunk, ChunkRegion, MAX_TRACK_CHUNK_SIZE, Project, Reaper, ReaperError, Take, Track,
+    get_track_fx_location,
 };
 
 use crate::error::ReaperResult;

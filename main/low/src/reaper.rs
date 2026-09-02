@@ -8,7 +8,7 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
-use crate::{bindings::root, PluginContext};
+use crate::{PluginContext, bindings::root};
 #[doc = r" This is the low-level API access point to all REAPER functions."]
 #[doc = r""]
 #[doc = r" In order to use it, you first must obtain an instance of this struct by invoking [`load()`]."]

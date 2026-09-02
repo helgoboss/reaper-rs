@@ -1,4 +1,4 @@
-use crate::raw::{ReaProject, INT_PTR};
+use crate::raw::{INT_PTR, ReaProject};
 use std::ffi::{c_char, c_int, c_void};
 
 /// This structure is only documented, in <https://github.com/justinfrankel/reaper-sdk/blob/main/sdk/reaper_plugin.h>

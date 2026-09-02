@@ -6,7 +6,7 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 
-use crate::{bindings::root, PluginContext, Swell, SwellFunctionPointers};
+use crate::{PluginContext, Swell, SwellFunctionPointers, bindings::root};
 use std::sync::OnceLock;
 
 static INSTANCE: OnceLock<Swell> = OnceLock::new();
@@ -211,11 +211,7 @@ impl Swell {
                 winapi::um::winuser::GetWindowTextW(hwnd as _, buffer, max_size) as _
             });
             // Just return whether successful in order to conform to SWELL.
-            if len == 0 {
-                0
-            } else {
-                1
-            }
+            if len == 0 { 0 } else { 1 }
         }
     }
 

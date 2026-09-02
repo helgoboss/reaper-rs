@@ -1,5 +1,5 @@
 use crate::{ReaperStr, ReaperString, ReaperStringArg};
-use std::ffi::{c_void, CString};
+use std::ffi::{CString, c_void};
 use std::os::raw::c_char;
 
 pub fn concat_reaper_strs(first: &ReaperStr, second: &ReaperStr) -> ReaperString {

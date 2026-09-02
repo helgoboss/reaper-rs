@@ -3,7 +3,7 @@
 #![allow(non_snake_case)]
 
 use super::bindings::root::reaper_midi::*;
-use super::bindings::root::{midi_Input, MIDI_event_t, MIDI_eventlist};
+use super::bindings::root::{MIDI_event_t, MIDI_eventlist, midi_Input};
 use crate::bindings::root::midi_Output;
 use std::os::raw::c_int;
 use std::ptr::NonNull;

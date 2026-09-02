@@ -1,16 +1,16 @@
 use crate::{CrashHandler, CrashHandlerConfig, KeyBinding, KeyBindingKind, PluginInfo};
 use std::cell::{Cell, RefCell, RefMut};
-use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 
 use std::rc::Rc;
 use std::sync::{Arc, OnceLock, Weak};
 
-use crate::undo_block::UndoBlock;
 use crate::ActionKind::Toggleable;
+use crate::undo_block::UndoBlock;
 use crate::{DefaultConsoleMessageFormatter, Project};
 use once_cell::sync::Lazy;
-use reaper_low::{raw, register_plugin_destroy_hook, PluginDestroyHook};
+use reaper_low::{PluginDestroyHook, raw, register_plugin_destroy_hook};
 
 use reaper_low::PluginContext;
 
@@ -26,8 +26,8 @@ use reaper_medium::{
 };
 use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
 use tracing::debug;
 
 /// How many tasks to process at a maximum in one main loop iteration.
@@ -762,8 +762,8 @@ pub use sentry_impl::SentryConfig;
 #[cfg(feature = "sentry")]
 mod sentry_impl {
     use super::*;
-    use sentry::types::Dsn;
     use sentry::ClientOptions;
+    use sentry::types::Dsn;
     use std::mem;
 
     pub struct SentryConfig<'a> {

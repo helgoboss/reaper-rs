@@ -1,15 +1,15 @@
 use futures_timer::Delay;
 use reaper_high::{
-    ActionKind, FutureMiddleware, FutureSupport, PluginInfo, Reaper, ReaperGuard,
-    DEFAULT_MAIN_THREAD_TASK_BULK_SIZE,
+    ActionKind, DEFAULT_MAIN_THREAD_TASK_BULK_SIZE, FutureMiddleware, FutureSupport, PluginInfo,
+    Reaper, ReaperGuard,
 };
-use reaper_low::{reaper_vst_plugin, static_plugin_context, PluginContext};
+use reaper_low::{PluginContext, reaper_vst_plugin, static_plugin_context};
 use reaper_medium::{CommandId, ControlSurface, HookPostCommand, OnAudioBuffer, OnAudioBufferArgs};
 use reaper_rx::{ControlSurfaceRx, ControlSurfaceRxMiddleware};
 use rxrust::prelude::*;
 use std::error::Error;
-use std::sync::mpsc::{channel, Receiver};
 use std::sync::Arc;
+use std::sync::mpsc::{Receiver, channel};
 use std::time::Duration;
 use tracing::debug;
 #[allow(deprecated)]

@@ -905,11 +905,13 @@ mod codegen {
             module_name: &str,
         ) -> Vec<&'a ForeignItemStatic> {
             let (_, root_mod_items) = match bindings_tree.items.as_slice() {
-                [Item::Mod(ItemMod {
-                    ident: id,
-                    content: Some(c),
-                    ..
-                })] if id == "root" => c,
+                [
+                    Item::Mod(ItemMod {
+                        ident: id,
+                        content: Some(c),
+                        ..
+                    }),
+                ] if id == "root" => c,
                 _ => panic!("root mod not found"),
             };
             let (_, fn_ptr_mod_items) = root_mod_items

@@ -7,8 +7,9 @@ mod tests;
 use crate::api::{Test, TestStep, TestStepContext, VersionRestriction};
 use crate::tests::create_test_steps;
 use reaper_high::{
-    ChangeDetectionMiddleware, ControlSurfaceEvent, ControlSurfaceMiddleware, FutureMiddleware,
-    FutureSupport, MiddlewareControlSurface, Reaper, DEFAULT_MAIN_THREAD_TASK_BULK_SIZE,
+    ChangeDetectionMiddleware, ControlSurfaceEvent, ControlSurfaceMiddleware,
+    DEFAULT_MAIN_THREAD_TASK_BULK_SIZE, FutureMiddleware, FutureSupport, MiddlewareControlSurface,
+    Reaper,
 };
 use rxrust::prelude::*;
 

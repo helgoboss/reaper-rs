@@ -10,7 +10,7 @@ use futures::future::LocalBoxFuture;
 use {
     futures::{
         future::FutureExt,
-        task::{waker_ref, ArcWake},
+        task::{ArcWake, waker_ref},
     },
     std::{
         future::Future,

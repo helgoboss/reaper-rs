@@ -1,4 +1,4 @@
-use crate::{concat_reaper_strs, ReaperStr, ReaperStringArg};
+use crate::{ReaperStr, ReaperStringArg, concat_reaper_strs};
 
 use std::borrow::Cow;
 

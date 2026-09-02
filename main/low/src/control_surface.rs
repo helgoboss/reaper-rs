@@ -7,7 +7,7 @@ use crate::raw;
 use downcast_rs::Downcast;
 use std::fmt::Debug;
 use std::os::raw::c_void;
-use std::ptr::{null, null_mut, NonNull};
+use std::ptr::{NonNull, null, null_mut};
 
 /// This is the Rust analog to the C++ virtual base class `IReaperControlSurface`.
 ///

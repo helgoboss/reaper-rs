@@ -1,37 +1,37 @@
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_int, c_void};
-use std::ptr::{null, null_mut, NonNull};
+use std::ptr::{NonNull, null, null_mut};
 
 use reaper_low::raw;
 
 use crate::ProjectContext::CurrentProject;
 use crate::{
-    require_media_track_panic, Accel, ActionValueChange, AddFxBehavior,
-    AdvancePlaybackPositionEvent, AudioDeviceAttributeKey, AutoSeekBehavior, AutomationMode,
-    BeatAttachMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint, CommandId, CommandItem, Db,
-    DurationInSeconds, EditMode, EnvChunkName, FadeCurvature, FadeShape, FullPitchShiftMode,
-    FxAddByNameBehavior, FxChainVisibility, FxPresetRef, FxShowInstruction, GangBehavior,
-    GetThemeColorFlags, GlobalAutomationModeOverride, HelpMode, Hidden, Hwnd, InitialAction,
-    InputMonitoringMode, InsertMediaFlag, InsertMediaMode, ItemAttributeKey, ItemGroupId,
-    KbdSectionInfo, MarkerOrRegionPosition, MasterTrackBehavior, MeasureMode, MediaItem,
-    MediaItemTake, MediaTrack, MenuOrToolbarItem, MessageBoxResult, MessageBoxType,
-    MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput, MidiOutputDeviceId, NativeColor,
-    NormalizedPlayRate, NotificationBehavior, OpenMediaExplorerMode, OpenProjectBehavior,
-    OwnedPcmSource, OwnedReaperPitchShift, OwnedReaperResample, PanMode, ParamId, PcmSource,
-    PeakFileMode, PitchShiftMode, PitchShiftSubMode, PlaybackSpeedFactor, PluginContext,
-    PositionDescriptor, PositionInBeats, PositionInPulsesPerQuarterNote, PositionInQuarterNotes,
-    PositionInSeconds, Progress, ProjectContext, ProjectInfoAttributeKey, ProjectRef,
-    PromptForActionResult, ReaProject, ReaperFunctionError, ReaperFunctionResult,
-    ReaperNormalizedFxParamValue, ReaperPanLikeValue, ReaperPanValue, ReaperPointer, ReaperStr,
-    ReaperString, ReaperStringArg, ReaperVersion, ReaperVolumeValue, ReaperWidthValue,
-    RecordArmMode, RecordingInput, RecordingMode, ReorderTracksBehavior, RequiredViewMode,
-    ResampleMode, SectionContext, SectionId, SendTarget, SetTrackUiFlags, SoloMode,
-    StuffMidiMessageTarget, SubMenuStart, TakeAttributeKey, TimeModeOverride, TimeRangeType,
-    TrackArea, TrackAttributeKey, TrackDefaultsBehavior, TrackEnvelope, TrackFxChainType,
-    TrackFxLocation, TrackLocation, TrackMuteOperation, TrackMuteState, TrackPolarity,
-    TrackPolarityOperation, TrackRecArmOperation, TrackSendAttributeKey, TrackSendCategory,
-    TrackSendDirection, TrackSendRef, TrackSoloOperation, TransferBehavior, UiRefreshBehavior,
-    UndoBehavior, UndoScope, ValueChange, VolumeSliderValue, WindowContext,
+    Accel, ActionValueChange, AddFxBehavior, AdvancePlaybackPositionEvent, AudioDeviceAttributeKey,
+    AutoSeekBehavior, AutomationMode, BeatAttachMode, BookmarkId, BookmarkRef, Bpm, ChunkCacheHint,
+    CommandId, CommandItem, Db, DurationInSeconds, EditMode, EnvChunkName, FadeCurvature,
+    FadeShape, FullPitchShiftMode, FxAddByNameBehavior, FxChainVisibility, FxPresetRef,
+    FxShowInstruction, GangBehavior, GetThemeColorFlags, GlobalAutomationModeOverride, HelpMode,
+    Hidden, Hwnd, InitialAction, InputMonitoringMode, InsertMediaFlag, InsertMediaMode,
+    ItemAttributeKey, ItemGroupId, KbdSectionInfo, MarkerOrRegionPosition, MasterTrackBehavior,
+    MeasureMode, MediaItem, MediaItemTake, MediaTrack, MenuOrToolbarItem, MessageBoxResult,
+    MessageBoxType, MidiImportBehavior, MidiInput, MidiInputDeviceId, MidiOutput,
+    MidiOutputDeviceId, NativeColor, NormalizedPlayRate, NotificationBehavior,
+    OpenMediaExplorerMode, OpenProjectBehavior, OwnedPcmSource, OwnedReaperPitchShift,
+    OwnedReaperResample, PanMode, ParamId, PcmSource, PeakFileMode, PitchShiftMode,
+    PitchShiftSubMode, PlaybackSpeedFactor, PluginContext, PositionDescriptor, PositionInBeats,
+    PositionInPulsesPerQuarterNote, PositionInQuarterNotes, PositionInSeconds, Progress,
+    ProjectContext, ProjectInfoAttributeKey, ProjectRef, PromptForActionResult, ReaProject,
+    ReaperFunctionError, ReaperFunctionResult, ReaperNormalizedFxParamValue, ReaperPanLikeValue,
+    ReaperPanValue, ReaperPointer, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
+    ReaperVolumeValue, ReaperWidthValue, RecordArmMode, RecordingInput, RecordingMode,
+    ReorderTracksBehavior, RequiredViewMode, ResampleMode, SectionContext, SectionId, SendTarget,
+    SetTrackUiFlags, SoloMode, StuffMidiMessageTarget, SubMenuStart, TakeAttributeKey,
+    TimeModeOverride, TimeRangeType, TrackArea, TrackAttributeKey, TrackDefaultsBehavior,
+    TrackEnvelope, TrackFxChainType, TrackFxLocation, TrackLocation, TrackMuteOperation,
+    TrackMuteState, TrackPolarity, TrackPolarityOperation, TrackRecArmOperation,
+    TrackSendAttributeKey, TrackSendCategory, TrackSendDirection, TrackSendRef, TrackSoloOperation,
+    TransferBehavior, UiRefreshBehavior, UndoBehavior, UndoScope, ValueChange, VolumeSliderValue,
+    WindowContext, require_media_track_panic,
 };
 pub use reaper_common_types::RgbColor;
 use reaper_common_types::{Hz, Semitones};

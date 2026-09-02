@@ -5,14 +5,14 @@ use reaper_medium::{
     ReaperStr, ReaperString, SectionContext, WindowContext,
 };
 
-use helgoboss_midi::{U14, U7};
+use helgoboss_midi::{U7, U14};
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::SectionContext::Sec;
 use std::borrow::Cow;
 use std::cell::{Ref, RefCell};
 
 use enumflags2::BitFlags;
-use reaper_low::{raw, Swell};
+use reaper_low::{Swell, raw};
 use std::ffi::CString;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]

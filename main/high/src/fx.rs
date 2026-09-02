@@ -1,5 +1,5 @@
 use std::cell::Cell;
-use std::ffi::{c_char, CString};
+use std::ffi::{CString, c_char};
 
 use std::ops::Deref;
 use std::path::{Path, PathBuf};

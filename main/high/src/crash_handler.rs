@@ -6,8 +6,8 @@ use std::fmt::{Display, Formatter};
 use std::os::raw::c_char;
 #[allow(deprecated)]
 use std::panic::PanicInfo;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 /// Handles crashes when they occur.
 pub struct CrashHandler {

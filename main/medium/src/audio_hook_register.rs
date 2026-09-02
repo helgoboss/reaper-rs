@@ -1,11 +1,11 @@
-use crate::{decode_user_data, encode_user_data, Hz};
+use crate::{Hz, decode_user_data, encode_user_data};
 use reaper_low::raw::audio_hook_register_t;
 use reaper_low::{firewall, raw};
 
 use std::fmt;
 use std::fmt::Debug;
 use std::os::raw::c_int;
-use std::ptr::{null_mut, NonNull};
+use std::ptr::{NonNull, null_mut};
 
 /// Consumers need to implement this trait in order to be called back in the real-time audio thread.
 ///

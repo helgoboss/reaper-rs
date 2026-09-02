@@ -9,7 +9,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(unused_unsafe)]
-use crate::{bindings::root, PluginContext};
+use crate::{PluginContext, bindings::root};
 #[doc = r" This is the low-level API access point to all SWELL functions."]
 #[doc = r""]
 #[doc = r" SWELL is the Simple Windows Emulation Layer and is exposed by REAPER for Linux"]
@@ -9570,7 +9570,7 @@ mod windows {
     }
     extern "system" {
         pub fn GlobalAlloc(flags: ::std::os::raw::c_int, sz: ::std::os::raw::c_int)
-            -> root::HANDLE;
+        -> root::HANDLE;
     }
     extern "system" {
         pub fn GlobalLock(h: root::HANDLE) -> *mut ::std::os::raw::c_void;

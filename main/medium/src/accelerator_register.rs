@@ -1,4 +1,4 @@
-use crate::{decode_user_data, encode_user_data, AcceleratorBehavior, Hidden, Hwnd};
+use crate::{AcceleratorBehavior, Hidden, Hwnd, decode_user_data, encode_user_data};
 use enumflags2::BitFlags;
 use reaper_low::{firewall, raw};
 #[cfg(feature = "serde")]

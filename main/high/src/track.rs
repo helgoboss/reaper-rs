@@ -1,6 +1,6 @@
 use std::cell::Cell;
 
-use crate::fx::{get_index_from_query_index, Fx};
+use crate::fx::{Fx, get_index_from_query_index};
 use crate::fx_chain::FxChain;
 use crate::guid::Guid;
 use crate::track_route::TrackRoute;

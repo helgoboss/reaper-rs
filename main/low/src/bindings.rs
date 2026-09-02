@@ -11969,7 +11969,7 @@ pub mod root {
         }
         unsafe extern "C" {
             pub fn midi_Input_GetReadBuf(self_: *mut root::midi_Input)
-                -> *mut root::MIDI_eventlist;
+            -> *mut root::MIDI_eventlist;
         }
         unsafe extern "C" {
             pub fn midi_Output_Send(
@@ -12211,7 +12211,7 @@ pub mod root {
         }
         unsafe extern "C" {
             pub fn rust_to_cpp_PCM_source_GetPreferredPosition(self_: *mut root::PCM_source)
-                -> f64;
+            -> f64;
         }
         unsafe extern "C" {
             pub fn rust_to_cpp_PCM_source_PropertiesWindow(

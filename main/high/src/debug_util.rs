@@ -1,5 +1,5 @@
-use crate::crash_handler::ModuleInfo;
 use crate::Reaper;
+use crate::crash_handler::ModuleInfo;
 use backtrace::Symbol;
 use regex::Regex;
 

@@ -5,8 +5,8 @@
 //! This crate is part of [reaper-rs](https://github.com/helgoboss/reaper-rs) and contains a
 //! [simple attribute macro](attr.reaper_extension_plugin.html) to simplify bootstrapping REAPER
 //! extension plug-ins.
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
 use proc_macro::TokenStream;
 use quote::quote;
 

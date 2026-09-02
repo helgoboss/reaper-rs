@@ -5,14 +5,14 @@ use crate::{
 
 use crate::util::concat_reaper_strs;
 use enumflags2::BitFlags;
-use helgoboss_midi::{U14, U7};
+use helgoboss_midi::{U7, U14};
 use reaper_common_types::PositionInSeconds;
 use reaper_low::raw;
 use std::borrow::Cow;
 use std::convert::{TryFrom, TryInto};
 use std::num::NonZeroU32;
 use std::os::raw::{c_char, c_void};
-use std::ptr::{null_mut, NonNull};
+use std::ptr::{NonNull, null_mut};
 
 /// Determines the behavior when adding an FX.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]

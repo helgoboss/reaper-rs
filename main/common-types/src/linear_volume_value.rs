@@ -1,5 +1,5 @@
-use crate::constants::TWENTY_OVER_LN10;
 use crate::Db;
+use crate::constants::TWENTY_OVER_LN10;
 use nutype::nutype;
 
 /// This represents a volume measured in REAPER's native volume unit.

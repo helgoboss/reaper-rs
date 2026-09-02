@@ -154,11 +154,7 @@ impl<S: CustomProjectStateContext> reaper_low::ProjectStateContext
 
     fn GetLine(&mut self, buf: *mut c_char, buflen: c_int) -> c_int {
         let slice = unsafe { std::slice::from_raw_parts_mut(buf, buflen as usize) };
-        if self.delegate.get_line(slice) {
-            0
-        } else {
-            -1
-        }
+        if self.delegate.get_line(slice) { 0 } else { -1 }
     }
 
     fn GetOutputSize(&mut self) -> c_longlong {
