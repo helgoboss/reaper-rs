@@ -186,35 +186,35 @@ pub unsafe fn delete_cpp_control_surface(surface: NonNull<raw::IReaperControlSur
     crate::bindings::root::reaper_control_surface::delete_control_surface(surface.as_ptr());
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_GetTypeString(
     callback_target: *mut Box<dyn IReaperControlSurface>,
 ) -> *const ::std::os::raw::c_char {
     firewall(|| unsafe { &*callback_target }.GetTypeString()).unwrap_or(null_mut())
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_GetDescString(
     callback_target: *mut Box<dyn IReaperControlSurface>,
 ) -> *const ::std::os::raw::c_char {
     firewall(|| unsafe { &*callback_target }.GetDescString()).unwrap_or(null_mut())
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_GetConfigString(
     callback_target: *mut Box<dyn IReaperControlSurface>,
 ) -> *const ::std::os::raw::c_char {
     firewall(|| unsafe { &*callback_target }.GetConfigString()).unwrap_or(null_mut())
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_CloseNoReset(
     callback_target: *mut Box<dyn IReaperControlSurface>,
 ) {
     firewall(|| unsafe { &*callback_target }.CloseNoReset());
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_Run(
     callback_target: *mut Box<dyn IReaperControlSurface>,
 ) {
@@ -224,14 +224,14 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_Run(
     firewall(|| unsafe { &mut *callback_target }.Run());
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_SetTrackListChange(
     callback_target: *mut Box<dyn IReaperControlSurface>,
 ) {
     firewall(|| unsafe { &*callback_target }.SetTrackListChange());
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_SetSurfaceVolume(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
@@ -240,7 +240,7 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_SetSurfaceVolume(
     firewall(|| unsafe { &*callback_target }.SetSurfaceVolume(trackid, volume));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_SetSurfacePan(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
@@ -249,7 +249,7 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_SetSurfacePan(
     firewall(|| unsafe { &*callback_target }.SetSurfacePan(trackid, pan));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_SetSurfaceMute(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
@@ -258,7 +258,7 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_SetSurfaceMute(
     firewall(|| unsafe { &*callback_target }.SetSurfaceMute(trackid, mute));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_SetSurfaceSelected(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
@@ -267,7 +267,7 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_SetSurfaceSelected(
     firewall(|| unsafe { &*callback_target }.SetSurfaceSelected(trackid, selected));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_SetSurfaceSolo(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
@@ -276,7 +276,7 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_SetSurfaceSolo(
     firewall(|| unsafe { &*callback_target }.SetSurfaceSolo(trackid, solo));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_SetSurfaceRecArm(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
@@ -285,7 +285,7 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_SetSurfaceRecArm(
     firewall(|| unsafe { &*callback_target }.SetSurfaceRecArm(trackid, recarm));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_SetPlayState(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     play: bool,
@@ -295,7 +295,7 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_SetPlayState(
     firewall(|| unsafe { &*callback_target }.SetPlayState(play, pause, rec));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_SetRepeatState(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     rep: bool,
@@ -303,7 +303,7 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_SetRepeatState(
     firewall(|| unsafe { &*callback_target }.SetRepeatState(rep));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_SetTrackTitle(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
@@ -312,7 +312,7 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_SetTrackTitle(
     firewall(|| unsafe { &*callback_target }.SetTrackTitle(trackid, title));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_GetTouchState(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
@@ -321,7 +321,7 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_GetTouchState(
     firewall(|| unsafe { &*callback_target }.GetTouchState(trackid, isPan)).unwrap_or(false)
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_SetAutoMode(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     mode: ::std::os::raw::c_int,
@@ -329,14 +329,14 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_SetAutoMode(
     firewall(|| unsafe { &*callback_target }.SetAutoMode(mode));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_ResetCachedVolPanStates(
     callback_target: *mut Box<dyn IReaperControlSurface>,
 ) {
     firewall(|| unsafe { &*callback_target }.ResetCachedVolPanStates());
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_OnTrackSelection(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     trackid: *mut MediaTrack,
@@ -344,7 +344,7 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_OnTrackSelection(
     firewall(|| unsafe { &*callback_target }.OnTrackSelection(trackid));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_IsKeyDown(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     key: ::std::os::raw::c_int,
@@ -352,7 +352,7 @@ extern "C" fn cpp_to_rust_IReaperControlSurface_IsKeyDown(
     firewall(|| unsafe { &*callback_target }.IsKeyDown(key)).unwrap_or(false)
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_IReaperControlSurface_Extended(
     callback_target: *mut Box<dyn IReaperControlSurface>,
     call: ::std::os::raw::c_int,

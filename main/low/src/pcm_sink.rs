@@ -218,7 +218,7 @@ pub unsafe fn delete_cpp_pcm_sink(sink: NonNull<raw::PCM_sink>) {
     crate::bindings::root::reaper_pcm_sink::delete_pcm_sink(sink.as_ptr());
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_sink_GetOutputInfoString(
     callback_target: *mut Box<dyn PCM_sink>,
     buf: *mut ::std::os::raw::c_char,
@@ -227,43 +227,43 @@ extern "C" fn cpp_to_rust_PCM_sink_GetOutputInfoString(
     firewall(|| unsafe { &mut *callback_target }.GetOutputInfoString(buf, buflen));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_sink_GetStartTime(callback_target: *mut Box<dyn PCM_sink>) -> f64 {
     firewall(|| unsafe { &mut *callback_target }.GetStartTime()).unwrap_or_default()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_sink_SetStartTime(callback_target: *mut Box<dyn PCM_sink>, st: f64) {
     firewall(|| unsafe { &mut *callback_target }.SetStartTime(st));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_sink_GetFileName(
     callback_target: *mut Box<dyn PCM_sink>,
 ) -> *const ::std::os::raw::c_char {
     firewall(|| unsafe { &mut *callback_target }.GetFileName()).unwrap_or(null())
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_sink_GetNumChannels(
     callback_target: *mut Box<dyn PCM_sink>,
 ) -> ::std::os::raw::c_int {
     firewall(|| unsafe { &mut *callback_target }.GetNumChannels()).unwrap_or_default()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_sink_GetLength(callback_target: *mut Box<dyn PCM_sink>) -> f64 {
     firewall(|| unsafe { &mut *callback_target }.GetLength()).unwrap_or_default()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_sink_GetFileSize(
     callback_target: *mut Box<dyn PCM_sink>,
 ) -> ::std::os::raw::c_longlong {
     firewall(|| unsafe { &mut *callback_target }.GetFileSize()).unwrap_or_default()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_sink_WriteMIDI(
     callback_target: *mut Box<dyn PCM_sink>,
     events: *mut raw::MIDI_eventlist,
@@ -273,7 +273,7 @@ extern "C" fn cpp_to_rust_PCM_sink_WriteMIDI(
     firewall(|| unsafe { &mut *callback_target }.WriteMIDI(events, len, samplerate));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_sink_WriteDoubles(
     callback_target: *mut Box<dyn PCM_sink>,
     samples: *mut *mut raw::ReaSample,
@@ -285,12 +285,12 @@ extern "C" fn cpp_to_rust_PCM_sink_WriteDoubles(
     firewall(|| unsafe { &mut *callback_target }.WriteDoubles(samples, len, nch, offset, spacing));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_sink_WantMIDI(callback_target: *mut Box<dyn PCM_sink>) -> bool {
     firewall(|| unsafe { &mut *callback_target }.WantMIDI()).unwrap_or_default()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_sink_GetLastSecondPeaks(
     callback_target: *mut Box<dyn PCM_sink>,
     sz: ::std::os::raw::c_int,
@@ -299,7 +299,7 @@ extern "C" fn cpp_to_rust_PCM_sink_GetLastSecondPeaks(
     firewall(|| unsafe { &mut *callback_target }.GetLastSecondPeaks(sz, buf)).unwrap_or_default()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_sink_GetPeakInfo(
     callback_target: *mut Box<dyn PCM_sink>,
     block: *mut raw::PCM_source_peaktransfer_t,
@@ -307,7 +307,7 @@ extern "C" fn cpp_to_rust_PCM_sink_GetPeakInfo(
     firewall(|| unsafe { &mut *callback_target }.GetPeakInfo(block));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_sink_Extended(
     callback_target: *mut Box<dyn PCM_sink>,
     call: ::std::os::raw::c_int,

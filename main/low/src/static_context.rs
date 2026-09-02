@@ -69,7 +69,7 @@ mod swell {
     ///
     /// It lets Rust know about the SWELL function provider. It's called on REAPER startup.
     #[cfg(target_os = "macos")]
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     unsafe extern "C" fn register_swell_called_from_cpp(get_func: Option<crate::GetSwellFunc>) {
         if let Some(get_func) = get_func {
             let _ = crate::register_swell_function_provider(get_func);

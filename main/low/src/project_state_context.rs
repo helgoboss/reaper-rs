@@ -104,7 +104,7 @@ pub unsafe fn delete_cpp_project_state_context(context: NonNull<raw::ProjectStat
     );
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_ProjectStateContext_AddLine(
     callback_target: *mut Box<dyn ProjectStateContext>,
     line: *const ::std::os::raw::c_char,
@@ -112,7 +112,7 @@ extern "C" fn cpp_to_rust_ProjectStateContext_AddLine(
     firewall(|| unsafe { &mut *callback_target }.AddLine(line));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_ProjectStateContext_GetLine(
     callback_target: *mut Box<dyn ProjectStateContext>,
     buf: *mut ::std::os::raw::c_char,
@@ -121,21 +121,21 @@ extern "C" fn cpp_to_rust_ProjectStateContext_GetLine(
     firewall(|| unsafe { &mut *callback_target }.GetLine(buf, buflen)).unwrap_or_default()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_ProjectStateContext_GetOutputSize(
     callback_target: *mut Box<dyn ProjectStateContext>,
 ) -> ::std::os::raw::c_longlong {
     firewall(|| unsafe { &mut *callback_target }.GetOutputSize()).unwrap_or_default()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_ProjectStateContext_GetTempFlag(
     callback_target: *mut Box<dyn ProjectStateContext>,
 ) -> ::std::os::raw::c_int {
     firewall(|| unsafe { &mut *callback_target }.GetTempFlag()).unwrap_or_default()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_ProjectStateContext_SetTempFlag(
     callback_target: *mut Box<dyn ProjectStateContext>,
     flag: ::std::os::raw::c_int,

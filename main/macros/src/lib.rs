@@ -85,7 +85,7 @@ fn generate_low_level_plugin_code(main_function: syn::ItemFn) -> TokenStream {
         /// Entry point for the REAPER extension plug-in.
         ///
         /// This is called by REAPER at startup time.
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         unsafe extern "C" fn ReaperPluginEntry(h_instance: ::reaper_low::raw::HINSTANCE, rec: *mut ::reaper_low::raw::reaper_plugin_info_t) -> ::std::os::raw::c_int {
             let static_context = reaper_low::static_plugin_context();
             ::reaper_low::bootstrap_extension_plugin(h_instance, rec, static_context, #main_function_name)

@@ -256,120 +256,120 @@ pub unsafe fn delete_cpp_pcm_source(source: NonNull<raw::PCM_source>) {
     crate::bindings::root::reaper_pcm_source::delete_pcm_source(source.as_ptr());
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_GetLength(callback_target: *mut Box<dyn PCM_source>) -> f64 {
     firewall(|| unsafe { &mut *callback_target }.GetLength()).unwrap_or_default()
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_Duplicate(
     callback_target: *mut Box<dyn PCM_source>,
 ) -> *mut raw::PCM_source {
     firewall(|| unsafe { &mut *callback_target }.Duplicate()).unwrap_or(null_mut())
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_GetType(
     callback_target: *mut Box<dyn PCM_source>,
 ) -> *const ::std::os::raw::c_char {
     firewall(|| unsafe { &mut *callback_target }.GetType()).unwrap_or(null())
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_GetFileName(
     callback_target: *mut Box<dyn PCM_source>,
 ) -> *const ::std::os::raw::c_char {
     firewall(|| unsafe { &mut *callback_target }.GetFileName()).unwrap_or(null())
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_GetSource(
     callback_target: *mut Box<dyn PCM_source>,
 ) -> *mut raw::PCM_source {
     firewall(|| unsafe { &mut *callback_target }.GetSource()).unwrap_or(null_mut())
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_IsAvailable(
     callback_target: *mut Box<dyn PCM_source>,
 ) -> bool {
     firewall(|| unsafe { &mut *callback_target }.IsAvailable()).unwrap_or_default()
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_SetAvailable(
     callback_target: *mut Box<dyn PCM_source>,
     avail: bool,
 ) {
     firewall(|| unsafe { &mut *callback_target }.SetAvailable(avail));
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_SetFileName(
     callback_target: *mut Box<dyn PCM_source>,
     newfn: *const ::std::os::raw::c_char,
 ) -> bool {
     firewall(|| unsafe { &mut *callback_target }.SetFileName(newfn)).unwrap_or_default()
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_SetSource(
     callback_target: *mut Box<dyn PCM_source>,
     src: *mut raw::PCM_source,
 ) {
     firewall(|| unsafe { &mut *callback_target }.SetSource(src));
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_GetNumChannels(
     callback_target: *mut Box<dyn PCM_source>,
 ) -> ::std::os::raw::c_int {
     firewall(|| unsafe { &mut *callback_target }.GetNumChannels()).unwrap_or_default()
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_GetSampleRate(
     callback_target: *mut Box<dyn PCM_source>,
 ) -> f64 {
     firewall(|| unsafe { &mut *callback_target }.GetSampleRate()).unwrap_or_default()
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_GetLengthBeats(
     callback_target: *mut Box<dyn PCM_source>,
 ) -> f64 {
     firewall(|| unsafe { &mut *callback_target }.GetLengthBeats()).unwrap_or_default()
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_GetBitsPerSample(
     callback_target: *mut Box<dyn PCM_source>,
 ) -> ::std::os::raw::c_int {
     firewall(|| unsafe { &mut *callback_target }.GetBitsPerSample()).unwrap_or_default()
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_GetPreferredPosition(
     callback_target: *mut Box<dyn PCM_source>,
 ) -> f64 {
     firewall(|| unsafe { &mut *callback_target }.GetPreferredPosition()).unwrap_or_default()
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_PropertiesWindow(
     callback_target: *mut Box<dyn PCM_source>,
     hwndParent: raw::HWND,
 ) -> ::std::os::raw::c_int {
     firewall(|| unsafe { &mut *callback_target }.PropertiesWindow(hwndParent)).unwrap_or_default()
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_GetSamples(
     callback_target: *mut Box<dyn PCM_source>,
     block: *mut raw::PCM_source_transfer_t,
 ) {
     firewall(|| unsafe { &mut *callback_target }.GetSamples(block));
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_GetPeakInfo(
     callback_target: *mut Box<dyn PCM_source>,
     block: *mut raw::PCM_source_peaktransfer_t,
 ) {
     firewall(|| unsafe { &mut *callback_target }.GetPeakInfo(block));
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_SaveState(
     callback_target: *mut Box<dyn PCM_source>,
     ctx: *mut raw::ProjectStateContext,
 ) {
     firewall(|| unsafe { &mut *callback_target }.SaveState(ctx));
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_LoadState(
     callback_target: *mut Box<dyn PCM_source>,
     firstline: *const ::std::os::raw::c_char,
@@ -377,31 +377,31 @@ extern "C" fn cpp_to_rust_PCM_source_LoadState(
 ) -> ::std::os::raw::c_int {
     firewall(|| unsafe { &mut *callback_target }.LoadState(firstline, ctx)).unwrap_or_default()
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_Peaks_Clear(
     callback_target: *mut Box<dyn PCM_source>,
     deleteFile: bool,
 ) {
     firewall(|| unsafe { &mut *callback_target }.Peaks_Clear(deleteFile));
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_PeaksBuild_Begin(
     callback_target: *mut Box<dyn PCM_source>,
 ) -> ::std::os::raw::c_int {
     firewall(|| unsafe { &mut *callback_target }.PeaksBuild_Begin()).unwrap_or_default()
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_PeaksBuild_Run(
     callback_target: *mut Box<dyn PCM_source>,
 ) -> ::std::os::raw::c_int {
     firewall(|| unsafe { &mut *callback_target }.PeaksBuild_Run()).unwrap_or_default()
 }
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_PeaksBuild_Finish(callback_target: *mut Box<dyn PCM_source>) {
     firewall(|| unsafe { &mut *callback_target }.PeaksBuild_Finish());
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cpp_to_rust_PCM_source_Extended(
     callback_target: *mut Box<dyn PCM_source>,
     call: ::std::os::raw::c_int,
