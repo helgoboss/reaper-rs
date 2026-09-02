@@ -420,6 +420,7 @@ mod codegen {
                 #![allow(non_upper_case_globals)]
                 #![allow(non_camel_case_types)]
                 #![allow(non_snake_case)]
+                #![allow(unused_unsafe)]
 
                 use crate::{bindings::root, PluginContext};
 
@@ -834,7 +835,9 @@ mod codegen {
                             "Attempt to use a function that has not been loaded: {}",
                             stringify!(#name)
                         ),
-                        Some(f) => #fn_ptr_call,
+                        Some(f) => unsafe {
+                            #fn_ptr_call
+                        },
                     }
                 }
             }

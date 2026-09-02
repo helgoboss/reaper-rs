@@ -2095,7 +2095,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(lstrcpyn)
             ),
-            Some(f) => f(dest, src, l),
+            Some(f) => unsafe { f(dest, src, l) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2110,7 +2110,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MulDiv)
             ),
-            Some(f) => f(arg1, arg2, arg3),
+            Some(f) => unsafe { f(arg1, arg2, arg3) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2120,7 +2120,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Sleep)
             ),
-            Some(f) => f(ms),
+            Some(f) => unsafe { f(ms) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2130,7 +2130,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTickCount)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2149,7 +2149,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetFileTime)
             ),
-            Some(f) => f(filedes, lpCreationTime, lpLastAccessTime, lpLastWriteTime),
+            Some(f) => unsafe { f(filedes, lpCreationTime, lpLastAccessTime, lpLastWriteTime) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2168,7 +2168,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WritePrivateProfileString)
             ),
-            Some(f) => f(appname, keyname, val, fn_),
+            Some(f) => unsafe { f(appname, keyname, val, fn_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2189,7 +2189,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPrivateProfileString)
             ),
-            Some(f) => f(appname, keyname, def, ret, retsize, fn_),
+            Some(f) => unsafe { f(appname, keyname, def, ret, retsize, fn_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2208,7 +2208,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPrivateProfileInt)
             ),
-            Some(f) => f(appname, keyname, def, fn_),
+            Some(f) => unsafe { f(appname, keyname, def, fn_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2228,7 +2228,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPrivateProfileStruct)
             ),
-            Some(f) => f(appname, keyname, buf, bufsz, fn_),
+            Some(f) => unsafe { f(appname, keyname, buf, bufsz, fn_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2248,7 +2248,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WritePrivateProfileStruct)
             ),
-            Some(f) => f(appname, keyname, buf, bufsz, fn_),
+            Some(f) => unsafe { f(appname, keyname, buf, bufsz, fn_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2266,7 +2266,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WritePrivateProfileSection)
             ),
-            Some(f) => f(appname, strings, fn_),
+            Some(f) => unsafe { f(appname, strings, fn_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2285,7 +2285,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPrivateProfileSection)
             ),
-            Some(f) => f(appname, strout, strout_len, fn_),
+            Some(f) => unsafe { f(appname, strout, strout_len, fn_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2303,7 +2303,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetModuleFileName)
             ),
-            Some(f) => f(hInst, fn_, nSize),
+            Some(f) => unsafe { f(hInst, fn_, nSize) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2316,7 +2316,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_PtInRect)
             ),
-            Some(f) => f(r, p),
+            Some(f) => unsafe { f(r, p) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2337,7 +2337,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ShellExecute)
             ),
-            Some(f) => f(hwndDlg, action, content1, content2, content3, blah),
+            Some(f) => unsafe { f(hwndDlg, action, content1, content2, content3, blah) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2356,7 +2356,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MessageBox)
             ),
-            Some(f) => f(hwndParent, text, caption, type_),
+            Some(f) => unsafe { f(hwndParent, text, caption, type_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2376,7 +2376,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BrowseForFiles)
             ),
-            Some(f) => f(text, initialdir, initialfile, allowmul, extlist),
+            Some(f) => unsafe { f(text, initialdir, initialfile, allowmul, extlist) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2397,7 +2397,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BrowseForSaveFile)
             ),
-            Some(f) => f(text, initialdir, initialfile, extlist, fn_, fnsize),
+            Some(f) => unsafe { f(text, initialdir, initialfile, extlist, fn_, fnsize) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2416,7 +2416,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BrowseForDirectory)
             ),
-            Some(f) => f(text, initialdir, fn_, fnsize),
+            Some(f) => unsafe { f(text, initialdir, fn_, fnsize) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2434,7 +2434,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BrowseFile_SetTemplate)
             ),
-            Some(f) => f(dlgid, dlgProc, reshead),
+            Some(f) => unsafe { f(dlgid, dlgProc, reshead) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2447,7 +2447,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetDlgItem)
             ),
-            Some(f) => f(arg1, arg2),
+            Some(f) => unsafe { f(arg1, arg2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2460,7 +2460,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ShowWindow)
             ),
-            Some(f) => f(arg1, arg2),
+            Some(f) => unsafe { f(arg1, arg2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2473,7 +2473,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DestroyWindow)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2490,7 +2490,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetGestureInfo)
             ),
-            Some(f) => f(lParam, gi),
+            Some(f) => unsafe { f(lParam, gi) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2500,7 +2500,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_HideApp)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2518,7 +2518,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetDlgItemText)
             ),
-            Some(f) => f(arg1, idx, text),
+            Some(f) => unsafe { f(arg1, idx, text) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2537,7 +2537,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetDlgItemInt)
             ),
-            Some(f) => f(arg1, idx, val, issigned),
+            Some(f) => unsafe { f(arg1, idx, val, issigned) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2556,7 +2556,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetDlgItemInt)
             ),
-            Some(f) => f(arg1, idx, translated, issigned),
+            Some(f) => unsafe { f(arg1, idx, translated, issigned) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2575,7 +2575,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetDlgItemText)
             ),
-            Some(f) => f(arg1, idx, text, textlen),
+            Some(f) => unsafe { f(arg1, idx, text, textlen) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2588,7 +2588,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetWindowTextLength)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2606,7 +2606,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CheckDlgButton)
             ),
-            Some(f) => f(hwnd, idx, check),
+            Some(f) => unsafe { f(hwnd, idx, check) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2623,7 +2623,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsDlgButtonChecked)
             ),
-            Some(f) => f(hwnd, idx),
+            Some(f) => unsafe { f(hwnd, idx) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2636,7 +2636,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnableWindow)
             ),
-            Some(f) => f(hwnd, enable),
+            Some(f) => unsafe { f(hwnd, enable) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2649,7 +2649,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetFocus)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2659,7 +2659,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetFocus)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2672,7 +2672,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetForegroundWindow)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2682,7 +2682,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetForegroundWindow)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2695,7 +2695,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetCapture)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2705,7 +2705,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCapture)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2715,7 +2715,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ReleaseCapture)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2732,7 +2732,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsChild)
             ),
-            Some(f) => f(hwndParent, hwndChild),
+            Some(f) => unsafe { f(hwndParent, hwndChild) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2745,7 +2745,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetParent)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2758,7 +2758,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetParent)
             ),
-            Some(f) => f(hwnd, newPar),
+            Some(f) => unsafe { f(hwnd, newPar) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2771,7 +2771,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetWindow)
             ),
-            Some(f) => f(hwnd, what),
+            Some(f) => unsafe { f(hwnd, what) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2790,7 +2790,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumWindows)
             ),
-            Some(f) => f(proc_, lp),
+            Some(f) => unsafe { f(proc_, lp) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2809,7 +2809,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(FindWindowEx)
             ),
-            Some(f) => f(par, lastw, classname, title),
+            Some(f) => unsafe { f(par, lastw, classname, title) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2822,7 +2822,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ClientToScreen)
             ),
-            Some(f) => f(hwnd, p),
+            Some(f) => unsafe { f(hwnd, p) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2835,7 +2835,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ScreenToClient)
             ),
-            Some(f) => f(hwnd, p),
+            Some(f) => unsafe { f(hwnd, p) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2848,7 +2848,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetWindowRect)
             ),
-            Some(f) => f(hwnd, r),
+            Some(f) => unsafe { f(hwnd, r) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2861,7 +2861,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetWindowContentViewRect)
             ),
-            Some(f) => f(hwnd, r),
+            Some(f) => unsafe { f(hwnd, r) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2874,7 +2874,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetClientRect)
             ),
-            Some(f) => f(hwnd, r),
+            Some(f) => unsafe { f(hwnd, r) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2887,7 +2887,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WindowFromPoint)
             ),
-            Some(f) => f(p),
+            Some(f) => unsafe { f(p) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2905,7 +2905,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WinOffsetRect)
             ),
-            Some(f) => f(lprc, dx, dy),
+            Some(f) => unsafe { f(lprc, dx, dy) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2925,7 +2925,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WinSetRect)
             ),
-            Some(f) => f(lprc, xLeft, yTop, xRight, yBottom),
+            Some(f) => unsafe { f(lprc, xLeft, yTop, xRight, yBottom) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2943,7 +2943,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WinUnionRect)
             ),
-            Some(f) => f(out, in1, in2),
+            Some(f) => unsafe { f(out, in1, in2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2961,7 +2961,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WinIntersectRect)
             ),
-            Some(f) => f(out, in1, in2),
+            Some(f) => unsafe { f(out, in1, in2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -2983,7 +2983,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetWindowPos)
             ),
-            Some(f) => f(hwnd, unused, x, y, cx, cy, flags),
+            Some(f) => unsafe { f(hwnd, unused, x, y, cx, cy, flags) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3000,7 +3000,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetWindowLevel)
             ),
-            Some(f) => f(hwnd, newlevel),
+            Some(f) => unsafe { f(hwnd, newlevel) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3018,7 +3018,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InvalidateRect)
             ),
-            Some(f) => f(hwnd, r, eraseBk),
+            Some(f) => unsafe { f(hwnd, r, eraseBk) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3031,7 +3031,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(UpdateWindow)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3048,7 +3048,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetWindowLong)
             ),
-            Some(f) => f(hwnd, idx),
+            Some(f) => unsafe { f(hwnd, idx) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3066,7 +3066,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetWindowLong)
             ),
-            Some(f) => f(hwnd, idx, val),
+            Some(f) => unsafe { f(hwnd, idx, val) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3086,7 +3086,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ScrollWindow)
             ),
-            Some(f) => f(hwnd, xamt, yamt, lpRect, lpClipRect),
+            Some(f) => unsafe { f(hwnd, xamt, yamt, lpRect, lpClipRect) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3104,7 +3104,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumPropsEx)
             ),
-            Some(f) => f(arg1, arg2, arg3),
+            Some(f) => unsafe { f(arg1, arg2, arg3) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3121,7 +3121,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProp)
             ),
-            Some(f) => f(arg1, arg2),
+            Some(f) => unsafe { f(arg1, arg2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3139,7 +3139,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProp)
             ),
-            Some(f) => f(arg1, arg2, arg3),
+            Some(f) => unsafe { f(arg1, arg2, arg3) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3156,7 +3156,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RemoveProp)
             ),
-            Some(f) => f(arg1, arg2),
+            Some(f) => unsafe { f(arg1, arg2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3169,7 +3169,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsWindowVisible)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3182,7 +3182,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsWindow)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3201,7 +3201,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTimer)
             ),
-            Some(f) => f(hwnd, timerid, rate, tProc),
+            Some(f) => unsafe { f(hwnd, timerid, rate, tProc) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3214,7 +3214,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(KillTimer)
             ),
-            Some(f) => f(hwnd, timerid),
+            Some(f) => unsafe { f(hwnd, timerid) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3232,7 +3232,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetExtendedListViewStyleEx)
             ),
-            Some(f) => f(h, mask, style),
+            Some(f) => unsafe { f(h, mask, style) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3250,7 +3250,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_InsertColumn)
             ),
-            Some(f) => f(h, pos, lvc),
+            Some(f) => unsafe { f(h, pos, lvc) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3263,7 +3263,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_DeleteColumn)
             ),
-            Some(f) => f(h, pos),
+            Some(f) => unsafe { f(h, pos) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3281,7 +3281,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetColumn)
             ),
-            Some(f) => f(h, pos, lvc),
+            Some(f) => unsafe { f(h, pos, lvc) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3298,7 +3298,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetColumnWidth)
             ),
-            Some(f) => f(h, pos),
+            Some(f) => unsafe { f(h, pos) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3315,7 +3315,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_InsertItem)
             ),
-            Some(f) => f(h, item),
+            Some(f) => unsafe { f(h, item) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3334,7 +3334,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetItemText)
             ),
-            Some(f) => f(h, ipos, cpos, txt),
+            Some(f) => unsafe { f(h, ipos, cpos, txt) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3347,7 +3347,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetItem)
             ),
-            Some(f) => f(h, item),
+            Some(f) => unsafe { f(h, item) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3365,7 +3365,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetNextItem)
             ),
-            Some(f) => f(h, istart, flags),
+            Some(f) => unsafe { f(h, istart, flags) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3378,7 +3378,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetItem)
             ),
-            Some(f) => f(h, item),
+            Some(f) => unsafe { f(h, item) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3396,7 +3396,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetItemState)
             ),
-            Some(f) => f(h, ipos, mask),
+            Some(f) => unsafe { f(h, ipos, mask) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3409,7 +3409,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_DeleteItem)
             ),
-            Some(f) => f(h, ipos),
+            Some(f) => unsafe { f(h, ipos) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3422,7 +3422,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_DeleteAllItems)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3435,7 +3435,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetSelectedCount)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3448,7 +3448,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetItemCount)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3461,7 +3461,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetSelectionMark)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3479,7 +3479,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetColumnWidth)
             ),
-            Some(f) => f(h, colpos, wid),
+            Some(f) => unsafe { f(h, colpos, wid) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3498,7 +3498,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetItemState)
             ),
-            Some(f) => f(h, item, state, statemask),
+            Some(f) => unsafe { f(h, item, state, statemask) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3516,7 +3516,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_RedrawItems)
             ),
-            Some(f) => f(h, startitem, enditem),
+            Some(f) => unsafe { f(h, startitem, enditem) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3529,7 +3529,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetItemCount)
             ),
-            Some(f) => f(h, cnt),
+            Some(f) => unsafe { f(h, cnt) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3547,7 +3547,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_EnsureVisible)
             ),
-            Some(f) => f(h, i, pok),
+            Some(f) => unsafe { f(h, i, pok) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3565,7 +3565,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetImageList)
             ),
-            Some(f) => f(h, imagelist, which),
+            Some(f) => unsafe { f(h, imagelist, which) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3582,7 +3582,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SubItemHitTest)
             ),
-            Some(f) => f(h, pinf),
+            Some(f) => unsafe { f(h, pinf) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3602,7 +3602,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetItemText)
             ),
-            Some(f) => f(hwnd, item, subitem, text, textmax),
+            Some(f) => unsafe { f(hwnd, item, subitem, text, textmax) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3620,7 +3620,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SortItems)
             ),
-            Some(f) => f(hwnd, compf, parm),
+            Some(f) => unsafe { f(hwnd, compf, parm) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3638,7 +3638,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_Scroll)
             ),
-            Some(f) => f(h, xscroll, yscroll),
+            Some(f) => unsafe { f(h, xscroll, yscroll) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3651,7 +3651,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetTopIndex)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3664,7 +3664,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetCountPerPage)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3682,7 +3682,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetColumnOrderArray)
             ),
-            Some(f) => f(h, cnt, arr),
+            Some(f) => unsafe { f(h, cnt, arr) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3700,7 +3700,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetColumnOrderArray)
             ),
-            Some(f) => f(h, cnt, arr),
+            Some(f) => unsafe { f(h, cnt, arr) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3713,7 +3713,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetHeader)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3726,7 +3726,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Header_GetItemCount)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3744,7 +3744,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Header_GetItem)
             ),
-            Some(f) => f(h, col, hi),
+            Some(f) => unsafe { f(h, col, hi) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3762,7 +3762,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Header_SetItem)
             ),
-            Some(f) => f(h, col, hi),
+            Some(f) => unsafe { f(h, col, hi) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3781,7 +3781,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetItemRect)
             ),
-            Some(f) => f(h, item, r, code),
+            Some(f) => unsafe { f(h, item, r, code) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3801,7 +3801,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_GetSubItemRect)
             ),
-            Some(f) => f(h, item, subitem, code, r),
+            Some(f) => unsafe { f(h, item, subitem, code, r) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3818,7 +3818,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_HitTest)
             ),
-            Some(f) => f(h, pinf),
+            Some(f) => unsafe { f(h, pinf) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3831,7 +3831,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetListViewHeaderHeight)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3841,7 +3841,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ImageList_CreateEx)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3858,7 +3858,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ImageList_Remove)
             ),
-            Some(f) => f(list, idx),
+            Some(f) => unsafe { f(list, idx) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3876,7 +3876,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ImageList_ReplaceIcon)
             ),
-            Some(f) => f(list, offset, image),
+            Some(f) => unsafe { f(list, offset, image) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3894,7 +3894,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ImageList_Add)
             ),
-            Some(f) => f(list, image, mask),
+            Some(f) => unsafe { f(list, image, mask) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3907,7 +3907,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ImageList_Destroy)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3920,7 +3920,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TabCtrl_GetItemCount)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3937,7 +3937,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TabCtrl_DeleteItem)
             ),
-            Some(f) => f(hwnd, idx),
+            Some(f) => unsafe { f(hwnd, idx) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3955,7 +3955,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TabCtrl_InsertItem)
             ),
-            Some(f) => f(hwnd, idx, item),
+            Some(f) => unsafe { f(hwnd, idx, item) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3972,7 +3972,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TabCtrl_SetCurSel)
             ),
-            Some(f) => f(hwnd, idx),
+            Some(f) => unsafe { f(hwnd, idx) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -3985,7 +3985,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TabCtrl_GetCurSel)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4003,7 +4003,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TabCtrl_AdjustRect)
             ),
-            Some(f) => f(hwnd, fLarger, r),
+            Some(f) => unsafe { f(hwnd, fLarger, r) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4020,7 +4020,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_InsertItem)
             ),
-            Some(f) => f(hwnd, ins),
+            Some(f) => unsafe { f(hwnd, ins) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4038,7 +4038,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_Expand)
             ),
-            Some(f) => f(hwnd, item, flag),
+            Some(f) => unsafe { f(hwnd, item, flag) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4051,7 +4051,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_GetSelection)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4064,7 +4064,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_DeleteItem)
             ),
-            Some(f) => f(hwnd, item),
+            Some(f) => unsafe { f(hwnd, item) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4077,7 +4077,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_DeleteAllItems)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4090,7 +4090,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_SelectItem)
             ),
-            Some(f) => f(hwnd, item),
+            Some(f) => unsafe { f(hwnd, item) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4103,7 +4103,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_EnsureVisible)
             ),
-            Some(f) => f(hwnd, item),
+            Some(f) => unsafe { f(hwnd, item) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4116,7 +4116,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_GetItem)
             ),
-            Some(f) => f(hwnd, pitem),
+            Some(f) => unsafe { f(hwnd, pitem) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4129,7 +4129,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_SetItem)
             ),
-            Some(f) => f(hwnd, pitem),
+            Some(f) => unsafe { f(hwnd, pitem) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4146,7 +4146,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_HitTest)
             ),
-            Some(f) => f(hwnd, hti),
+            Some(f) => unsafe { f(hwnd, hti) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4163,7 +4163,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_SetIndent)
             ),
-            Some(f) => f(hwnd, indent),
+            Some(f) => unsafe { f(hwnd, indent) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4180,7 +4180,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_GetParent)
             ),
-            Some(f) => f(hwnd, item),
+            Some(f) => unsafe { f(hwnd, item) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4197,7 +4197,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_GetChild)
             ),
-            Some(f) => f(hwnd, item),
+            Some(f) => unsafe { f(hwnd, item) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4214,7 +4214,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_GetNextSibling)
             ),
-            Some(f) => f(hwnd, item),
+            Some(f) => unsafe { f(hwnd, item) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4227,7 +4227,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_GetRoot)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4240,7 +4240,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_SetBkColor)
             ),
-            Some(f) => f(hwnd, color),
+            Some(f) => unsafe { f(hwnd, color) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4253,7 +4253,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TreeView_SetTextColor)
             ),
-            Some(f) => f(hwnd, color),
+            Some(f) => unsafe { f(hwnd, color) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4266,7 +4266,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetBkColor)
             ),
-            Some(f) => f(hwnd, color),
+            Some(f) => unsafe { f(hwnd, color) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4279,7 +4279,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetTextBkColor)
             ),
-            Some(f) => f(hwnd, color),
+            Some(f) => unsafe { f(hwnd, color) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4292,7 +4292,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetTextColor)
             ),
-            Some(f) => f(hwnd, color),
+            Some(f) => unsafe { f(hwnd, color) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4305,7 +4305,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetGridColor)
             ),
-            Some(f) => f(hwnd, color),
+            Some(f) => unsafe { f(hwnd, color) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4323,7 +4323,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ListView_SetSelColors)
             ),
-            Some(f) => f(hwnd, colors, ncolors),
+            Some(f) => unsafe { f(hwnd, colors, ncolors) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4336,7 +4336,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ModalWindowStart)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4353,7 +4353,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ModalWindowRun)
             ),
-            Some(f) => f(ctx, ret),
+            Some(f) => unsafe { f(ctx, ret) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4366,7 +4366,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ModalWindowEnd)
             ),
-            Some(f) => f(ctx),
+            Some(f) => unsafe { f(ctx) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4379,7 +4379,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CloseWindow)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4389,7 +4389,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreatePopupMenu)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4402,7 +4402,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreatePopupMenuEx)
             ),
-            Some(f) => f(title),
+            Some(f) => unsafe { f(title) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4415,7 +4415,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DestroyMenu)
             ),
-            Some(f) => f(hMenu),
+            Some(f) => unsafe { f(hMenu) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4434,7 +4434,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddMenuItem)
             ),
-            Some(f) => f(hMenu, pos, name, tagid),
+            Some(f) => unsafe { f(hMenu, pos, name, tagid) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4447,7 +4447,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSubMenu)
             ),
-            Some(f) => f(hMenu, pos),
+            Some(f) => unsafe { f(hMenu, pos) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4460,7 +4460,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMenuItemCount)
             ),
-            Some(f) => f(hMenu),
+            Some(f) => unsafe { f(hMenu) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4477,7 +4477,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMenuItemID)
             ),
-            Some(f) => f(hMenu, pos),
+            Some(f) => unsafe { f(hMenu, pos) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4497,7 +4497,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMenuItemModifier)
             ),
-            Some(f) => f(hMenu, idx, flag, code, mask),
+            Some(f) => unsafe { f(hMenu, idx, flag, code, mask) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4516,7 +4516,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMenuItemText)
             ),
-            Some(f) => f(hMenu, idx, flag, text),
+            Some(f) => unsafe { f(hMenu, idx, flag, text) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4534,7 +4534,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnableMenuItem)
             ),
-            Some(f) => f(hMenu, idx, en),
+            Some(f) => unsafe { f(hMenu, idx, en) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4552,7 +4552,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteMenu)
             ),
-            Some(f) => f(hMenu, idx, flag),
+            Some(f) => unsafe { f(hMenu, idx, flag) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4570,7 +4570,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CheckMenuItem)
             ),
-            Some(f) => f(hMenu, idx, chk),
+            Some(f) => unsafe { f(hMenu, idx, chk) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4589,7 +4589,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertMenuItem)
             ),
-            Some(f) => f(hMenu, pos, byPos, mi),
+            Some(f) => unsafe { f(hMenu, pos, byPos, mi) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4609,7 +4609,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_InsertMenu)
             ),
-            Some(f) => f(menu, pos, flag, idx, str_),
+            Some(f) => unsafe { f(menu, pos, flag, idx, str_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4628,7 +4628,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMenuItemInfo)
             ),
-            Some(f) => f(hMenu, pos, byPos, mi),
+            Some(f) => unsafe { f(hMenu, pos, byPos, mi) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4647,7 +4647,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMenuItemInfo)
             ),
-            Some(f) => f(hMenu, pos, byPos, mi),
+            Some(f) => unsafe { f(hMenu, pos, byPos, mi) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4660,7 +4660,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DrawMenuBar)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4677,7 +4677,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_LoadMenu)
             ),
-            Some(f) => f(head, resid),
+            Some(f) => unsafe { f(head, resid) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4699,7 +4699,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackPopupMenu)
             ),
-            Some(f) => f(hMenu, flags, xpos, ypos, resvd, hwnd, r),
+            Some(f) => unsafe { f(hMenu, flags, xpos, ypos, resvd, hwnd, r) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4712,7 +4712,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetMenuDestination)
             ),
-            Some(f) => f(menu, hwnd),
+            Some(f) => unsafe { f(menu, hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4725,7 +4725,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_DuplicateMenu)
             ),
-            Some(f) => f(menu),
+            Some(f) => unsafe { f(menu) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4738,7 +4738,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMenu)
             ),
-            Some(f) => f(hwnd, menu),
+            Some(f) => unsafe { f(hwnd, menu) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4751,7 +4751,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMenu)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4761,7 +4761,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetDefaultWindowMenu)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4774,7 +4774,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetDefaultWindowMenu)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4784,7 +4784,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetDefaultModalWindowMenu)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4797,7 +4797,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetDefaultModalWindowMenu)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4807,7 +4807,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetCurrentMenu)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4820,7 +4820,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetCurrentMenu)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4840,7 +4840,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_DialogBox)
             ),
-            Some(f) => f(reshead, resid, parent, dlgproc, param),
+            Some(f) => unsafe { f(reshead, resid, parent, dlgproc, param) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4860,7 +4860,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CreateDialog)
             ),
-            Some(f) => f(reshead, resid, parent, dlgproc, param),
+            Some(f) => unsafe { f(reshead, resid, parent, dlgproc, param) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4873,7 +4873,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_RegisterCustomControlCreator)
             ),
-            Some(f) => f(proc_),
+            Some(f) => unsafe { f(proc_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4889,7 +4889,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_UnregisterCustomControlCreator)
             ),
-            Some(f) => f(proc_),
+            Some(f) => unsafe { f(proc_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4908,7 +4908,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DefWindowProc)
             ),
-            Some(f) => f(hwnd, msg, wParam, lParam),
+            Some(f) => unsafe { f(hwnd, msg, wParam, lParam) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4921,7 +4921,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EndDialog)
             ),
-            Some(f) => f(arg1, arg2),
+            Some(f) => unsafe { f(arg1, arg2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4938,7 +4938,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetDefaultButtonID)
             ),
-            Some(f) => f(hwndDlg, onlyIfEnabled),
+            Some(f) => unsafe { f(hwndDlg, onlyIfEnabled) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4957,7 +4957,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SendMessage)
             ),
-            Some(f) => f(arg1, arg2, arg3, arg4),
+            Some(f) => unsafe { f(arg1, arg2, arg3, arg4) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4975,7 +4975,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_BroadcastMessage)
             ),
-            Some(f) => f(arg1, arg2, arg3),
+            Some(f) => unsafe { f(arg1, arg2, arg3) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -4994,7 +4994,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PostMessage)
             ),
-            Some(f) => f(hwnd, msg, wParam, lParam),
+            Some(f) => unsafe { f(hwnd, msg, wParam, lParam) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5004,7 +5004,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MessageQueue_Flush)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5017,7 +5017,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MessageQueue_Clear)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5035,7 +5035,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_KeyToASCII)
             ),
-            Some(f) => f(wParam, lParam, newflags),
+            Some(f) => unsafe { f(wParam, lParam, newflags) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5045,7 +5045,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAsyncKeyState)
             ),
-            Some(f) => f(key),
+            Some(f) => unsafe { f(key) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5058,7 +5058,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCursorPos)
             ),
-            Some(f) => f(pt),
+            Some(f) => unsafe { f(pt) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5068,7 +5068,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMessagePos)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5081,7 +5081,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_LoadCursor)
             ),
-            Some(f) => f(idx),
+            Some(f) => unsafe { f(idx) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5094,7 +5094,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetCursor)
             ),
-            Some(f) => f(curs),
+            Some(f) => unsafe { f(curs) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5107,7 +5107,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_EnableRightClickEmulate)
             ),
-            Some(f) => f(enable),
+            Some(f) => unsafe { f(enable) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5117,7 +5117,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetCursor)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5127,7 +5127,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetLastSetCursor)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5137,7 +5137,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_IsCursorVisible)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5150,7 +5150,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ShowCursor)
             ),
-            Some(f) => f(bShow),
+            Some(f) => unsafe { f(bShow) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5164,7 +5164,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetCursorPos)
             ),
-            Some(f) => f(X, Y),
+            Some(f) => unsafe { f(X, Y) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5182,7 +5182,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetViewPort)
             ),
-            Some(f) => f(r, sourcerect, wantWork),
+            Some(f) => unsafe { f(r, sourcerect, wantWork) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5195,7 +5195,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OpenClipboard)
             ),
-            Some(f) => f(hwndDlg),
+            Some(f) => unsafe { f(hwndDlg) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5205,7 +5205,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CloseClipboard)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5218,7 +5218,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetClipboardData)
             ),
-            Some(f) => f(type_),
+            Some(f) => unsafe { f(type_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5228,7 +5228,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EmptyClipboard)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5241,7 +5241,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetClipboardData)
             ),
-            Some(f) => f(type_, h),
+            Some(f) => unsafe { f(type_, h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5257,7 +5257,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RegisterClipboardFormat)
             ),
-            Some(f) => f(desc),
+            Some(f) => unsafe { f(desc) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5270,7 +5270,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumClipboardFormats)
             ),
-            Some(f) => f(lastfmt),
+            Some(f) => unsafe { f(lastfmt) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5284,7 +5284,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GlobalAlloc)
             ),
-            Some(f) => f(flags, sz),
+            Some(f) => unsafe { f(flags, sz) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5297,7 +5297,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GlobalLock)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5310,7 +5310,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GlobalSize)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5323,7 +5323,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GlobalUnlock)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5336,7 +5336,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GlobalFree)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5357,7 +5357,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateThread)
             ),
-            Some(f) => f(TA, stackSize, ThreadProc, parm, cf, tidOut),
+            Some(f) => unsafe { f(TA, stackSize, ThreadProc, parm, cf, tidOut) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5376,7 +5376,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateEvent)
             ),
-            Some(f) => f(SA, manualReset, initialSig, ignored),
+            Some(f) => unsafe { f(SA, manualReset, initialSig, ignored) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5395,7 +5395,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateEventAsSocket)
             ),
-            Some(f) => f(SA, manualReset, initialSig, ignored),
+            Some(f) => unsafe { f(SA, manualReset, initialSig, ignored) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5405,7 +5405,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCurrentThreadId)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5418,7 +5418,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WaitForSingleObject)
             ),
-            Some(f) => f(hand, msTO),
+            Some(f) => unsafe { f(hand, msTO) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5436,7 +5436,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WaitForAnySocketObject)
             ),
-            Some(f) => f(numObjs, objs, msTO),
+            Some(f) => unsafe { f(numObjs, objs, msTO) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5449,7 +5449,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CloseHandle)
             ),
-            Some(f) => f(hand),
+            Some(f) => unsafe { f(hand) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5466,7 +5466,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetThreadPriority)
             ),
-            Some(f) => f(evt, prio),
+            Some(f) => unsafe { f(evt, prio) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5479,7 +5479,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetEvent)
             ),
-            Some(f) => f(evt),
+            Some(f) => unsafe { f(evt) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5492,7 +5492,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ResetEvent)
             ),
-            Some(f) => f(evt),
+            Some(f) => unsafe { f(evt) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5502,7 +5502,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CreateProcessFromPID)
             ),
-            Some(f) => f(pid),
+            Some(f) => unsafe { f(pid) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5520,7 +5520,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CreateProcess)
             ),
-            Some(f) => f(exe, nparams, params),
+            Some(f) => unsafe { f(exe, nparams, params) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5533,7 +5533,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetProcessExitCode)
             ),
-            Some(f) => f(hand),
+            Some(f) => unsafe { f(hand) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5550,7 +5550,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LoadLibraryGlobals)
             ),
-            Some(f) => f(fileName, symbolsAsGlobals),
+            Some(f) => unsafe { f(fileName, symbolsAsGlobals) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5563,7 +5563,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LoadLibrary)
             ),
-            Some(f) => f(fileName),
+            Some(f) => unsafe { f(fileName) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5580,7 +5580,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProcAddress)
             ),
-            Some(f) => f(hInst, procName),
+            Some(f) => unsafe { f(hInst, procName) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5593,7 +5593,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(FreeLibrary)
             ),
-            Some(f) => f(hInst),
+            Some(f) => unsafe { f(hInst) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5606,7 +5606,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetBundle)
             ),
-            Some(f) => f(hInst),
+            Some(f) => unsafe { f(hInst) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5624,7 +5624,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CreateMemContext)
             ),
-            Some(f) => f(hdc, w, h),
+            Some(f) => unsafe { f(hdc, w, h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5637,7 +5637,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_DeleteGfxContext)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5650,7 +5650,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetCtxGC)
             ),
-            Some(f) => f(ctx),
+            Some(f) => unsafe { f(ctx) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5663,7 +5663,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetCtxFrameBuffer)
             ),
-            Some(f) => f(ctx),
+            Some(f) => unsafe { f(ctx) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5676,7 +5676,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_PushClipRegion)
             ),
-            Some(f) => f(ctx),
+            Some(f) => unsafe { f(ctx) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5689,7 +5689,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetClipRegion)
             ),
-            Some(f) => f(ctx, r),
+            Some(f) => unsafe { f(ctx, r) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5702,7 +5702,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_PopClipRegion)
             ),
-            Some(f) => f(ctx),
+            Some(f) => unsafe { f(ctx) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5715,7 +5715,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateFontIndirect)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5744,22 +5744,24 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateFont)
             ),
-            Some(f) => f(
-                lfHeight,
-                lfWidth,
-                lfEscapement,
-                lfOrientation,
-                lfWeight,
-                lfItalic,
-                lfUnderline,
-                lfStrikeOut,
-                lfCharSet,
-                lfOutPrecision,
-                lfClipPrecision,
-                lfQuality,
-                lfPitchAndFamily,
-                lfFaceName,
-            ),
+            Some(f) => unsafe {
+                f(
+                    lfHeight,
+                    lfWidth,
+                    lfEscapement,
+                    lfOrientation,
+                    lfWeight,
+                    lfItalic,
+                    lfUnderline,
+                    lfStrikeOut,
+                    lfCharSet,
+                    lfOutPrecision,
+                    lfClipPrecision,
+                    lfQuality,
+                    lfPitchAndFamily,
+                    lfFaceName,
+                )
+            },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5774,7 +5776,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreatePen)
             ),
-            Some(f) => f(attr, wid, col),
+            Some(f) => unsafe { f(attr, wid, col) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5784,7 +5786,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateSolidBrush)
             ),
-            Some(f) => f(col),
+            Some(f) => unsafe { f(col) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5800,7 +5802,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreatePenAlpha)
             ),
-            Some(f) => f(attr, wid, col, alpha),
+            Some(f) => unsafe { f(attr, wid, col, alpha) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5810,7 +5812,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateSolidBrushAlpha)
             ),
-            Some(f) => f(col, alpha),
+            Some(f) => unsafe { f(col, alpha) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5823,7 +5825,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SelectObject)
             ),
-            Some(f) => f(ctx, pen),
+            Some(f) => unsafe { f(ctx, pen) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5833,7 +5835,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetStockObject)
             ),
-            Some(f) => f(wh),
+            Some(f) => unsafe { f(wh) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5846,7 +5848,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteObject)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5859,7 +5861,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_FillRect)
             ),
-            Some(f) => f(ctx, r, br),
+            Some(f) => unsafe { f(ctx, r, br) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5879,7 +5881,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Rectangle)
             ),
-            Some(f) => f(ctx, l, t, r, b),
+            Some(f) => unsafe { f(ctx, l, t, r, b) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5899,7 +5901,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Ellipse)
             ),
-            Some(f) => f(ctx, l, t, r, b),
+            Some(f) => unsafe { f(ctx, l, t, r, b) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5917,7 +5919,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_Polygon)
             ),
-            Some(f) => f(ctx, pts, npts),
+            Some(f) => unsafe { f(ctx, pts, npts) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5936,7 +5938,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MoveToEx)
             ),
-            Some(f) => f(ctx, x, y, op),
+            Some(f) => unsafe { f(ctx, x, y, op) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5954,7 +5956,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_LineTo)
             ),
-            Some(f) => f(ctx, x, y),
+            Some(f) => unsafe { f(ctx, x, y) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5973,7 +5975,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetPixel)
             ),
-            Some(f) => f(ctx, x, y, c),
+            Some(f) => unsafe { f(ctx, x, y, c) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -5991,7 +5993,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PolyBezierTo)
             ),
-            Some(f) => f(ctx, pts, np),
+            Some(f) => unsafe { f(ctx, pts, np) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6011,7 +6013,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_DrawText)
             ),
-            Some(f) => f(ctx, buf, len, r, align),
+            Some(f) => unsafe { f(ctx, buf, len, r, align) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6024,7 +6026,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTextColor)
             ),
-            Some(f) => f(ctx, col),
+            Some(f) => unsafe { f(ctx, col) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6037,7 +6039,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTextColor)
             ),
-            Some(f) => f(ctx),
+            Some(f) => unsafe { f(ctx) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6050,7 +6052,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetBkColor)
             ),
-            Some(f) => f(ctx, col),
+            Some(f) => unsafe { f(ctx, col) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6063,7 +6065,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetBkMode)
             ),
-            Some(f) => f(ctx, col),
+            Some(f) => unsafe { f(ctx, col) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6083,7 +6085,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetGlyphIndicesW)
             ),
-            Some(f) => f(ctx, buf, len, indices, flags),
+            Some(f) => unsafe { f(ctx, buf, len, indices, flags) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6105,7 +6107,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RoundRect)
             ),
-            Some(f) => f(ctx, x, y, x2, y2, xrnd, yrnd),
+            Some(f) => unsafe { f(ctx, x, y, x2, y2, xrnd, yrnd) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6124,7 +6126,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PolyPolyline)
             ),
-            Some(f) => f(ctx, pts, cnts, nseg),
+            Some(f) => unsafe { f(ctx, pts, cnts, nseg) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6137,7 +6139,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTextMetrics)
             ),
-            Some(f) => f(ctx, tm),
+            Some(f) => unsafe { f(ctx, tm) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6155,7 +6157,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTextFace)
             ),
-            Some(f) => f(ctx, nCount, lpFaceName),
+            Some(f) => unsafe { f(ctx, nCount, lpFaceName) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6173,7 +6175,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetObject)
             ),
-            Some(f) => f(icon, bmsz, _bm),
+            Some(f) => unsafe { f(icon, bmsz, _bm) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6186,7 +6188,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateIconIndirect)
             ),
-            Some(f) => f(iconinfo),
+            Some(f) => unsafe { f(iconinfo) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6203,7 +6205,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LoadNamedImage)
             ),
-            Some(f) => f(name, alphaFromMask),
+            Some(f) => unsafe { f(name, alphaFromMask) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6216,7 +6218,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DrawImageInRect)
             ),
-            Some(f) => f(ctx, img, r),
+            Some(f) => unsafe { f(ctx, img, r) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6240,7 +6242,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BitBlt)
             ),
-            Some(f) => f(hdcOut, x, y, w, h, hdcIn, xin, yin, mode),
+            Some(f) => unsafe { f(hdcOut, x, y, w, h, hdcIn, xin, yin, mode) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6266,7 +6268,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(StretchBlt)
             ),
-            Some(f) => f(hdcOut, x, y, w, h, hdcIn, xin, yin, srcw, srch, mode),
+            Some(f) => unsafe { f(hdcOut, x, y, w, h, hdcIn, xin, yin, srcw, srch, mode) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6290,7 +6292,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(StretchBltFromMem)
             ),
-            Some(f) => f(hdcOut, x, y, w, h, bits, srcw, srch, srcspan),
+            Some(f) => unsafe { f(hdcOut, x, y, w, h, bits, srcw, srch, srcspan) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6300,7 +6302,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetScaling256)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6317,7 +6319,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ExtendedAPI)
             ),
-            Some(f) => f(key, v),
+            Some(f) => unsafe { f(key, v) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6327,7 +6329,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSysColor)
             ),
-            Some(f) => f(idx),
+            Some(f) => unsafe { f(idx) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6347,7 +6349,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateBitmap)
             ),
-            Some(f) => f(width, height, numplanes, bitsperpixel, bits),
+            Some(f) => unsafe { f(width, height, numplanes, bitsperpixel, bits) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6360,7 +6362,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetOpaque)
             ),
-            Some(f) => f(h, isopaque),
+            Some(f) => unsafe { f(h, isopaque) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6373,7 +6375,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetAllowNoMiddleManRendering)
             ),
-            Some(f) => f(h, allow),
+            Some(f) => unsafe { f(h, allow) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6386,7 +6388,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetViewGL)
             ),
-            Some(f) => f(h, wantGL),
+            Some(f) => unsafe { f(h, wantGL) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6399,7 +6401,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetViewGL)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6412,7 +6414,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetGLContextToView)
             ),
-            Some(f) => f(h),
+            Some(f) => unsafe { f(h) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6425,7 +6427,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BeginPaint)
             ),
-            Some(f) => f(arg1, arg2),
+            Some(f) => unsafe { f(arg1, arg2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6438,7 +6440,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EndPaint)
             ),
-            Some(f) => f(arg1, arg2),
+            Some(f) => unsafe { f(arg1, arg2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6451,7 +6453,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetDC)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6464,7 +6466,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetWindowDC)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6477,7 +6479,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ReleaseDC)
             ),
-            Some(f) => f(arg1, arg2),
+            Some(f) => unsafe { f(arg1, arg2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6495,7 +6497,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_FillDialogBackground)
             ),
-            Some(f) => f(hdc, r, level),
+            Some(f) => unsafe { f(hdc, r, level) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6508,7 +6510,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CloneGDIObject)
             ),
-            Some(f) => f(a),
+            Some(f) => unsafe { f(a) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6518,7 +6520,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSystemMetrics)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6531,7 +6533,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DragQueryPoint)
             ),
-            Some(f) => f(arg1, arg2),
+            Some(f) => unsafe { f(arg1, arg2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6544,7 +6546,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DragFinish)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6563,7 +6565,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DragQueryFile)
             ),
-            Some(f) => f(arg1, arg2, arg3, arg4),
+            Some(f) => unsafe { f(arg1, arg2, arg3, arg4) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6584,7 +6586,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_InitiateDragDrop)
             ),
-            Some(f) => f(arg1, srcrect, srcfn, callback),
+            Some(f) => unsafe { f(arg1, srcrect, srcfn, callback) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6604,7 +6606,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_InitiateDragDropOfFileList)
             ),
-            Some(f) => f(arg1, srcrect, srclist, srccount, icon),
+            Some(f) => unsafe { f(arg1, srcrect, srclist, srccount, icon) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6614,7 +6616,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_FinishDragDrop)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6632,7 +6634,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_DrawFocusRect)
             ),
-            Some(f) => f(hwndPar, rct, handle),
+            Some(f) => unsafe { f(hwndPar, rct, handle) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6654,7 +6656,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeSetCurParms)
             ),
-            Some(f) => f(xscale, yscale, xtrans, ytrans, parent, doauto, dosizetofit),
+            Some(f) => unsafe { f(xscale, yscale, xtrans, ytrans, parent, doauto, dosizetofit) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6677,7 +6679,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeButton)
             ),
-            Some(f) => f(def, label, idx, x, y, w, h, flags),
+            Some(f) => unsafe { f(def, label, idx, x, y, w, h, flags) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6695,7 +6697,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeEditField)
             ),
-            Some(f) => f(idx, x, y, w, h, flags),
+            Some(f) => unsafe { f(idx, x, y, w, h, flags) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6718,7 +6720,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeLabel)
             ),
-            Some(f) => f(align, label, idx, x, y, w, h, flags),
+            Some(f) => unsafe { f(align, label, idx, x, y, w, h, flags) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6742,7 +6744,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeControl)
             ),
-            Some(f) => f(cname, idx, classname, style, x, y, w, h, exstyle),
+            Some(f) => unsafe { f(cname, idx, classname, style, x, y, w, h, exstyle) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6760,7 +6762,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeCombo)
             ),
-            Some(f) => f(idx, x, y, w, h, flags),
+            Some(f) => unsafe { f(idx, x, y, w, h, flags) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6782,7 +6784,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeGroupBox)
             ),
-            Some(f) => f(name, idx, x, y, w, h, style),
+            Some(f) => unsafe { f(name, idx, x, y, w, h, style) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6804,7 +6806,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeCheckBox)
             ),
-            Some(f) => f(name, idx, x, y, w, h, flags),
+            Some(f) => unsafe { f(name, idx, x, y, w, h, flags) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6822,7 +6824,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_MakeListBox)
             ),
-            Some(f) => f(idx, x, y, w, h, styles),
+            Some(f) => unsafe { f(idx, x, y, w, h, styles) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6841,7 +6843,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_Menu_AddMenuItem)
             ),
-            Some(f) => f(hMenu, name, idx, flags),
+            Some(f) => unsafe { f(hMenu, name, idx, flags) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6859,7 +6861,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GenerateMenuFromList)
             ),
-            Some(f) => f(hMenu, list, listsz),
+            Some(f) => unsafe { f(hMenu, list, listsz) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6876,7 +6878,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GenerateDialogFromList)
             ),
-            Some(f) => f(list, listsz),
+            Some(f) => unsafe { f(list, listsz) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6890,7 +6892,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(_controlfp)
             ),
-            Some(f) => f(flag, mask),
+            Some(f) => unsafe { f(flag, mask) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6900,7 +6902,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_Internal_PostMessage_Init)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6916,7 +6918,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_LoadCursorFromFile)
             ),
-            Some(f) => f(fn_),
+            Some(f) => unsafe { f(fn_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6929,7 +6931,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetWindowWantRaiseAmt)
             ),
-            Some(f) => f(h, amt),
+            Some(f) => unsafe { f(h, amt) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6942,7 +6944,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetWindowWantRaiseAmt)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6959,7 +6961,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetListViewFastClickMask)
             ),
-            Some(f) => f(hList, mask),
+            Some(f) => unsafe { f(hList, mask) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6972,7 +6974,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTempPath)
             ),
-            Some(f) => f(sz, buf),
+            Some(f) => unsafe { f(sz, buf) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6989,7 +6991,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_initargs)
             ),
-            Some(f) => f(argc, argv),
+            Some(f) => unsafe { f(argc, argv) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -6999,7 +7001,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_RunMessageLoop)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7017,7 +7019,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_CreateXBridgeWindow)
             ),
-            Some(f) => f(viewpar, wref, arg1),
+            Some(f) => unsafe { f(viewpar, wref, arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7034,7 +7036,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetOSWindow)
             ),
-            Some(f) => f(hwnd, type_),
+            Some(f) => unsafe { f(hwnd, type_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7050,7 +7052,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetOSEvent)
             ),
-            Some(f) => f(type_),
+            Some(f) => unsafe { f(type_) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7063,7 +7065,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GenerateGUID)
             ),
-            Some(f) => f(g),
+            Some(f) => unsafe { f(g) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7083,7 +7085,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumChildWindows)
             ),
-            Some(f) => f(hwnd, cwEnumFunc, lParam),
+            Some(f) => unsafe { f(hwnd, cwEnumFunc, lParam) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7096,7 +7098,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_IsGroupBox)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7109,7 +7111,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_IsButton)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7122,7 +7124,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_IsStaticText)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7135,7 +7137,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_GetDesiredControlSize)
             ),
-            Some(f) => f(hwnd, r),
+            Some(f) => unsafe { f(hwnd, r) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7153,7 +7155,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddFontResourceEx)
             ),
-            Some(f) => f(str_, fl, pdv),
+            Some(f) => unsafe { f(str_, fl, pdv) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7172,7 +7174,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_Register_Cursor_Resource)
             ),
-            Some(f) => f(idx, name, hotspot_x, hotspot_y),
+            Some(f) => unsafe { f(idx, name, hotspot_x, hotspot_y) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7191,7 +7193,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ChooseColor)
             ),
-            Some(f) => f(arg1, arg2, ncustom, custom),
+            Some(f) => unsafe { f(arg1, arg2, ncustom, custom) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7204,7 +7206,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_ChooseFont)
             ),
-            Some(f) => f(arg1, arg2),
+            Some(f) => unsafe { f(arg1, arg2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7217,7 +7219,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsWindowEnabled)
             ),
-            Some(f) => f(arg1),
+            Some(f) => unsafe { f(arg1) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7235,7 +7237,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetClassName)
             ),
-            Some(f) => f(arg1, arg2, arg3),
+            Some(f) => unsafe { f(arg1, arg2, arg3) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7248,7 +7250,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_SetClassName)
             ),
-            Some(f) => f(arg1, arg2),
+            Some(f) => unsafe { f(arg1, arg2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7261,7 +7263,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_DisableContextMenu)
             ),
-            Some(f) => f(arg1, arg2),
+            Some(f) => unsafe { f(arg1, arg2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7280,7 +7282,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumDisplayMonitors)
             ),
-            Some(f) => f(arg1, arg2, arg3, arg4),
+            Some(f) => unsafe { f(arg1, arg2, arg3, arg4) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7297,7 +7299,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMonitorInfo)
             ),
-            Some(f) => f(arg1, arg2),
+            Some(f) => unsafe { f(arg1, arg2) },
         }
     }
     #[cfg(target_family = "unix")]
@@ -7307,7 +7309,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_osx_is_dark_mode)
             ),
-            Some(f) => f(mode),
+            Some(f) => unsafe { f(mode) },
         }
     }
     #[cfg(target_family = "windows")]

@@ -8,6 +8,7 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
+#![allow(unused_unsafe)]
 use crate::{PluginContext, bindings::root};
 #[doc = r" This is the low-level API access point to all REAPER functions."]
 #[doc = r""]
@@ -6031,7 +6032,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(__mergesort)
             ),
-            Some(f) => f(base, nmemb, size, cmpfunc, tmpspace),
+            Some(f) => unsafe { f(base, nmemb, size, cmpfunc, tmpspace) },
         }
     }
     #[doc = r" # Safety"]
@@ -6049,7 +6050,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddCustomizableMenu)
             ),
-            Some(f) => f(menuidstr, menuname, kbdsecname, addtomainmenu),
+            Some(f) => unsafe { f(menuidstr, menuname, kbdsecname, addtomainmenu) },
         }
     }
     pub fn AddExtensionsMainMenu(&self) -> bool {
@@ -6058,7 +6059,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddExtensionsMainMenu)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -6070,7 +6071,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddMediaItemToTrack)
             ),
-            Some(f) => f(tr),
+            Some(f) => unsafe { f(tr) },
         }
     }
     #[doc = r" # Safety"]
@@ -6090,7 +6091,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddProjectMarker)
             ),
-            Some(f) => f(proj, isrgn, pos, rgnend, name, wantidx),
+            Some(f) => unsafe { f(proj, isrgn, pos, rgnend, name, wantidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -6111,7 +6112,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddProjectMarker2)
             ),
-            Some(f) => f(proj, isrgn, pos, rgnend, name, wantidx, color),
+            Some(f) => unsafe { f(proj, isrgn, pos, rgnend, name, wantidx, color) },
         }
     }
     #[doc = r" # Safety"]
@@ -6129,7 +6130,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddRemoveReaScript)
             ),
-            Some(f) => f(add, sectionID, scriptfn, commit),
+            Some(f) => unsafe { f(add, sectionID, scriptfn, commit) },
         }
     }
     #[doc = r" # Safety"]
@@ -6144,7 +6145,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddTakeToMediaItem)
             ),
-            Some(f) => f(item),
+            Some(f) => unsafe { f(item) },
         }
     }
     #[doc = r" # Safety"]
@@ -6164,14 +6165,16 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddTempoTimeSigMarker)
             ),
-            Some(f) => f(
-                proj,
-                timepos,
-                bpm,
-                timesig_num,
-                timesig_denom,
-                lineartempochange,
-            ),
+            Some(f) => unsafe {
+                f(
+                    proj,
+                    timepos,
+                    bpm,
+                    timesig_num,
+                    timesig_denom,
+                    lineartempochange,
+                )
+            },
         }
     }
     pub fn adjustZoom(
@@ -6186,7 +6189,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(adjustZoom)
             ),
-            Some(f) => f(amt, forceset, doupd, centermode),
+            Some(f) => unsafe { f(amt, forceset, doupd, centermode) },
         }
     }
     #[doc = r" # Safety"]
@@ -6198,7 +6201,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AnyTrackSolo)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -6210,7 +6213,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(APIExists)
             ),
-            Some(f) => f(function_name),
+            Some(f) => unsafe { f(function_name) },
         }
     }
     pub fn APITest(&self) {
@@ -6219,7 +6222,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(APITest)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -6240,9 +6243,11 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ApplyNudge)
             ),
-            Some(f) => f(
-                project, nudgeflag, nudgewhat, nudgeunits, value, reverse, copies,
-            ),
+            Some(f) => unsafe {
+                f(
+                    project, nudgeflag, nudgewhat, nudgeunits, value, reverse, copies,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -6258,7 +6263,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ArmCommand)
             ),
-            Some(f) => f(cmd, sectionname),
+            Some(f) => unsafe { f(cmd, sectionname) },
         }
     }
     pub fn Audio_Init(&self) {
@@ -6267,7 +6272,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Audio_Init)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn Audio_IsPreBuffer(&self) -> ::std::os::raw::c_int {
@@ -6276,7 +6281,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Audio_IsPreBuffer)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn Audio_IsRunning(&self) -> ::std::os::raw::c_int {
@@ -6285,7 +6290,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Audio_IsRunning)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn Audio_Quit(&self) {
@@ -6294,7 +6299,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Audio_Quit)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -6310,7 +6315,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Audio_RegHardwareHook)
             ),
-            Some(f) => f(isAdd, reg),
+            Some(f) => unsafe { f(isAdd, reg) },
         }
     }
     #[doc = r" # Safety"]
@@ -6325,7 +6330,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AudioAccessorStateChanged)
             ),
-            Some(f) => f(accessor),
+            Some(f) => unsafe { f(accessor) },
         }
     }
     #[doc = r" # Safety"]
@@ -6337,7 +6342,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AudioAccessorUpdate)
             ),
-            Some(f) => f(accessor),
+            Some(f) => unsafe { f(accessor) },
         }
     }
     #[doc = r" # Safety"]
@@ -6352,7 +6357,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AudioAccessorValidateState)
             ),
-            Some(f) => f(accessor),
+            Some(f) => unsafe { f(accessor) },
         }
     }
     pub fn BypassFxAllTracks(&self, bypass: ::std::os::raw::c_int) {
@@ -6361,7 +6366,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(BypassFxAllTracks)
             ),
-            Some(f) => f(bypass),
+            Some(f) => unsafe { f(bypass) },
         }
     }
     #[doc = r" # Safety"]
@@ -6376,7 +6381,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CalcMediaSrcLoudness)
             ),
-            Some(f) => f(mediasource),
+            Some(f) => unsafe { f(mediasource) },
         }
     }
     #[doc = r" # Safety"]
@@ -6395,13 +6400,15 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CalculateNormalization)
             ),
-            Some(f) => f(
-                source,
-                normalizeTo,
-                normalizeTarget,
-                normalizeStart,
-                normalizeEnd,
-            ),
+            Some(f) => unsafe {
+                f(
+                    source,
+                    normalizeTo,
+                    normalizeTarget,
+                    normalizeStart,
+                    normalizeEnd,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -6417,7 +6424,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CalculatePeaks)
             ),
-            Some(f) => f(srcBlock, pksBlock),
+            Some(f) => unsafe { f(srcBlock, pksBlock) },
         }
     }
     #[doc = r" # Safety"]
@@ -6433,7 +6440,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CalculatePeaksFloatSrcPtr)
             ),
-            Some(f) => f(srcBlock, pksBlock),
+            Some(f) => unsafe { f(srcBlock, pksBlock) },
         }
     }
     pub fn ClearAllRecArmed(&self) {
@@ -6442,7 +6449,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ClearAllRecArmed)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn ClearConsole(&self) {
@@ -6451,7 +6458,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ClearConsole)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn ClearPeakCache(&self) {
@@ -6460,7 +6467,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ClearPeakCache)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -6478,7 +6485,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ColorFromNative)
             ),
-            Some(f) => f(col, rOut, gOut, bOut),
+            Some(f) => unsafe { f(col, rOut, gOut, bOut) },
         }
     }
     pub fn ColorToNative(
@@ -6492,7 +6499,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ColorToNative)
             ),
-            Some(f) => f(r, g, b),
+            Some(f) => unsafe { f(r, g, b) },
         }
     }
     #[doc = r" # Safety"]
@@ -6508,7 +6515,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountActionShortcuts)
             ),
-            Some(f) => f(section, cmdID),
+            Some(f) => unsafe { f(section, cmdID) },
         }
     }
     #[doc = r" # Safety"]
@@ -6523,7 +6530,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountAutomationItems)
             ),
-            Some(f) => f(env),
+            Some(f) => unsafe { f(env) },
         }
     }
     #[doc = r" # Safety"]
@@ -6538,7 +6545,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountEnvelopePoints)
             ),
-            Some(f) => f(envelope),
+            Some(f) => unsafe { f(envelope) },
         }
     }
     #[doc = r" # Safety"]
@@ -6554,7 +6561,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountEnvelopePointsEx)
             ),
-            Some(f) => f(envelope, autoitem_idx),
+            Some(f) => unsafe { f(envelope, autoitem_idx) },
         }
     }
     #[doc = r" # Safety"]
@@ -6566,7 +6573,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountMediaItems)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -6583,7 +6590,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountProjectMarkers)
             ),
-            Some(f) => f(proj, num_markersOut, num_regionsOut),
+            Some(f) => unsafe { f(proj, num_markersOut, num_regionsOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -6598,7 +6605,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountSelectedMediaItems)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -6610,7 +6617,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountSelectedTracks)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -6626,7 +6633,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountSelectedTracks2)
             ),
-            Some(f) => f(proj, wantmaster),
+            Some(f) => unsafe { f(proj, wantmaster) },
         }
     }
     #[doc = r" # Safety"]
@@ -6641,7 +6648,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTakeEnvelopes)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     #[doc = r" # Safety"]
@@ -6653,7 +6660,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTakes)
             ),
-            Some(f) => f(item),
+            Some(f) => unsafe { f(item) },
         }
     }
     #[doc = r" # Safety"]
@@ -6669,7 +6676,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTCPFXParms)
             ),
-            Some(f) => f(project, track),
+            Some(f) => unsafe { f(project, track) },
         }
     }
     #[doc = r" # Safety"]
@@ -6684,7 +6691,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTempoTimeSigMarkers)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -6699,7 +6706,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTrackEnvelopes)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -6714,7 +6721,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTrackMediaItems)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -6726,7 +6733,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CountTracks)
             ),
-            Some(f) => f(projOptional),
+            Some(f) => unsafe { f(projOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -6742,7 +6749,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateLocalOscHandler)
             ),
-            Some(f) => f(obj, callback),
+            Some(f) => unsafe { f(obj, callback) },
         }
     }
     pub fn CreateMIDIInput(&self, dev: ::std::os::raw::c_int) -> *mut root::midi_Input {
@@ -6751,7 +6758,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateMIDIInput)
             ),
-            Some(f) => f(dev),
+            Some(f) => unsafe { f(dev) },
         }
     }
     #[doc = r" # Safety"]
@@ -6768,7 +6775,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateMIDIOutput)
             ),
-            Some(f) => f(dev, streamMode, msoffset100),
+            Some(f) => unsafe { f(dev, streamMode, msoffset100) },
         }
     }
     #[doc = r" # Safety"]
@@ -6786,7 +6793,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateNewMIDIItemInProj)
             ),
-            Some(f) => f(track, starttime, endtime, qnInOptional),
+            Some(f) => unsafe { f(track, starttime, endtime, qnInOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -6801,7 +6808,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateTakeAudioAccessor)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     #[doc = r" # Safety"]
@@ -6816,7 +6823,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateTrackAudioAccessor)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -6832,7 +6839,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CreateTrackSend)
             ),
-            Some(f) => f(tr, desttrInOptional),
+            Some(f) => unsafe { f(tr, desttrInOptional) },
         }
     }
     pub fn CSurf_FlushUndo(&self, force: bool) {
@@ -6841,7 +6848,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_FlushUndo)
             ),
-            Some(f) => f(force),
+            Some(f) => unsafe { f(force) },
         }
     }
     #[doc = r" # Safety"]
@@ -6857,7 +6864,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_GetTouchState)
             ),
-            Some(f) => f(trackid, isPan),
+            Some(f) => unsafe { f(trackid, isPan) },
         }
     }
     pub fn CSurf_GoEnd(&self) {
@@ -6866,7 +6873,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_GoEnd)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn CSurf_GoStart(&self) {
@@ -6875,7 +6882,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_GoStart)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn CSurf_NumTracks(&self, mcpView: bool) -> ::std::os::raw::c_int {
@@ -6884,7 +6891,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_NumTracks)
             ),
-            Some(f) => f(mcpView),
+            Some(f) => unsafe { f(mcpView) },
         }
     }
     pub fn CSurf_OnArrow(&self, whichdir: ::std::os::raw::c_int, wantzoom: bool) {
@@ -6893,7 +6900,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnArrow)
             ),
-            Some(f) => f(whichdir, wantzoom),
+            Some(f) => unsafe { f(whichdir, wantzoom) },
         }
     }
     pub fn CSurf_OnFwd(&self, seekplay: ::std::os::raw::c_int) {
@@ -6902,7 +6909,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnFwd)
             ),
-            Some(f) => f(seekplay),
+            Some(f) => unsafe { f(seekplay) },
         }
     }
     #[doc = r" # Safety"]
@@ -6918,7 +6925,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnFXChange)
             ),
-            Some(f) => f(trackid, en),
+            Some(f) => unsafe { f(trackid, en) },
         }
     }
     #[doc = r" # Safety"]
@@ -6934,7 +6941,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnInputMonitorChange)
             ),
-            Some(f) => f(trackid, monitor),
+            Some(f) => unsafe { f(trackid, monitor) },
         }
     }
     #[doc = r" # Safety"]
@@ -6951,7 +6958,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnInputMonitorChangeEx)
             ),
-            Some(f) => f(trackid, monitor, allowgang),
+            Some(f) => unsafe { f(trackid, monitor, allowgang) },
         }
     }
     #[doc = r" # Safety"]
@@ -6967,7 +6974,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnMuteChange)
             ),
-            Some(f) => f(trackid, mute),
+            Some(f) => unsafe { f(trackid, mute) },
         }
     }
     #[doc = r" # Safety"]
@@ -6984,7 +6991,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnMuteChangeEx)
             ),
-            Some(f) => f(trackid, mute, allowgang),
+            Some(f) => unsafe { f(trackid, mute, allowgang) },
         }
     }
     #[doc = r" # Safety"]
@@ -7000,7 +7007,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnOscControlMessage)
             ),
-            Some(f) => f(msg, arg),
+            Some(f) => unsafe { f(msg, arg) },
         }
     }
     #[doc = r" # Safety"]
@@ -7017,7 +7024,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnOscControlMessage2)
             ),
-            Some(f) => f(msg, arg, argstr),
+            Some(f) => unsafe { f(msg, arg, argstr) },
         }
     }
     #[doc = r" # Safety"]
@@ -7034,7 +7041,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnPanChange)
             ),
-            Some(f) => f(trackid, pan, relative),
+            Some(f) => unsafe { f(trackid, pan, relative) },
         }
     }
     #[doc = r" # Safety"]
@@ -7052,7 +7059,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnPanChangeEx)
             ),
-            Some(f) => f(trackid, pan, relative, allowGang),
+            Some(f) => unsafe { f(trackid, pan, relative, allowGang) },
         }
     }
     pub fn CSurf_OnPause(&self) {
@@ -7061,7 +7068,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnPause)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn CSurf_OnPlay(&self) {
@@ -7070,7 +7077,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnPlay)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn CSurf_OnPlayRateChange(&self, playrate: f64) {
@@ -7079,7 +7086,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnPlayRateChange)
             ),
-            Some(f) => f(playrate),
+            Some(f) => unsafe { f(playrate) },
         }
     }
     #[doc = r" # Safety"]
@@ -7095,7 +7102,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRecArmChange)
             ),
-            Some(f) => f(trackid, recarm),
+            Some(f) => unsafe { f(trackid, recarm) },
         }
     }
     #[doc = r" # Safety"]
@@ -7112,7 +7119,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRecArmChangeEx)
             ),
-            Some(f) => f(trackid, recarm, allowgang),
+            Some(f) => unsafe { f(trackid, recarm, allowgang) },
         }
     }
     pub fn CSurf_OnRecord(&self) {
@@ -7121,7 +7128,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRecord)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -7139,7 +7146,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRecvPanChange)
             ),
-            Some(f) => f(trackid, recv_index, pan, relative),
+            Some(f) => unsafe { f(trackid, recv_index, pan, relative) },
         }
     }
     #[doc = r" # Safety"]
@@ -7157,7 +7164,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRecvVolumeChange)
             ),
-            Some(f) => f(trackid, recv_index, volume, relative),
+            Some(f) => unsafe { f(trackid, recv_index, volume, relative) },
         }
     }
     pub fn CSurf_OnRew(&self, seekplay: ::std::os::raw::c_int) {
@@ -7166,7 +7173,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRew)
             ),
-            Some(f) => f(seekplay),
+            Some(f) => unsafe { f(seekplay) },
         }
     }
     pub fn CSurf_OnRewFwd(&self, seekplay: ::std::os::raw::c_int, dir: ::std::os::raw::c_int) {
@@ -7175,7 +7182,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnRewFwd)
             ),
-            Some(f) => f(seekplay, dir),
+            Some(f) => unsafe { f(seekplay, dir) },
         }
     }
     pub fn CSurf_OnScroll(&self, xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int) {
@@ -7184,7 +7191,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnScroll)
             ),
-            Some(f) => f(xdir, ydir),
+            Some(f) => unsafe { f(xdir, ydir) },
         }
     }
     #[doc = r" # Safety"]
@@ -7200,7 +7207,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnSelectedChange)
             ),
-            Some(f) => f(trackid, selected),
+            Some(f) => unsafe { f(trackid, selected) },
         }
     }
     #[doc = r" # Safety"]
@@ -7218,7 +7225,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnSendPanChange)
             ),
-            Some(f) => f(trackid, send_index, pan, relative),
+            Some(f) => unsafe { f(trackid, send_index, pan, relative) },
         }
     }
     #[doc = r" # Safety"]
@@ -7236,7 +7243,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnSendVolumeChange)
             ),
-            Some(f) => f(trackid, send_index, volume, relative),
+            Some(f) => unsafe { f(trackid, send_index, volume, relative) },
         }
     }
     #[doc = r" # Safety"]
@@ -7252,7 +7259,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnSoloChange)
             ),
-            Some(f) => f(trackid, solo),
+            Some(f) => unsafe { f(trackid, solo) },
         }
     }
     #[doc = r" # Safety"]
@@ -7269,7 +7276,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnSoloChangeEx)
             ),
-            Some(f) => f(trackid, solo, allowgang),
+            Some(f) => unsafe { f(trackid, solo, allowgang) },
         }
     }
     pub fn CSurf_OnStop(&self) {
@@ -7278,7 +7285,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnStop)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn CSurf_OnTempoChange(&self, bpm: f64) {
@@ -7287,7 +7294,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnTempoChange)
             ),
-            Some(f) => f(bpm),
+            Some(f) => unsafe { f(bpm) },
         }
     }
     #[doc = r" # Safety"]
@@ -7299,7 +7306,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnTrackSelection)
             ),
-            Some(f) => f(trackid),
+            Some(f) => unsafe { f(trackid) },
         }
     }
     #[doc = r" # Safety"]
@@ -7316,7 +7323,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnVolumeChange)
             ),
-            Some(f) => f(trackid, volume, relative),
+            Some(f) => unsafe { f(trackid, volume, relative) },
         }
     }
     #[doc = r" # Safety"]
@@ -7334,7 +7341,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnVolumeChangeEx)
             ),
-            Some(f) => f(trackid, volume, relative, allowGang),
+            Some(f) => unsafe { f(trackid, volume, relative, allowGang) },
         }
     }
     #[doc = r" # Safety"]
@@ -7351,7 +7358,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnWidthChange)
             ),
-            Some(f) => f(trackid, width, relative),
+            Some(f) => unsafe { f(trackid, width, relative) },
         }
     }
     #[doc = r" # Safety"]
@@ -7369,7 +7376,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnWidthChangeEx)
             ),
-            Some(f) => f(trackid, width, relative, allowGang),
+            Some(f) => unsafe { f(trackid, width, relative, allowGang) },
         }
     }
     pub fn CSurf_OnZoom(&self, xdir: ::std::os::raw::c_int, ydir: ::std::os::raw::c_int) {
@@ -7378,7 +7385,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_OnZoom)
             ),
-            Some(f) => f(xdir, ydir),
+            Some(f) => unsafe { f(xdir, ydir) },
         }
     }
     pub fn CSurf_ResetAllCachedVolPanStates(&self) {
@@ -7387,7 +7394,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_ResetAllCachedVolPanStates)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn CSurf_ScrubAmt(&self, amt: f64) {
@@ -7396,7 +7403,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_ScrubAmt)
             ),
-            Some(f) => f(amt),
+            Some(f) => unsafe { f(amt) },
         }
     }
     #[doc = r" # Safety"]
@@ -7412,7 +7419,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetAutoMode)
             ),
-            Some(f) => f(mode, ignoresurf),
+            Some(f) => unsafe { f(mode, ignoresurf) },
         }
     }
     #[doc = r" # Safety"]
@@ -7430,7 +7437,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetPlayState)
             ),
-            Some(f) => f(play, pause, rec, ignoresurf),
+            Some(f) => unsafe { f(play, pause, rec, ignoresurf) },
         }
     }
     #[doc = r" # Safety"]
@@ -7446,7 +7453,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetRepeatState)
             ),
-            Some(f) => f(rep, ignoresurf),
+            Some(f) => unsafe { f(rep, ignoresurf) },
         }
     }
     #[doc = r" # Safety"]
@@ -7463,7 +7470,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetSurfaceMute)
             ),
-            Some(f) => f(trackid, mute, ignoresurf),
+            Some(f) => unsafe { f(trackid, mute, ignoresurf) },
         }
     }
     #[doc = r" # Safety"]
@@ -7480,7 +7487,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetSurfacePan)
             ),
-            Some(f) => f(trackid, pan, ignoresurf),
+            Some(f) => unsafe { f(trackid, pan, ignoresurf) },
         }
     }
     #[doc = r" # Safety"]
@@ -7497,7 +7504,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetSurfaceRecArm)
             ),
-            Some(f) => f(trackid, recarm, ignoresurf),
+            Some(f) => unsafe { f(trackid, recarm, ignoresurf) },
         }
     }
     #[doc = r" # Safety"]
@@ -7514,7 +7521,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetSurfaceSelected)
             ),
-            Some(f) => f(trackid, selected, ignoresurf),
+            Some(f) => unsafe { f(trackid, selected, ignoresurf) },
         }
     }
     #[doc = r" # Safety"]
@@ -7531,7 +7538,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetSurfaceSolo)
             ),
-            Some(f) => f(trackid, solo, ignoresurf),
+            Some(f) => unsafe { f(trackid, solo, ignoresurf) },
         }
     }
     #[doc = r" # Safety"]
@@ -7548,7 +7555,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetSurfaceVolume)
             ),
-            Some(f) => f(trackid, volume, ignoresurf),
+            Some(f) => unsafe { f(trackid, volume, ignoresurf) },
         }
     }
     pub fn CSurf_SetTrackListChange(&self) {
@@ -7557,7 +7564,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_SetTrackListChange)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn CSurf_TrackFromID(
@@ -7570,7 +7577,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_TrackFromID)
             ),
-            Some(f) => f(idx, mcpView),
+            Some(f) => unsafe { f(idx, mcpView) },
         }
     }
     #[doc = r" # Safety"]
@@ -7586,7 +7593,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CSurf_TrackToID)
             ),
-            Some(f) => f(track, mcpView),
+            Some(f) => unsafe { f(track, mcpView) },
         }
     }
     pub fn DB2SLIDER(&self, x: f64) -> f64 {
@@ -7595,7 +7602,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DB2SLIDER)
             ),
-            Some(f) => f(x),
+            Some(f) => unsafe { f(x) },
         }
     }
     #[doc = r" # Safety"]
@@ -7612,7 +7619,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteActionShortcut)
             ),
-            Some(f) => f(section, cmdID, shortcutidx),
+            Some(f) => unsafe { f(section, cmdID, shortcutidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -7629,7 +7636,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteEnvelopePointEx)
             ),
-            Some(f) => f(envelope, autoitem_idx, ptidx),
+            Some(f) => unsafe { f(envelope, autoitem_idx, ptidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -7646,7 +7653,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteEnvelopePointRange)
             ),
-            Some(f) => f(envelope, time_start, time_end),
+            Some(f) => unsafe { f(envelope, time_start, time_end) },
         }
     }
     #[doc = r" # Safety"]
@@ -7664,7 +7671,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteEnvelopePointRangeEx)
             ),
-            Some(f) => f(envelope, autoitem_idx, time_start, time_end),
+            Some(f) => unsafe { f(envelope, autoitem_idx, time_start, time_end) },
         }
     }
     #[doc = r" # Safety"]
@@ -7681,7 +7688,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteExtState)
             ),
-            Some(f) => f(section, key, persist),
+            Some(f) => unsafe { f(section, key, persist) },
         }
     }
     #[doc = r" # Safety"]
@@ -7698,7 +7705,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteProjectMarker)
             ),
-            Some(f) => f(proj, markrgnindexnumber, isrgn),
+            Some(f) => unsafe { f(proj, markrgnindexnumber, isrgn) },
         }
     }
     #[doc = r" # Safety"]
@@ -7714,7 +7721,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteProjectMarkerByIndex)
             ),
-            Some(f) => f(proj, markrgnidx),
+            Some(f) => unsafe { f(proj, markrgnidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -7730,7 +7737,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteTakeMarker)
             ),
-            Some(f) => f(take, idx),
+            Some(f) => unsafe { f(take, idx) },
         }
     }
     #[doc = r" # Safety"]
@@ -7747,7 +7754,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteTakeStretchMarkers)
             ),
-            Some(f) => f(take, idx, countInOptional),
+            Some(f) => unsafe { f(take, idx, countInOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -7763,7 +7770,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteTempoTimeSigMarker)
             ),
-            Some(f) => f(project, markerindex),
+            Some(f) => unsafe { f(project, markerindex) },
         }
     }
     #[doc = r" # Safety"]
@@ -7775,7 +7782,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteTrack)
             ),
-            Some(f) => f(tr),
+            Some(f) => unsafe { f(tr) },
         }
     }
     #[doc = r" # Safety"]
@@ -7791,7 +7798,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteTrackMediaItem)
             ),
-            Some(f) => f(tr, it),
+            Some(f) => unsafe { f(tr, it) },
         }
     }
     #[doc = r" # Safety"]
@@ -7806,7 +7813,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DestroyAudioAccessor)
             ),
-            Some(f) => f(accessor),
+            Some(f) => unsafe { f(accessor) },
         }
     }
     #[doc = r" # Safety"]
@@ -7818,7 +7825,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DestroyLocalOscHandler)
             ),
-            Some(f) => f(local_osc_handler),
+            Some(f) => unsafe { f(local_osc_handler) },
         }
     }
     #[doc = r" # Safety"]
@@ -7836,7 +7843,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DoActionShortcutDialog)
             ),
-            Some(f) => f(hwnd, section, cmdID, shortcutidx),
+            Some(f) => unsafe { f(hwnd, section, cmdID, shortcutidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -7852,7 +7859,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Dock_UpdateDockID)
             ),
-            Some(f) => f(ident_str, whichDock),
+            Some(f) => unsafe { f(ident_str, whichDock) },
         }
     }
     pub fn DockGetPosition(&self, whichDock: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
@@ -7861,7 +7868,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockGetPosition)
             ),
-            Some(f) => f(whichDock),
+            Some(f) => unsafe { f(whichDock) },
         }
     }
     #[doc = r" # Safety"]
@@ -7877,7 +7884,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockIsChildOfDock)
             ),
-            Some(f) => f(hwnd, isFloatingDockerOut),
+            Some(f) => unsafe { f(hwnd, isFloatingDockerOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -7889,7 +7896,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockWindowActivate)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[doc = r" # Safety"]
@@ -7907,7 +7914,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockWindowAdd)
             ),
-            Some(f) => f(hwnd, name, pos, allowShow),
+            Some(f) => unsafe { f(hwnd, name, pos, allowShow) },
         }
     }
     #[doc = r" # Safety"]
@@ -7925,7 +7932,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockWindowAddEx)
             ),
-            Some(f) => f(hwnd, name, identstr, allowShow),
+            Some(f) => unsafe { f(hwnd, name, identstr, allowShow) },
         }
     }
     pub fn DockWindowRefresh(&self) {
@@ -7934,7 +7941,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockWindowRefresh)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -7946,7 +7953,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockWindowRefreshForHWND)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[doc = r" # Safety"]
@@ -7958,7 +7965,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DockWindowRemove)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[doc = r" # Safety"]
@@ -7974,7 +7981,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DuplicateCustomizableMenu)
             ),
-            Some(f) => f(srcmenu, destmenu),
+            Some(f) => unsafe { f(srcmenu, destmenu) },
         }
     }
     #[doc = r" # Safety"]
@@ -7990,7 +7997,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EditTempoTimeSigMarker)
             ),
-            Some(f) => f(project, markerindex),
+            Some(f) => unsafe { f(project, markerindex) },
         }
     }
     #[doc = r" # Safety"]
@@ -8002,7 +8009,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnsureNotCompletelyOffscreen)
             ),
-            Some(f) => f(rInOut),
+            Some(f) => unsafe { f(rInOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -8018,7 +8025,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumerateFiles)
             ),
-            Some(f) => f(path, fileindex),
+            Some(f) => unsafe { f(path, fileindex) },
         }
     }
     #[doc = r" # Safety"]
@@ -8034,7 +8041,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumerateSubdirectories)
             ),
-            Some(f) => f(path, subdirindex),
+            Some(f) => unsafe { f(path, subdirindex) },
         }
     }
     #[doc = r" # Safety"]
@@ -8051,7 +8058,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumInstalledFX)
             ),
-            Some(f) => f(index, nameOut, identOut),
+            Some(f) => unsafe { f(index, nameOut, identOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -8067,7 +8074,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumPitchShiftModes)
             ),
-            Some(f) => f(mode, strOut),
+            Some(f) => unsafe { f(mode, strOut) },
         }
     }
     pub fn EnumPitchShiftSubModes(
@@ -8080,7 +8087,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumPitchShiftSubModes)
             ),
-            Some(f) => f(mode, submode),
+            Some(f) => unsafe { f(mode, submode) },
         }
     }
     #[doc = r" # Safety"]
@@ -8100,14 +8107,16 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumProjectMarkers)
             ),
-            Some(f) => f(
-                idx,
-                isrgnOut,
-                posOut,
-                rgnendOut,
-                nameOut,
-                markrgnindexnumberOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    idx,
+                    isrgnOut,
+                    posOut,
+                    rgnendOut,
+                    nameOut,
+                    markrgnindexnumberOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -8128,15 +8137,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumProjectMarkers2)
             ),
-            Some(f) => f(
-                proj,
-                idx,
-                isrgnOut,
-                posOut,
-                rgnendOut,
-                nameOut,
-                markrgnindexnumberOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    proj,
+                    idx,
+                    isrgnOut,
+                    posOut,
+                    rgnendOut,
+                    nameOut,
+                    markrgnindexnumberOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -8158,16 +8169,18 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumProjectMarkers3)
             ),
-            Some(f) => f(
-                proj,
-                idx,
-                isrgnOut,
-                posOut,
-                rgnendOut,
-                nameOut,
-                markrgnindexnumberOut,
-                colorOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    proj,
+                    idx,
+                    isrgnOut,
+                    posOut,
+                    rgnendOut,
+                    nameOut,
+                    markrgnindexnumberOut,
+                    colorOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -8184,7 +8197,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumProjects)
             ),
-            Some(f) => f(idx, projfnOutOptional, projfnOutOptional_sz),
+            Some(f) => unsafe { f(idx, projfnOutOptional, projfnOutOptional_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -8205,15 +8218,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumProjExtState)
             ),
-            Some(f) => f(
-                proj,
-                extname,
-                idx,
-                keyOutOptional,
-                keyOutOptional_sz,
-                valOutOptional,
-                valOutOptional_sz,
-            ),
+            Some(f) => unsafe {
+                f(
+                    proj,
+                    extname,
+                    idx,
+                    keyOutOptional,
+                    keyOutOptional_sz,
+                    valOutOptional,
+                    valOutOptional_sz,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -8230,7 +8245,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumRegionRenderMatrix)
             ),
-            Some(f) => f(proj, regionindex, rendertrack),
+            Some(f) => unsafe { f(proj, regionindex, rendertrack) },
         }
     }
     #[doc = r" # Safety"]
@@ -8248,7 +8263,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumTrackMIDIProgramNames)
             ),
-            Some(f) => f(track, programNumber, programName, programName_sz),
+            Some(f) => unsafe { f(track, programNumber, programName, programName_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -8267,7 +8282,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(EnumTrackMIDIProgramNamesEx)
             ),
-            Some(f) => f(proj, track, programNumber, programName, programName_sz),
+            Some(f) => unsafe { f(proj, track, programNumber, programName, programName_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -8289,16 +8304,18 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_Evaluate)
             ),
-            Some(f) => f(
-                envelope,
-                time,
-                samplerate,
-                samplesRequested,
-                valueOut,
-                dVdSOut,
-                ddVdSOut,
-                dddVdSOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    envelope,
+                    time,
+                    samplerate,
+                    samplesRequested,
+                    valueOut,
+                    dVdSOut,
+                    ddVdSOut,
+                    dddVdSOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -8316,7 +8333,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_FormatValue)
             ),
-            Some(f) => f(env, value, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(env, value, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -8333,7 +8350,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_GetParentTake)
             ),
-            Some(f) => f(env, indexOut, index2Out),
+            Some(f) => unsafe { f(env, indexOut, index2Out) },
         }
     }
     #[doc = r" # Safety"]
@@ -8350,7 +8367,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_GetParentTrack)
             ),
-            Some(f) => f(env, indexOut, index2Out),
+            Some(f) => unsafe { f(env, indexOut, index2Out) },
         }
     }
     #[doc = r" # Safety"]
@@ -8362,7 +8379,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_SortPoints)
             ),
-            Some(f) => f(envelope),
+            Some(f) => unsafe { f(envelope) },
         }
     }
     #[doc = r" # Safety"]
@@ -8378,7 +8395,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Envelope_SortPointsEx)
             ),
-            Some(f) => f(envelope, autoitem_idx),
+            Some(f) => unsafe { f(envelope, autoitem_idx) },
         }
     }
     #[doc = r" # Safety"]
@@ -8394,7 +8411,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ExecProcess)
             ),
-            Some(f) => f(cmdline, timeoutmsec),
+            Some(f) => unsafe { f(cmdline, timeoutmsec) },
         }
     }
     #[doc = r" # Safety"]
@@ -8406,7 +8423,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(file_exists)
             ),
-            Some(f) => f(path),
+            Some(f) => unsafe { f(path) },
         }
     }
     #[doc = r" # Safety"]
@@ -8422,7 +8439,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(FindTempoTimeSigMarker)
             ),
-            Some(f) => f(project, time),
+            Some(f) => unsafe { f(project, time) },
         }
     }
     #[doc = r" # Safety"]
@@ -8439,7 +8456,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(format_timestr)
             ),
-            Some(f) => f(tpos, buf, buf_sz),
+            Some(f) => unsafe { f(tpos, buf, buf_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -8458,7 +8475,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(format_timestr_len)
             ),
-            Some(f) => f(tpos, buf, buf_sz, offset, modeoverride),
+            Some(f) => unsafe { f(tpos, buf, buf_sz, offset, modeoverride) },
         }
     }
     #[doc = r" # Safety"]
@@ -8476,7 +8493,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(format_timestr_pos)
             ),
-            Some(f) => f(tpos, buf, buf_sz, modeoverride),
+            Some(f) => unsafe { f(tpos, buf, buf_sz, modeoverride) },
         }
     }
     #[doc = r" # Safety"]
@@ -8488,7 +8505,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(FreeHeapPtr)
             ),
-            Some(f) => f(ptr),
+            Some(f) => unsafe { f(ptr) },
         }
     }
     #[doc = r" # Safety"]
@@ -8500,7 +8517,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(genGuid)
             ),
-            Some(f) => f(g),
+            Some(f) => unsafe { f(g) },
         }
     }
     #[doc = r" # Safety"]
@@ -8516,7 +8533,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(get_config_var)
             ),
-            Some(f) => f(name, szOut),
+            Some(f) => unsafe { f(name, szOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -8533,7 +8550,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(get_config_var_string)
             ),
-            Some(f) => f(name, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(name, bufOut, bufOut_sz) },
         }
     }
     pub fn get_ini_file(&self) -> *const ::std::os::raw::c_char {
@@ -8542,7 +8559,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(get_ini_file)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -8558,7 +8575,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(get_midi_config_var)
             ),
-            Some(f) => f(name, szOut),
+            Some(f) => unsafe { f(name, szOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -8577,7 +8594,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetActionShortcutDesc)
             ),
-            Some(f) => f(section, cmdID, shortcutidx, descOut, descOut_sz),
+            Some(f) => unsafe { f(section, cmdID, shortcutidx, descOut, descOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -8589,7 +8606,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetActiveTake)
             ),
-            Some(f) => f(item),
+            Some(f) => unsafe { f(item) },
         }
     }
     #[doc = r" # Safety"]
@@ -8604,7 +8621,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAllProjectPlayStates)
             ),
-            Some(f) => f(ignoreProject),
+            Some(f) => unsafe { f(ignoreProject) },
         }
     }
     pub fn GetAppVersion(&self) -> *const ::std::os::raw::c_char {
@@ -8613,7 +8630,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAppVersion)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -8629,7 +8646,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetArmedCommand)
             ),
-            Some(f) => f(secOut, secOut_sz),
+            Some(f) => unsafe { f(secOut, secOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -8644,7 +8661,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAudioAccessorEndTime)
             ),
-            Some(f) => f(accessor),
+            Some(f) => unsafe { f(accessor) },
         }
     }
     #[doc = r" # Safety"]
@@ -8660,7 +8677,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAudioAccessorHash)
             ),
-            Some(f) => f(accessor, hashNeed128),
+            Some(f) => unsafe { f(accessor, hashNeed128) },
         }
     }
     #[doc = r" # Safety"]
@@ -8680,14 +8697,16 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAudioAccessorSamples)
             ),
-            Some(f) => f(
-                accessor,
-                samplerate,
-                numchannels,
-                starttime_sec,
-                numsamplesperchannel,
-                samplebuffer,
-            ),
+            Some(f) => unsafe {
+                f(
+                    accessor,
+                    samplerate,
+                    numchannels,
+                    starttime_sec,
+                    numsamplesperchannel,
+                    samplebuffer,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -8702,7 +8721,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAudioAccessorStartTime)
             ),
-            Some(f) => f(accessor),
+            Some(f) => unsafe { f(accessor) },
         }
     }
     #[doc = r" # Safety"]
@@ -8719,7 +8738,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetAudioDeviceInfo)
             ),
-            Some(f) => f(attribute, descOut, descOut_sz),
+            Some(f) => unsafe { f(attribute, descOut, descOut_sz) },
         }
     }
     pub fn GetColorTheme(
@@ -8732,7 +8751,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetColorTheme)
             ),
-            Some(f) => f(idx, defval),
+            Some(f) => unsafe { f(idx, defval) },
         }
     }
     #[doc = r" # Safety"]
@@ -8747,7 +8766,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetColorThemeStruct)
             ),
-            Some(f) => f(szOut),
+            Some(f) => unsafe { f(szOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -8762,7 +8781,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetConfigWantsDock)
             ),
-            Some(f) => f(ident_str),
+            Some(f) => unsafe { f(ident_str) },
         }
     }
     pub fn GetContextMenu(&self, idx: ::std::os::raw::c_int) -> root::HMENU {
@@ -8771,7 +8790,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetContextMenu)
             ),
-            Some(f) => f(idx),
+            Some(f) => unsafe { f(idx) },
         }
     }
     pub fn GetCurrentProjectInLoadSave(&self) -> *mut root::ReaProject {
@@ -8780,7 +8799,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCurrentProjectInLoadSave)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn GetCursorContext(&self) -> ::std::os::raw::c_int {
@@ -8789,7 +8808,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCursorContext)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn GetCursorContext2(&self, want_last_valid: bool) -> ::std::os::raw::c_int {
@@ -8798,7 +8817,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCursorContext2)
             ),
-            Some(f) => f(want_last_valid),
+            Some(f) => unsafe { f(want_last_valid) },
         }
     }
     pub fn GetCursorPosition(&self) -> f64 {
@@ -8807,7 +8826,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCursorPosition)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -8819,7 +8838,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCursorPositionEx)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -8834,7 +8853,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetDisplayedMediaItemColor)
             ),
-            Some(f) => f(item),
+            Some(f) => unsafe { f(item) },
         }
     }
     #[doc = r" # Safety"]
@@ -8850,7 +8869,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetDisplayedMediaItemColor2)
             ),
-            Some(f) => f(item, take),
+            Some(f) => unsafe { f(item, take) },
         }
     }
     #[doc = r" # Safety"]
@@ -8866,7 +8885,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopeInfo_Value)
             ),
-            Some(f) => f(env, parmname),
+            Some(f) => unsafe { f(env, parmname) },
         }
     }
     #[doc = r" # Safety"]
@@ -8883,7 +8902,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopeName)
             ),
-            Some(f) => f(env, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(env, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -8904,15 +8923,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopePoint)
             ),
-            Some(f) => f(
-                envelope,
-                ptidx,
-                timeOut,
-                valueOut,
-                shapeOut,
-                tensionOut,
-                selectedOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    envelope,
+                    ptidx,
+                    timeOut,
+                    valueOut,
+                    shapeOut,
+                    tensionOut,
+                    selectedOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -8928,7 +8949,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopePointByTime)
             ),
-            Some(f) => f(envelope, time),
+            Some(f) => unsafe { f(envelope, time) },
         }
     }
     #[doc = r" # Safety"]
@@ -8945,7 +8966,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopePointByTimeEx)
             ),
-            Some(f) => f(envelope, autoitem_idx, time),
+            Some(f) => unsafe { f(envelope, autoitem_idx, time) },
         }
     }
     #[doc = r" # Safety"]
@@ -8967,16 +8988,18 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopePointEx)
             ),
-            Some(f) => f(
-                envelope,
-                autoitem_idx,
-                ptidx,
-                timeOut,
-                valueOut,
-                shapeOut,
-                tensionOut,
-                selectedOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    envelope,
+                    autoitem_idx,
+                    ptidx,
+                    timeOut,
+                    valueOut,
+                    shapeOut,
+                    tensionOut,
+                    selectedOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -8991,7 +9014,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopeScalingMode)
             ),
-            Some(f) => f(env),
+            Some(f) => unsafe { f(env) },
         }
     }
     #[doc = r" # Safety"]
@@ -9009,7 +9032,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopeStateChunk)
             ),
-            Some(f) => f(env, strNeedBig, strNeedBig_sz, isundoOptional),
+            Some(f) => unsafe { f(env, strNeedBig, strNeedBig_sz, isundoOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -9024,7 +9047,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetEnvelopeUIState)
             ),
-            Some(f) => f(env),
+            Some(f) => unsafe { f(env) },
         }
     }
     pub fn GetExePath(&self) -> *const ::std::os::raw::c_char {
@@ -9033,7 +9056,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetExePath)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -9049,7 +9072,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetExtState)
             ),
-            Some(f) => f(section, key),
+            Some(f) => unsafe { f(section, key) },
         }
     }
     #[doc = r" # Safety"]
@@ -9066,7 +9089,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetFocusedFX)
             ),
-            Some(f) => f(tracknumberOut, itemnumberOut, fxnumberOut),
+            Some(f) => unsafe { f(tracknumberOut, itemnumberOut, fxnumberOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -9083,7 +9106,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetFocusedFX2)
             ),
-            Some(f) => f(tracknumberOut, itemnumberOut, fxnumberOut),
+            Some(f) => unsafe { f(tracknumberOut, itemnumberOut, fxnumberOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -9099,7 +9122,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetFreeDiskSpaceForRecordPath)
             ),
-            Some(f) => f(proj, pathidx),
+            Some(f) => unsafe { f(proj, pathidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -9117,7 +9140,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetFXEnvelope)
             ),
-            Some(f) => f(track, fxindex, parameterindex, create),
+            Some(f) => unsafe { f(track, fxindex, parameterindex, create) },
         }
     }
     pub fn GetGlobalAutomationOverride(&self) -> ::std::os::raw::c_int {
@@ -9126,7 +9149,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetGlobalAutomationOverride)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn GetHZoomLevel(&self) -> f64 {
@@ -9135,7 +9158,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetHZoomLevel)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -9150,7 +9173,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetIconThemePointer)
             ),
-            Some(f) => f(name),
+            Some(f) => unsafe { f(name) },
         }
     }
     #[doc = r" # Safety"]
@@ -9166,7 +9189,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetIconThemePointerForDPI)
             ),
-            Some(f) => f(name, dpisc),
+            Some(f) => unsafe { f(name, dpisc) },
         }
     }
     #[doc = r" # Safety"]
@@ -9181,7 +9204,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetIconThemeStruct)
             ),
-            Some(f) => f(szOut),
+            Some(f) => unsafe { f(szOut) },
         }
     }
     pub fn GetInputActivityLevel(&self, input_id: ::std::os::raw::c_int) -> f64 {
@@ -9190,7 +9213,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetInputActivityLevel)
             ),
-            Some(f) => f(input_id),
+            Some(f) => unsafe { f(input_id) },
         }
     }
     pub fn GetInputChannelName(
@@ -9202,7 +9225,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetInputChannelName)
             ),
-            Some(f) => f(channelIndex),
+            Some(f) => unsafe { f(channelIndex) },
         }
     }
     #[doc = r" # Safety"]
@@ -9218,7 +9241,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetInputOutputLatency)
             ),
-            Some(f) => f(inputlatencyOut, outputLatencyOut),
+            Some(f) => unsafe { f(inputlatencyOut, outputLatencyOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -9234,7 +9257,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetItemEditingTime2)
             ),
-            Some(f) => f(which_itemOut, flagsOut),
+            Some(f) => unsafe { f(which_itemOut, flagsOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -9252,7 +9275,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetItemFromPoint)
             ),
-            Some(f) => f(screen_x, screen_y, allow_locked, takeOutOptional),
+            Some(f) => unsafe { f(screen_x, screen_y, allow_locked, takeOutOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -9267,7 +9290,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetItemProjectContext)
             ),
-            Some(f) => f(item),
+            Some(f) => unsafe { f(item) },
         }
     }
     #[doc = r" # Safety"]
@@ -9285,7 +9308,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetItemStateChunk)
             ),
-            Some(f) => f(item, strNeedBig, strNeedBig_sz, isundoOptional),
+            Some(f) => unsafe { f(item, strNeedBig, strNeedBig_sz, isundoOptional) },
         }
     }
     pub fn GetLastColorThemeFile(&self) -> *const ::std::os::raw::c_char {
@@ -9294,7 +9317,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetLastColorThemeFile)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -9312,7 +9335,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetLastMarkerAndCurRegion)
             ),
-            Some(f) => f(proj, time, markeridxOut, regionidxOut),
+            Some(f) => unsafe { f(proj, time, markeridxOut, regionidxOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -9329,7 +9352,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetLastTouchedFX)
             ),
-            Some(f) => f(tracknumberOut, fxnumberOut, paramnumberOut),
+            Some(f) => unsafe { f(tracknumberOut, fxnumberOut, paramnumberOut) },
         }
     }
     pub fn GetLastTouchedTrack(&self) -> *mut root::MediaTrack {
@@ -9338,7 +9361,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetLastTouchedTrack)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn GetMainHwnd(&self) -> root::HWND {
@@ -9347,7 +9370,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMainHwnd)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn GetMasterMuteSoloFlags(&self) -> ::std::os::raw::c_int {
@@ -9356,7 +9379,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMasterMuteSoloFlags)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -9368,7 +9391,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMasterTrack)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     pub fn GetMasterTrackVisibility(&self) -> ::std::os::raw::c_int {
@@ -9377,7 +9400,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMasterTrackVisibility)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn GetMaxMidiInputs(&self) -> ::std::os::raw::c_int {
@@ -9386,7 +9409,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMaxMidiInputs)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn GetMaxMidiOutputs(&self) -> ::std::os::raw::c_int {
@@ -9395,7 +9418,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMaxMidiOutputs)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -9413,7 +9436,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaFileMetadata)
             ),
-            Some(f) => f(mediaSource, identifier, bufOutNeedBig, bufOutNeedBig_sz),
+            Some(f) => unsafe { f(mediaSource, identifier, bufOutNeedBig, bufOutNeedBig_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -9429,7 +9452,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItem)
             ),
-            Some(f) => f(proj, itemidx),
+            Some(f) => unsafe { f(proj, itemidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -9441,7 +9464,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItem_Track)
             ),
-            Some(f) => f(item),
+            Some(f) => unsafe { f(item) },
         }
     }
     #[doc = r" # Safety"]
@@ -9457,7 +9480,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemInfo_Value)
             ),
-            Some(f) => f(item, parmname),
+            Some(f) => unsafe { f(item, parmname) },
         }
     }
     #[doc = r" # Safety"]
@@ -9469,7 +9492,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemNumTakes)
             ),
-            Some(f) => f(item),
+            Some(f) => unsafe { f(item) },
         }
     }
     #[doc = r" # Safety"]
@@ -9485,7 +9508,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTake)
             ),
-            Some(f) => f(item, tk),
+            Some(f) => unsafe { f(item, tk) },
         }
     }
     #[doc = r" # Safety"]
@@ -9500,7 +9523,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTake_Item)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     #[doc = r" # Safety"]
@@ -9521,15 +9544,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTake_Peaks)
             ),
-            Some(f) => f(
-                take,
-                peakrate,
-                starttime,
-                numchannels,
-                numsamplesperchannel,
-                want_extra_type,
-                buf,
-            ),
+            Some(f) => unsafe {
+                f(
+                    take,
+                    peakrate,
+                    starttime,
+                    numchannels,
+                    numsamplesperchannel,
+                    want_extra_type,
+                    buf,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -9544,7 +9569,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTake_Source)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     #[doc = r" # Safety"]
@@ -9559,7 +9584,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTake_Track)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     #[doc = r" # Safety"]
@@ -9575,7 +9600,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTakeByGUID)
             ),
-            Some(f) => f(project, guid),
+            Some(f) => unsafe { f(project, guid) },
         }
     }
     #[doc = r" # Safety"]
@@ -9591,7 +9616,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTakeInfo_Value)
             ),
-            Some(f) => f(take, parmname),
+            Some(f) => unsafe { f(take, parmname) },
         }
     }
     #[doc = r" # Safety"]
@@ -9603,7 +9628,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaItemTrack)
             ),
-            Some(f) => f(item),
+            Some(f) => unsafe { f(item) },
         }
     }
     #[doc = r" # Safety"]
@@ -9620,7 +9645,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceFileName)
             ),
-            Some(f) => f(source, filenamebufOut, filenamebufOut_sz),
+            Some(f) => unsafe { f(source, filenamebufOut, filenamebufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -9636,7 +9661,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceLength)
             ),
-            Some(f) => f(source, lengthIsQNOut),
+            Some(f) => unsafe { f(source, lengthIsQNOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -9651,7 +9676,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceNumChannels)
             ),
-            Some(f) => f(source),
+            Some(f) => unsafe { f(source) },
         }
     }
     #[doc = r" # Safety"]
@@ -9663,7 +9688,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceParent)
             ),
-            Some(f) => f(src),
+            Some(f) => unsafe { f(src) },
         }
     }
     #[doc = r" # Safety"]
@@ -9678,7 +9703,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceSampleRate)
             ),
-            Some(f) => f(source),
+            Some(f) => unsafe { f(source) },
         }
     }
     #[doc = r" # Safety"]
@@ -9695,7 +9720,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaSourceType)
             ),
-            Some(f) => f(source, typebufOut, typebufOut_sz),
+            Some(f) => unsafe { f(source, typebufOut, typebufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -9711,7 +9736,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMediaTrackInfo_Value)
             ),
-            Some(f) => f(tr, parmname),
+            Some(f) => unsafe { f(tr, parmname) },
         }
     }
     #[doc = r" # Safety"]
@@ -9728,7 +9753,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMIDIInputName)
             ),
-            Some(f) => f(dev, nameout, nameout_sz),
+            Some(f) => unsafe { f(dev, nameout, nameout_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -9745,7 +9770,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMIDIOutputName)
             ),
-            Some(f) => f(dev, nameout, nameout_sz),
+            Some(f) => unsafe { f(dev, nameout, nameout_sz) },
         }
     }
     pub fn GetMixerScroll(&self) -> *mut root::MediaTrack {
@@ -9754,7 +9779,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMixerScroll)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -9772,7 +9797,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMouseModifier)
             ),
-            Some(f) => f(context, modifier_flag, actionOut, actionOut_sz),
+            Some(f) => unsafe { f(context, modifier_flag, actionOut, actionOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -9788,7 +9813,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMousePosition)
             ),
-            Some(f) => f(xOut, yOut),
+            Some(f) => unsafe { f(xOut, yOut) },
         }
     }
     pub fn GetNumAudioInputs(&self) -> ::std::os::raw::c_int {
@@ -9797,7 +9822,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetNumAudioInputs)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn GetNumAudioOutputs(&self) -> ::std::os::raw::c_int {
@@ -9806,7 +9831,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetNumAudioOutputs)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn GetNumMIDIInputs(&self) -> ::std::os::raw::c_int {
@@ -9815,7 +9840,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetNumMIDIInputs)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn GetNumMIDIOutputs(&self) -> ::std::os::raw::c_int {
@@ -9824,7 +9849,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetNumMIDIOutputs)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -9839,7 +9864,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetNumTakeMarkers)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     pub fn GetNumTracks(&self) -> ::std::os::raw::c_int {
@@ -9848,7 +9873,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetNumTracks)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn GetOS(&self) -> *const ::std::os::raw::c_char {
@@ -9857,7 +9882,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetOS)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn GetOutputChannelName(
@@ -9869,7 +9894,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetOutputChannelName)
             ),
-            Some(f) => f(channelIndex),
+            Some(f) => unsafe { f(channelIndex) },
         }
     }
     pub fn GetOutputLatency(&self) -> f64 {
@@ -9878,7 +9903,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetOutputLatency)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -9890,7 +9915,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetParentTrack)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -9907,7 +9932,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPeakFileName)
             ),
-            Some(f) => f(fn_, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(fn_, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -9925,7 +9950,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPeakFileNameEx)
             ),
-            Some(f) => f(fn_, buf, buf_sz, forWrite),
+            Some(f) => unsafe { f(fn_, buf, buf_sz, forWrite) },
         }
     }
     #[doc = r" # Safety"]
@@ -9944,7 +9969,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPeakFileNameEx2)
             ),
-            Some(f) => f(fn_, buf, buf_sz, forWrite, peaksfileextension),
+            Some(f) => unsafe { f(fn_, buf, buf_sz, forWrite, peaksfileextension) },
         }
     }
     #[doc = r" # Safety"]
@@ -9963,7 +9988,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPeaksBitmap)
             ),
-            Some(f) => f(pks, maxamp, w, h, bmp),
+            Some(f) => unsafe { f(pks, maxamp, w, h, bmp) },
         }
     }
     pub fn GetPlayPosition(&self) -> f64 {
@@ -9972,7 +9997,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPlayPosition)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn GetPlayPosition2(&self) -> f64 {
@@ -9981,7 +10006,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPlayPosition2)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -9993,7 +10018,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPlayPosition2Ex)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -10005,7 +10030,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPlayPositionEx)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     pub fn GetPlayState(&self) -> ::std::os::raw::c_int {
@@ -10014,7 +10039,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPlayState)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -10026,7 +10051,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPlayStateEx)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -10043,7 +10068,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPreferredDiskReadMode)
             ),
-            Some(f) => f(mode, nb, bs),
+            Some(f) => unsafe { f(mode, nb, bs) },
         }
     }
     #[doc = r" # Safety"]
@@ -10060,7 +10085,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPreferredDiskReadModePeak)
             ),
-            Some(f) => f(mode, nb, bs),
+            Some(f) => unsafe { f(mode, nb, bs) },
         }
     }
     #[doc = r" # Safety"]
@@ -10077,7 +10102,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPreferredDiskWriteMode)
             ),
-            Some(f) => f(mode, nb, bs),
+            Some(f) => unsafe { f(mode, nb, bs) },
         }
     }
     #[doc = r" # Safety"]
@@ -10089,7 +10114,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectLength)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -10106,7 +10131,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectName)
             ),
-            Some(f) => f(proj, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(proj, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -10122,7 +10147,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectPath)
             ),
-            Some(f) => f(bufOut, bufOut_sz),
+            Some(f) => unsafe { f(bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -10139,7 +10164,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectPathEx)
             ),
-            Some(f) => f(proj, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(proj, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -10154,7 +10179,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectStateChangeCount)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -10166,7 +10191,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectTimeOffset)
             ),
-            Some(f) => f(proj, rndframe),
+            Some(f) => unsafe { f(proj, rndframe) },
         }
     }
     #[doc = r" # Safety"]
@@ -10178,7 +10203,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectTimeSignature)
             ),
-            Some(f) => f(bpmOut, bpiOut),
+            Some(f) => unsafe { f(bpmOut, bpiOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -10195,7 +10220,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjectTimeSignature2)
             ),
-            Some(f) => f(proj, bpmOut, bpiOut),
+            Some(f) => unsafe { f(proj, bpmOut, bpiOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -10214,7 +10239,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetProjExtState)
             ),
-            Some(f) => f(proj, extname, key, valOutNeedBig, valOutNeedBig_sz),
+            Some(f) => unsafe { f(proj, extname, key, valOutNeedBig, valOutNeedBig_sz) },
         }
     }
     pub fn GetResourcePath(&self) -> *const ::std::os::raw::c_char {
@@ -10223,7 +10248,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetResourcePath)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -10238,7 +10263,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSelectedEnvelope)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -10254,7 +10279,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSelectedMediaItem)
             ),
-            Some(f) => f(proj, selitem),
+            Some(f) => unsafe { f(proj, selitem) },
         }
     }
     #[doc = r" # Safety"]
@@ -10270,7 +10295,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSelectedTrack)
             ),
-            Some(f) => f(proj, seltrackidx),
+            Some(f) => unsafe { f(proj, seltrackidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -10287,7 +10312,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSelectedTrack2)
             ),
-            Some(f) => f(proj, seltrackidx, wantmaster),
+            Some(f) => unsafe { f(proj, seltrackidx, wantmaster) },
         }
     }
     #[doc = r" # Safety"]
@@ -10302,7 +10327,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSelectedTrackEnvelope)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -10322,14 +10347,16 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSet_ArrangeView2)
             ),
-            Some(f) => f(
-                proj,
-                isSet,
-                screen_x_start,
-                screen_x_end,
-                start_timeInOut,
-                end_timeInOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    proj,
+                    isSet,
+                    screen_x_start,
+                    screen_x_end,
+                    start_timeInOut,
+                    end_timeInOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -10348,7 +10375,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSet_LoopTimeRange)
             ),
-            Some(f) => f(isSet, isLoop, startOut, endOut, allowautoseek),
+            Some(f) => unsafe { f(isSet, isLoop, startOut, endOut, allowautoseek) },
         }
     }
     #[doc = r" # Safety"]
@@ -10368,7 +10395,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSet_LoopTimeRange2)
             ),
-            Some(f) => f(proj, isSet, isLoop, startOut, endOut, allowautoseek),
+            Some(f) => unsafe { f(proj, isSet, isLoop, startOut, endOut, allowautoseek) },
         }
     }
     #[doc = r" # Safety"]
@@ -10387,7 +10414,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetAutomationItemInfo)
             ),
-            Some(f) => f(env, autoitem_idx, desc, value, is_set),
+            Some(f) => unsafe { f(env, autoitem_idx, desc, value, is_set) },
         }
     }
     #[doc = r" # Safety"]
@@ -10406,7 +10433,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetAutomationItemInfo_String)
             ),
-            Some(f) => f(env, autoitem_idx, desc, valuestrNeedBig, is_set),
+            Some(f) => unsafe { f(env, autoitem_idx, desc, valuestrNeedBig, is_set) },
         }
     }
     #[doc = r" # Safety"]
@@ -10424,7 +10451,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetEnvelopeInfo_String)
             ),
-            Some(f) => f(env, parmname, stringNeedBig, setNewValue),
+            Some(f) => unsafe { f(env, parmname, stringNeedBig, setNewValue) },
         }
     }
     #[doc = r" # Safety"]
@@ -10441,7 +10468,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetEnvelopeState)
             ),
-            Some(f) => f(env, str_, str_sz),
+            Some(f) => unsafe { f(env, str_, str_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -10459,7 +10486,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetEnvelopeState2)
             ),
-            Some(f) => f(env, str_, str_sz, isundo),
+            Some(f) => unsafe { f(env, str_, str_sz, isundo) },
         }
     }
     #[doc = r" # Safety"]
@@ -10476,7 +10503,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetItemState)
             ),
-            Some(f) => f(item, str_, str_sz),
+            Some(f) => unsafe { f(item, str_, str_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -10494,7 +10521,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetItemState2)
             ),
-            Some(f) => f(item, str_, str_sz, isundo),
+            Some(f) => unsafe { f(item, str_, str_sz, isundo) },
         }
     }
     #[doc = r" # Safety"]
@@ -10511,7 +10538,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetMediaItemInfo)
             ),
-            Some(f) => f(item, parmname, setNewValue),
+            Some(f) => unsafe { f(item, parmname, setNewValue) },
         }
     }
     #[doc = r" # Safety"]
@@ -10529,7 +10556,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetMediaItemInfo_String)
             ),
-            Some(f) => f(item, parmname, stringNeedBig, setNewValue),
+            Some(f) => unsafe { f(item, parmname, stringNeedBig, setNewValue) },
         }
     }
     #[doc = r" # Safety"]
@@ -10546,7 +10573,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetMediaItemTakeInfo)
             ),
-            Some(f) => f(tk, parmname, setNewValue),
+            Some(f) => unsafe { f(tk, parmname, setNewValue) },
         }
     }
     #[doc = r" # Safety"]
@@ -10564,7 +10591,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetMediaItemTakeInfo_String)
             ),
-            Some(f) => f(tk, parmname, stringNeedBig, setNewValue),
+            Some(f) => unsafe { f(tk, parmname, stringNeedBig, setNewValue) },
         }
     }
     #[doc = r" # Safety"]
@@ -10581,7 +10608,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetMediaTrackInfo)
             ),
-            Some(f) => f(tr, parmname, setNewValue),
+            Some(f) => unsafe { f(tr, parmname, setNewValue) },
         }
     }
     #[doc = r" # Safety"]
@@ -10599,7 +10626,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetMediaTrackInfo_String)
             ),
-            Some(f) => f(tr, parmname, stringNeedBig, setNewValue),
+            Some(f) => unsafe { f(tr, parmname, stringNeedBig, setNewValue) },
         }
     }
     #[doc = r" # Safety"]
@@ -10615,7 +10642,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetObjectState)
             ),
-            Some(f) => f(obj, str_),
+            Some(f) => unsafe { f(obj, str_) },
         }
     }
     #[doc = r" # Safety"]
@@ -10632,7 +10659,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetObjectState2)
             ),
-            Some(f) => f(obj, str_, isundo),
+            Some(f) => unsafe { f(obj, str_, isundo) },
         }
     }
     #[doc = r" # Safety"]
@@ -10650,7 +10677,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetProjectAuthor)
             ),
-            Some(f) => f(proj, set, author, author_sz),
+            Some(f) => unsafe { f(proj, set, author, author_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -10669,13 +10696,15 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetProjectGrid)
             ),
-            Some(f) => f(
-                project,
-                set,
-                divisionInOutOptional,
-                swingmodeInOutOptional,
-                swingamtInOutOptional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    project,
+                    set,
+                    divisionInOutOptional,
+                    swingmodeInOutOptional,
+                    swingamtInOutOptional,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -10693,7 +10722,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetProjectInfo)
             ),
-            Some(f) => f(project, desc, value, is_set),
+            Some(f) => unsafe { f(project, desc, value, is_set) },
         }
     }
     #[doc = r" # Safety"]
@@ -10711,7 +10740,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetProjectInfo_String)
             ),
-            Some(f) => f(project, desc, valuestrNeedBig, is_set),
+            Some(f) => unsafe { f(project, desc, valuestrNeedBig, is_set) },
         }
     }
     #[doc = r" # Safety"]
@@ -10729,7 +10758,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetProjectNotes)
             ),
-            Some(f) => f(proj, set, notesNeedBig, notesNeedBig_sz),
+            Some(f) => unsafe { f(proj, set, notesNeedBig, notesNeedBig_sz) },
         }
     }
     pub fn GetSetRepeat(&self, val: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
@@ -10738,7 +10767,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetRepeat)
             ),
-            Some(f) => f(val),
+            Some(f) => unsafe { f(val) },
         }
     }
     #[doc = r" # Safety"]
@@ -10754,7 +10783,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetRepeatEx)
             ),
-            Some(f) => f(proj, val),
+            Some(f) => unsafe { f(proj, val) },
         }
     }
     #[doc = r" # Safety"]
@@ -10772,7 +10801,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTempoTimeSigMarkerFlag)
             ),
-            Some(f) => f(project, point_index, flag, is_set),
+            Some(f) => unsafe { f(project, point_index, flag, is_set) },
         }
     }
     #[doc = r" # Safety"]
@@ -10790,7 +10819,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackGroupMembership)
             ),
-            Some(f) => f(tr, groupname, setmask, setvalue),
+            Some(f) => unsafe { f(tr, groupname, setmask, setvalue) },
         }
     }
     #[doc = r" # Safety"]
@@ -10809,7 +10838,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackGroupMembershipEx)
             ),
-            Some(f) => f(tr, groupname, offset, setmask, setvalue),
+            Some(f) => unsafe { f(tr, groupname, offset, setmask, setvalue) },
         }
     }
     #[doc = r" # Safety"]
@@ -10827,7 +10856,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackGroupMembershipHigh)
             ),
-            Some(f) => f(tr, groupname, setmask, setvalue),
+            Some(f) => unsafe { f(tr, groupname, setmask, setvalue) },
         }
     }
     #[doc = r" # Safety"]
@@ -10845,7 +10874,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackMIDISupportFile)
             ),
-            Some(f) => f(proj, track, which, filename),
+            Some(f) => unsafe { f(proj, track, which, filename) },
         }
     }
     #[doc = r" # Safety"]
@@ -10864,7 +10893,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackSendInfo)
             ),
-            Some(f) => f(tr, category, sendidx, parmname, setNewValue),
+            Some(f) => unsafe { f(tr, category, sendidx, parmname, setNewValue) },
         }
     }
     #[doc = r" # Safety"]
@@ -10884,7 +10913,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackSendInfo_String)
             ),
-            Some(f) => f(tr, category, sendidx, parmname, stringNeedBig, setNewValue),
+            Some(f) => unsafe { f(tr, category, sendidx, parmname, stringNeedBig, setNewValue) },
         }
     }
     #[doc = r" # Safety"]
@@ -10901,7 +10930,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackState)
             ),
-            Some(f) => f(track, str_, str_sz),
+            Some(f) => unsafe { f(track, str_, str_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -10919,7 +10948,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackState2)
             ),
-            Some(f) => f(track, str_, str_sz, isundo),
+            Some(f) => unsafe { f(track, str_, str_sz, isundo) },
         }
     }
     #[doc = r" # Safety"]
@@ -10934,7 +10963,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSubProjectFromSource)
             ),
-            Some(f) => f(src),
+            Some(f) => unsafe { f(src) },
         }
     }
     #[doc = r" # Safety"]
@@ -10950,7 +10979,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTake)
             ),
-            Some(f) => f(item, takeidx),
+            Some(f) => unsafe { f(item, takeidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -10966,7 +10995,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeEnvelope)
             ),
-            Some(f) => f(take, envidx),
+            Some(f) => unsafe { f(take, envidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -10982,7 +11011,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeEnvelopeByName)
             ),
-            Some(f) => f(take, envname),
+            Some(f) => unsafe { f(take, envname) },
         }
     }
     #[doc = r" # Safety"]
@@ -11001,7 +11030,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeMarker)
             ),
-            Some(f) => f(take, idx, nameOut, nameOut_sz, colorOutOptional),
+            Some(f) => unsafe { f(take, idx, nameOut, nameOut_sz, colorOutOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -11016,7 +11045,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeName)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     #[doc = r" # Safety"]
@@ -11031,7 +11060,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeNumStretchMarkers)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     #[doc = r" # Safety"]
@@ -11049,7 +11078,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeStretchMarker)
             ),
-            Some(f) => f(take, idx, posOut, srcposOutOptional),
+            Some(f) => unsafe { f(take, idx, posOut, srcposOutOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -11065,7 +11094,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTakeStretchMarkerSlope)
             ),
-            Some(f) => f(take, idx),
+            Some(f) => unsafe { f(take, idx) },
         }
     }
     #[doc = r" # Safety"]
@@ -11084,7 +11113,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTCPFXParm)
             ),
-            Some(f) => f(project, track, index, fxindexOut, parmidxOut),
+            Some(f) => unsafe { f(project, track, index, fxindexOut, parmidxOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -11104,7 +11133,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTempoMatchPlayRate)
             ),
-            Some(f) => f(source, srcscale, position, mult, rateOut, targetlenOut),
+            Some(f) => unsafe { f(source, srcscale, position, mult, rateOut, targetlenOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -11127,17 +11156,19 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTempoTimeSigMarker)
             ),
-            Some(f) => f(
-                proj,
-                ptidx,
-                timeposOut,
-                measureposOut,
-                beatposOut,
-                bpmOut,
-                timesig_numOut,
-                timesig_denomOut,
-                lineartempoOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    proj,
+                    ptidx,
+                    timeposOut,
+                    measureposOut,
+                    beatposOut,
+                    bpmOut,
+                    timesig_numOut,
+                    timesig_denomOut,
+                    lineartempoOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -11153,7 +11184,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetThemeColor)
             ),
-            Some(f) => f(ini_key, flagsOptional),
+            Some(f) => unsafe { f(ini_key, flagsOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -11171,7 +11202,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetThingFromPoint)
             ),
-            Some(f) => f(screen_x, screen_y, infoOut, infoOut_sz),
+            Some(f) => unsafe { f(screen_x, screen_y, infoOut, infoOut_sz) },
         }
     }
     pub fn GetToggleCommandState(
@@ -11183,7 +11214,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetToggleCommandState)
             ),
-            Some(f) => f(command_id),
+            Some(f) => unsafe { f(command_id) },
         }
     }
     #[doc = r" # Safety"]
@@ -11199,7 +11230,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetToggleCommandState2)
             ),
-            Some(f) => f(section, command_id),
+            Some(f) => unsafe { f(section, command_id) },
         }
     }
     pub fn GetToggleCommandStateEx(
@@ -11212,7 +11243,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetToggleCommandStateEx)
             ),
-            Some(f) => f(section_id, command_id),
+            Some(f) => unsafe { f(section_id, command_id) },
         }
     }
     #[doc = r" # Safety"]
@@ -11228,7 +11259,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetToggleCommandStateThroughHooks)
             ),
-            Some(f) => f(section, command_id),
+            Some(f) => unsafe { f(section, command_id) },
         }
     }
     pub fn GetTooltipWindow(&self) -> root::HWND {
@@ -11237,7 +11268,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTooltipWindow)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -11257,7 +11288,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTouchedOrFocusedFX)
             ),
-            Some(f) => f(mode, trackidxOut, itemidxOut, takeidxOut, fxidxOut, parmOut),
+            Some(f) => unsafe { f(mode, trackidxOut, itemidxOut, takeidxOut, fxidxOut, parmOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -11273,7 +11304,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrack)
             ),
-            Some(f) => f(proj, trackidx),
+            Some(f) => unsafe { f(proj, trackidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -11288,7 +11319,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackAutomationMode)
             ),
-            Some(f) => f(tr),
+            Some(f) => unsafe { f(tr) },
         }
     }
     #[doc = r" # Safety"]
@@ -11300,7 +11331,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackColor)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -11312,7 +11343,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackDepth)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -11328,7 +11359,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackEnvelope)
             ),
-            Some(f) => f(track, envidx),
+            Some(f) => unsafe { f(track, envidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -11344,7 +11375,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackEnvelopeByChunkName)
             ),
-            Some(f) => f(tr, cfgchunkname_or_guid),
+            Some(f) => unsafe { f(tr, cfgchunkname_or_guid) },
         }
     }
     #[doc = r" # Safety"]
@@ -11360,7 +11391,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackEnvelopeByName)
             ),
-            Some(f) => f(track, envname),
+            Some(f) => unsafe { f(track, envname) },
         }
     }
     #[doc = r" # Safety"]
@@ -11377,7 +11408,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackFromPoint)
             ),
-            Some(f) => f(screen_x, screen_y, infoOutOptional),
+            Some(f) => unsafe { f(screen_x, screen_y, infoOutOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -11389,7 +11420,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackGUID)
             ),
-            Some(f) => f(tr),
+            Some(f) => unsafe { f(tr) },
         }
     }
     #[doc = r" # Safety"]
@@ -11405,7 +11436,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackInfo)
             ),
-            Some(f) => f(track, flags),
+            Some(f) => unsafe { f(track, flags) },
         }
     }
     #[doc = r" # Safety"]
@@ -11421,7 +11452,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackMediaItem)
             ),
-            Some(f) => f(tr, itemidx),
+            Some(f) => unsafe { f(tr, itemidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -11439,7 +11470,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackMIDILyrics)
             ),
-            Some(f) => f(track, flag, bufOutWantNeedBig, bufOutWantNeedBig_sz),
+            Some(f) => unsafe { f(track, flag, bufOutWantNeedBig, bufOutWantNeedBig_sz) },
         }
     }
     pub fn GetTrackMIDINoteName(
@@ -11453,7 +11484,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackMIDINoteName)
             ),
-            Some(f) => f(track, pitch, chan),
+            Some(f) => unsafe { f(track, pitch, chan) },
         }
     }
     #[doc = r" # Safety"]
@@ -11471,7 +11502,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackMIDINoteNameEx)
             ),
-            Some(f) => f(proj, track, pitch, chan),
+            Some(f) => unsafe { f(proj, track, pitch, chan) },
         }
     }
     #[doc = r" # Safety"]
@@ -11489,7 +11520,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackMIDINoteRange)
             ),
-            Some(f) => f(proj, track, note_loOut, note_hiOut),
+            Some(f) => unsafe { f(proj, track, note_loOut, note_hiOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -11506,7 +11537,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackName)
             ),
-            Some(f) => f(track, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(track, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -11518,7 +11549,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackNumMediaItems)
             ),
-            Some(f) => f(tr),
+            Some(f) => unsafe { f(tr) },
         }
     }
     #[doc = r" # Safety"]
@@ -11534,7 +11565,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackNumSends)
             ),
-            Some(f) => f(tr, category),
+            Some(f) => unsafe { f(tr, category) },
         }
     }
     #[doc = r" # Safety"]
@@ -11552,7 +11583,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackReceiveName)
             ),
-            Some(f) => f(track, recv_index, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(track, recv_index, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -11569,7 +11600,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackReceiveUIMute)
             ),
-            Some(f) => f(track, recv_index, muteOut),
+            Some(f) => unsafe { f(track, recv_index, muteOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -11587,7 +11618,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackReceiveUIVolPan)
             ),
-            Some(f) => f(track, recv_index, volumeOut, panOut),
+            Some(f) => unsafe { f(track, recv_index, volumeOut, panOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -11605,7 +11636,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackSendInfo_Value)
             ),
-            Some(f) => f(tr, category, sendidx, parmname),
+            Some(f) => unsafe { f(tr, category, sendidx, parmname) },
         }
     }
     #[doc = r" # Safety"]
@@ -11623,7 +11654,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackSendName)
             ),
-            Some(f) => f(track, send_index, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(track, send_index, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -11640,7 +11671,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackSendUIMute)
             ),
-            Some(f) => f(track, send_index, muteOut),
+            Some(f) => unsafe { f(track, send_index, muteOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -11658,7 +11689,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackSendUIVolPan)
             ),
-            Some(f) => f(track, send_index, volumeOut, panOut),
+            Some(f) => unsafe { f(track, send_index, volumeOut, panOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -11674,7 +11705,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackState)
             ),
-            Some(f) => f(track, flagsOut),
+            Some(f) => unsafe { f(track, flagsOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -11692,7 +11723,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackStateChunk)
             ),
-            Some(f) => f(track, strNeedBig, strNeedBig_sz, isundoOptional),
+            Some(f) => unsafe { f(track, strNeedBig, strNeedBig_sz, isundoOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -11704,7 +11735,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackUIMute)
             ),
-            Some(f) => f(track, muteOut),
+            Some(f) => unsafe { f(track, muteOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -11722,7 +11753,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackUIPan)
             ),
-            Some(f) => f(track, pan1Out, pan2Out, panmodeOut),
+            Some(f) => unsafe { f(track, pan1Out, pan2Out, panmodeOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -11739,7 +11770,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetTrackUIVolPan)
             ),
-            Some(f) => f(track, volumeOut, panOut),
+            Some(f) => unsafe { f(track, volumeOut, panOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -11756,7 +11787,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetUnderrunTime)
             ),
-            Some(f) => f(audio_xrunOut, media_xrunOut, curtimeOut),
+            Some(f) => unsafe { f(audio_xrunOut, media_xrunOut, curtimeOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -11773,7 +11804,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetUserFileNameForRead)
             ),
-            Some(f) => f(filenameNeed4096, title, defext),
+            Some(f) => unsafe { f(filenameNeed4096, title, defext) },
         }
     }
     #[doc = r" # Safety"]
@@ -11792,7 +11823,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetUserInputs)
             ),
-            Some(f) => f(title, num_inputs, captions_csv, retvals_csv, retvals_csv_sz),
+            Some(f) => unsafe { f(title, num_inputs, captions_csv, retvals_csv, retvals_csv_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -11809,7 +11840,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GoToMarker)
             ),
-            Some(f) => f(proj, marker_index, use_timeline_order),
+            Some(f) => unsafe { f(proj, marker_index, use_timeline_order) },
         }
     }
     #[doc = r" # Safety"]
@@ -11826,7 +11857,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GoToRegion)
             ),
-            Some(f) => f(proj, region_index, use_timeline_order),
+            Some(f) => unsafe { f(proj, region_index, use_timeline_order) },
         }
     }
     #[doc = r" # Safety"]
@@ -11842,7 +11873,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GR_SelectColor)
             ),
-            Some(f) => f(hwnd, colorOut),
+            Some(f) => unsafe { f(hwnd, colorOut) },
         }
     }
     pub fn GSC_mainwnd(&self, t: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
@@ -11851,7 +11882,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GSC_mainwnd)
             ),
-            Some(f) => f(t),
+            Some(f) => unsafe { f(t) },
         }
     }
     #[doc = r" # Safety"]
@@ -11867,7 +11898,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(guidToString)
             ),
-            Some(f) => f(g, destNeed64),
+            Some(f) => unsafe { f(g, destNeed64) },
         }
     }
     #[doc = r" # Safety"]
@@ -11883,7 +11914,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(HasExtState)
             ),
-            Some(f) => f(section, key),
+            Some(f) => unsafe { f(section, key) },
         }
     }
     pub fn HasTrackMIDIPrograms(
@@ -11895,7 +11926,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(HasTrackMIDIPrograms)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -11911,7 +11942,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(HasTrackMIDIProgramsEx)
             ),
-            Some(f) => f(proj, track),
+            Some(f) => unsafe { f(proj, track) },
         }
     }
     #[doc = r" # Safety"]
@@ -11927,7 +11958,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Help_Set)
             ),
-            Some(f) => f(helpstring, is_temporary_help),
+            Some(f) => unsafe { f(helpstring, is_temporary_help) },
         }
     }
     #[doc = r" # Safety"]
@@ -11943,7 +11974,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(HiresPeaksFromSource)
             ),
-            Some(f) => f(src, block),
+            Some(f) => unsafe { f(src, block) },
         }
     }
     #[doc = r" # Safety"]
@@ -11960,7 +11991,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(image_resolve_fn)
             ),
-            Some(f) => f(in_, out, out_sz),
+            Some(f) => unsafe { f(in_, out, out_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -11978,7 +12009,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertAutomationItem)
             ),
-            Some(f) => f(env, pool_id, position, length),
+            Some(f) => unsafe { f(env, pool_id, position, length) },
         }
     }
     #[doc = r" # Safety"]
@@ -11999,15 +12030,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertEnvelopePoint)
             ),
-            Some(f) => f(
-                envelope,
-                time,
-                value,
-                shape,
-                tension,
-                selected,
-                noSortInOptional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    envelope,
+                    time,
+                    value,
+                    shape,
+                    tension,
+                    selected,
+                    noSortInOptional,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -12029,16 +12062,18 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertEnvelopePointEx)
             ),
-            Some(f) => f(
-                envelope,
-                autoitem_idx,
-                time,
-                value,
-                shape,
-                tension,
-                selected,
-                noSortInOptional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    envelope,
+                    autoitem_idx,
+                    time,
+                    value,
+                    shape,
+                    tension,
+                    selected,
+                    noSortInOptional,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -12054,7 +12089,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertMedia)
             ),
-            Some(f) => f(file, mode),
+            Some(f) => unsafe { f(file, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -12073,7 +12108,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertMediaSection)
             ),
-            Some(f) => f(file, mode, startpct, endpct, pitchshift),
+            Some(f) => unsafe { f(file, mode, startpct, endpct, pitchshift) },
         }
     }
     pub fn InsertTrackAtIndex(&self, idx: ::std::os::raw::c_int, wantDefaults: bool) {
@@ -12082,7 +12117,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertTrackAtIndex)
             ),
-            Some(f) => f(idx, wantDefaults),
+            Some(f) => unsafe { f(idx, wantDefaults) },
         }
     }
     #[doc = r" # Safety"]
@@ -12099,7 +12134,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InsertTrackInProject)
             ),
-            Some(f) => f(proj, idx, flags),
+            Some(f) => unsafe { f(proj, idx, flags) },
         }
     }
     pub fn IsInRealTimeAudio(&self) -> ::std::os::raw::c_int {
@@ -12108,7 +12143,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsInRealTimeAudio)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -12124,7 +12159,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsItemTakeActiveForPlayback)
             ),
-            Some(f) => f(item, take),
+            Some(f) => unsafe { f(item, take) },
         }
     }
     #[doc = r" # Safety"]
@@ -12140,7 +12175,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsMediaExtension)
             ),
-            Some(f) => f(ext, wantOthers),
+            Some(f) => unsafe { f(ext, wantOthers) },
         }
     }
     #[doc = r" # Safety"]
@@ -12152,7 +12187,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsMediaItemSelected)
             ),
-            Some(f) => f(item),
+            Some(f) => unsafe { f(item) },
         }
     }
     #[doc = r" # Safety"]
@@ -12164,7 +12199,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsProjectDirty)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     pub fn IsREAPER(&self) -> bool {
@@ -12173,7 +12208,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsREAPER)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -12185,7 +12220,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsTrackSelected)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -12197,7 +12232,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsTrackVisible)
             ),
-            Some(f) => f(track, mixer),
+            Some(f) => unsafe { f(track, mixer) },
         }
     }
     #[doc = r" # Safety"]
@@ -12209,7 +12244,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(IsWindowTextField)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[doc = r" # Safety"]
@@ -12224,7 +12259,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_create)
             ),
-            Some(f) => f(guid),
+            Some(f) => unsafe { f(guid) },
         }
     }
     #[doc = r" # Safety"]
@@ -12236,7 +12271,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_destroy)
             ),
-            Some(f) => f(device),
+            Some(f) => unsafe { f(device) },
         }
     }
     #[doc = r" # Safety"]
@@ -12252,7 +12287,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_enum)
             ),
-            Some(f) => f(index, namestrOutOptional),
+            Some(f) => unsafe { f(index, namestrOutOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -12268,7 +12303,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_getaxis)
             ),
-            Some(f) => f(dev, axis),
+            Some(f) => unsafe { f(dev, axis) },
         }
     }
     #[doc = r" # Safety"]
@@ -12283,7 +12318,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_getbuttonmask)
             ),
-            Some(f) => f(dev),
+            Some(f) => unsafe { f(dev) },
         }
     }
     #[doc = r" # Safety"]
@@ -12300,7 +12335,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_getinfo)
             ),
-            Some(f) => f(dev, axesOutOptional, povsOutOptional),
+            Some(f) => unsafe { f(dev, axesOutOptional, povsOutOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -12316,7 +12351,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_getpov)
             ),
-            Some(f) => f(dev, pov),
+            Some(f) => unsafe { f(dev, pov) },
         }
     }
     #[doc = r" # Safety"]
@@ -12331,7 +12366,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(joystick_update)
             ),
-            Some(f) => f(dev),
+            Some(f) => unsafe { f(dev) },
         }
     }
     #[doc = r" # Safety"]
@@ -12348,7 +12383,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_enumerateActions)
             ),
-            Some(f) => f(section, idx, nameOut),
+            Some(f) => unsafe { f(section, idx, nameOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -12360,7 +12395,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_formatKeyName)
             ),
-            Some(f) => f(ac, s),
+            Some(f) => unsafe { f(ac, s) },
         }
     }
     #[doc = r" # Safety"]
@@ -12377,7 +12412,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_getCommandName)
             ),
-            Some(f) => f(cmd, s, section),
+            Some(f) => unsafe { f(cmd, s, section) },
         }
     }
     #[doc = r" # Safety"]
@@ -12393,7 +12428,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_getTextFromCmd)
             ),
-            Some(f) => f(cmd, section),
+            Some(f) => unsafe { f(cmd, section) },
         }
     }
     #[doc = r" # Safety"]
@@ -12413,7 +12448,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(KBD_OnMainActionEx)
             ),
-            Some(f) => f(cmd, val, valhw, relmode, hwnd, proj),
+            Some(f) => unsafe { f(cmd, val, valhw, relmode, hwnd, proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -12429,7 +12464,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_OnMidiEvent)
             ),
-            Some(f) => f(evt, dev_index),
+            Some(f) => unsafe { f(evt, dev_index) },
         }
     }
     #[doc = r" # Safety"]
@@ -12445,7 +12480,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_OnMidiList)
             ),
-            Some(f) => f(list, dev_index),
+            Some(f) => unsafe { f(list, dev_index) },
         }
     }
     #[doc = r" # Safety"]
@@ -12461,7 +12496,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_ProcessActionsMenu)
             ),
-            Some(f) => f(menu, section),
+            Some(f) => unsafe { f(menu, section) },
         }
     }
     #[doc = r" # Safety"]
@@ -12478,7 +12513,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_processMidiEventActionEx)
             ),
-            Some(f) => f(evt, section, hwndCtx),
+            Some(f) => unsafe { f(evt, section, hwndCtx) },
         }
     }
     #[doc = r" # Safety"]
@@ -12490,7 +12525,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_reprocessMenu)
             ),
-            Some(f) => f(menu, section),
+            Some(f) => unsafe { f(menu, section) },
         }
     }
     #[doc = r" # Safety"]
@@ -12510,7 +12545,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_RunCommandThroughHooks)
             ),
-            Some(f) => f(section, actionCommandID, val, valhw, relmode, hwnd),
+            Some(f) => unsafe { f(section, actionCommandID, val, valhw, relmode, hwnd) },
         }
     }
     #[doc = r" # Safety"]
@@ -12527,7 +12562,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(kbd_translateAccelerator)
             ),
-            Some(f) => f(hwnd, msg, section),
+            Some(f) => unsafe { f(hwnd, msg, section) },
         }
     }
     #[doc = r" # Safety"]
@@ -12539,7 +12574,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__Destroy)
             ),
-            Some(f) => f(bm),
+            Some(f) => unsafe { f(bm) },
         }
     }
     #[doc = r" # Safety"]
@@ -12551,7 +12586,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__DestroyFont)
             ),
-            Some(f) => f(font),
+            Some(f) => unsafe { f(font) },
         }
     }
     #[doc = r" # Safety"]
@@ -12571,7 +12606,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__DrawText)
             ),
-            Some(f) => f(font, bm, str_, strcnt, rect, dtFlags),
+            Some(f) => unsafe { f(font, bm, str_, strcnt, rect, dtFlags) },
         }
     }
     #[doc = r" # Safety"]
@@ -12586,7 +12621,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__GetBits)
             ),
-            Some(f) => f(bm),
+            Some(f) => unsafe { f(bm) },
         }
     }
     #[doc = r" # Safety"]
@@ -12598,7 +12633,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__GetDC)
             ),
-            Some(f) => f(bm),
+            Some(f) => unsafe { f(bm) },
         }
     }
     #[doc = r" # Safety"]
@@ -12613,7 +12648,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__GetHeight)
             ),
-            Some(f) => f(bm),
+            Some(f) => unsafe { f(bm) },
         }
     }
     #[doc = r" # Safety"]
@@ -12628,7 +12663,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__GetRowSpan)
             ),
-            Some(f) => f(bm),
+            Some(f) => unsafe { f(bm) },
         }
     }
     #[doc = r" # Safety"]
@@ -12643,7 +12678,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__GetWidth)
             ),
-            Some(f) => f(bm),
+            Some(f) => unsafe { f(bm) },
         }
     }
     #[doc = r" # Safety"]
@@ -12655,7 +12690,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__IsFlipped)
             ),
-            Some(f) => f(bm),
+            Some(f) => unsafe { f(bm) },
         }
     }
     #[doc = r" # Safety"]
@@ -12672,7 +12707,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__resize)
             ),
-            Some(f) => f(bm, w, h),
+            Some(f) => unsafe { f(bm, w, h) },
         }
     }
     #[doc = r" # Safety"]
@@ -12688,7 +12723,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__SetBkColor)
             ),
-            Some(f) => f(font, color),
+            Some(f) => unsafe { f(font, color) },
         }
     }
     #[doc = r" # Safety"]
@@ -12705,7 +12740,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__SetFromHFont)
             ),
-            Some(f) => f(font, hfont, flags),
+            Some(f) => unsafe { f(font, hfont, flags) },
         }
     }
     #[doc = r" # Safety"]
@@ -12721,7 +12756,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__SetTextColor)
             ),
-            Some(f) => f(font, color),
+            Some(f) => unsafe { f(font, color) },
         }
     }
     #[doc = r" # Safety"]
@@ -12738,7 +12773,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__SetTextCombineMode)
             ),
-            Some(f) => f(ifont, mode, alpha),
+            Some(f) => unsafe { f(ifont, mode, alpha) },
         }
     }
     #[doc = r" # Safety"]
@@ -12762,7 +12797,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Arc)
             ),
-            Some(f) => f(dest, cx, cy, r, minAngle, maxAngle, color, alpha, mode, aa),
+            Some(f) => unsafe { f(dest, cx, cy, r, minAngle, maxAngle, color, alpha, mode, aa) },
         }
     }
     #[doc = r" # Safety"]
@@ -12786,7 +12821,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Blit)
             ),
-            Some(f) => f(dest, src, dstx, dsty, srcx, srcy, srcw, srch, alpha, mode),
+            Some(f) => unsafe { f(dest, src, dstx, dsty, srcx, srcy, srcw, srch, alpha, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -12808,7 +12843,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Blur)
             ),
-            Some(f) => f(dest, src, dstx, dsty, srcx, srcy, srcw, srch),
+            Some(f) => unsafe { f(dest, src, dstx, dsty, srcx, srcy, srcw, srch) },
         }
     }
     #[doc = r" # Safety"]
@@ -12831,7 +12866,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_BorderedRect)
             ),
-            Some(f) => f(dest, x, y, w, h, bgcolor, fgcolor, alpha, mode),
+            Some(f) => unsafe { f(dest, x, y, w, h, bgcolor, fgcolor, alpha, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -12853,7 +12888,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Circle)
             ),
-            Some(f) => f(dest, cx, cy, r, color, alpha, mode, aa),
+            Some(f) => unsafe { f(dest, cx, cy, r, color, alpha, mode, aa) },
         }
     }
     #[doc = r" # Safety"]
@@ -12869,7 +12904,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Clear)
             ),
-            Some(f) => f(dest, color),
+            Some(f) => unsafe { f(dest, color) },
         }
     }
     #[doc = r" # Safety"]
@@ -12890,7 +12925,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_ClearRect)
             ),
-            Some(f) => f(dest, x, y, w, h, mask, orbits),
+            Some(f) => unsafe { f(dest, x, y, w, h, mask, orbits) },
         }
     }
     #[doc = r" # Safety"]
@@ -12912,7 +12947,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_ClipLine)
             ),
-            Some(f) => f(pX1Out, pY1Out, pX2Out, pY2Out, xLo, yLo, xHi, yHi),
+            Some(f) => unsafe { f(pX1Out, pY1Out, pX2Out, pY2Out, xLo, yLo, xHi, yHi) },
         }
     }
     pub fn LICE_CombinePixels(
@@ -12927,7 +12962,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_CombinePixels)
             ),
-            Some(f) => f(dest, src, alpha, mode),
+            Some(f) => unsafe { f(dest, src, alpha, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -12943,7 +12978,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Copy)
             ),
-            Some(f) => f(dest, src),
+            Some(f) => unsafe { f(dest, src) },
         }
     }
     pub fn LICE_CreateBitmap(
@@ -12957,7 +12992,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_CreateBitmap)
             ),
-            Some(f) => f(mode, w, h),
+            Some(f) => unsafe { f(mode, w, h) },
         }
     }
     pub fn LICE_CreateFont(&self) -> *mut root::reaper_functions::LICE_IFont {
@@ -12966,7 +13001,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_CreateFont)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -12994,10 +13029,12 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_DrawCBezier)
             ),
-            Some(f) => f(
-                dest, xstart, ystart, xctl1, yctl1, xctl2, yctl2, xend, yend, color, alpha, mode,
-                aa, tol,
-            ),
+            Some(f) => unsafe {
+                f(
+                    dest, xstart, ystart, xctl1, yctl1, xctl2, yctl2, xend, yend, color, alpha,
+                    mode, aa, tol,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -13018,7 +13055,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_DrawChar)
             ),
-            Some(f) => f(bm, x, y, c, color, alpha, mode),
+            Some(f) => unsafe { f(bm, x, y, c, color, alpha, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -13041,7 +13078,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_DrawGlyph)
             ),
-            Some(f) => f(dest, x, y, color, alphas, glyph_w, glyph_h, alpha, mode),
+            Some(f) => unsafe { f(dest, x, y, color, alphas, glyph_w, glyph_h, alpha, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -13063,7 +13100,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_DrawRect)
             ),
-            Some(f) => f(dest, x, y, w, h, color, alpha, mode),
+            Some(f) => unsafe { f(dest, x, y, w, h, color, alpha, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -13084,7 +13121,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_DrawText)
             ),
-            Some(f) => f(bm, x, y, string, color, alpha, mode),
+            Some(f) => unsafe { f(bm, x, y, string, color, alpha, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -13113,10 +13150,12 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_FillCBezier)
             ),
-            Some(f) => f(
-                dest, xstart, ystart, xctl1, yctl1, xctl2, yctl2, xend, yend, yfill, color, alpha,
-                mode, aa, tol,
-            ),
+            Some(f) => unsafe {
+                f(
+                    dest, xstart, ystart, xctl1, yctl1, xctl2, yctl2, xend, yend, yfill, color,
+                    alpha, mode, aa, tol,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -13138,7 +13177,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_FillCircle)
             ),
-            Some(f) => f(dest, cx, cy, r, color, alpha, mode, aa),
+            Some(f) => unsafe { f(dest, cx, cy, r, color, alpha, mode, aa) },
         }
     }
     #[doc = r" # Safety"]
@@ -13159,7 +13198,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_FillConvexPolygon)
             ),
-            Some(f) => f(dest, x, y, npoints, color, alpha, mode),
+            Some(f) => unsafe { f(dest, x, y, npoints, color, alpha, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -13181,7 +13220,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_FillRect)
             ),
-            Some(f) => f(dest, x, y, w, h, color, alpha, mode),
+            Some(f) => unsafe { f(dest, x, y, w, h, color, alpha, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -13205,7 +13244,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_FillTrapezoid)
             ),
-            Some(f) => f(dest, x1a, x1b, y1, x2a, x2b, y2, color, alpha, mode),
+            Some(f) => unsafe { f(dest, x1a, x1b, y1, x2a, x2b, y2, color, alpha, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -13229,7 +13268,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_FillTriangle)
             ),
-            Some(f) => f(dest, x1, y1, x2, y2, x3, y3, color, alpha, mode),
+            Some(f) => unsafe { f(dest, x1, y1, x2, y2, x3, y3, color, alpha, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -13246,7 +13285,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_GetPixel)
             ),
-            Some(f) => f(bm, x, y),
+            Some(f) => unsafe { f(bm, x, y) },
         }
     }
     #[doc = r" # Safety"]
@@ -13278,10 +13317,12 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_GradRect)
             ),
-            Some(f) => f(
-                dest, dstx, dsty, dstw, dsth, ir, ig, ib, ia, drdx, dgdx, dbdx, dadx, drdy, dgdy,
-                dbdy, dady, mode,
-            ),
+            Some(f) => unsafe {
+                f(
+                    dest, dstx, dsty, dstw, dsth, ir, ig, ib, ia, drdx, dgdx, dbdx, dadx, drdy,
+                    dgdy, dbdy, dady, mode,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -13304,7 +13345,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_Line)
             ),
-            Some(f) => f(dest, x1, y1, x2, y2, color, alpha, mode, aa),
+            Some(f) => unsafe { f(dest, x1, y1, x2, y2, color, alpha, mode, aa) },
         }
     }
     #[doc = r" # Safety"]
@@ -13327,7 +13368,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_LineInt)
             ),
-            Some(f) => f(dest, x1, y1, x2, y2, color, alpha, mode, aa),
+            Some(f) => unsafe { f(dest, x1, y1, x2, y2, color, alpha, mode, aa) },
         }
     }
     #[doc = r" # Safety"]
@@ -13343,7 +13384,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_LoadPNG)
             ),
-            Some(f) => f(filename, bmp),
+            Some(f) => unsafe { f(filename, bmp) },
         }
     }
     #[doc = r" # Safety"]
@@ -13360,7 +13401,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_LoadPNGFromResource)
             ),
-            Some(f) => f(hInst, resid, bmp),
+            Some(f) => unsafe { f(hInst, resid, bmp) },
         }
     }
     #[doc = r" # Safety"]
@@ -13377,7 +13418,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_MeasureText)
             ),
-            Some(f) => f(string, w, h),
+            Some(f) => unsafe { f(string, w, h) },
         }
     }
     #[doc = r" # Safety"]
@@ -13404,7 +13445,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_MultiplyAddRect)
             ),
-            Some(f) => f(dest, x, y, w, h, rsc, gsc, bsc, asc, radd, gadd, badd, aadd),
+            Some(f) => unsafe { f(dest, x, y, w, h, rsc, gsc, bsc, asc, radd, gadd, badd, aadd) },
         }
     }
     #[doc = r" # Safety"]
@@ -13424,7 +13465,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_PutPixel)
             ),
-            Some(f) => f(bm, x, y, color, alpha, mode),
+            Some(f) => unsafe { f(bm, x, y, color, alpha, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -13454,24 +13495,26 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_RotatedBlit)
             ),
-            Some(f) => f(
-                dest,
-                src,
-                dstx,
-                dsty,
-                dstw,
-                dsth,
-                srcx,
-                srcy,
-                srcw,
-                srch,
-                angle,
-                cliptosourcerect,
-                alpha,
-                mode,
-                rotxcent,
-                rotycent,
-            ),
+            Some(f) => unsafe {
+                f(
+                    dest,
+                    src,
+                    dstx,
+                    dsty,
+                    dstw,
+                    dsth,
+                    srcx,
+                    srcy,
+                    srcw,
+                    srch,
+                    angle,
+                    cliptosourcerect,
+                    alpha,
+                    mode,
+                    rotxcent,
+                    rotycent,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -13495,7 +13538,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_RoundRect)
             ),
-            Some(f) => f(drawbm, xpos, ypos, w, h, cornerradius, col, alpha, mode, aa),
+            Some(f) => unsafe { f(drawbm, xpos, ypos, w, h, cornerradius, col, alpha, mode, aa) },
         }
     }
     #[doc = r" # Safety"]
@@ -13521,9 +13564,11 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_ScaledBlit)
             ),
-            Some(f) => f(
-                dest, src, dstx, dsty, dstw, dsth, srcx, srcy, srcw, srch, alpha, mode,
-            ),
+            Some(f) => unsafe {
+                f(
+                    dest, src, dstx, dsty, dstw, dsth, srcx, srcy, srcw, srch, alpha, mode,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -13543,7 +13588,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_SimpleFill)
             ),
-            Some(f) => f(dest, x, y, newcolor, comparemask, keepmask),
+            Some(f) => unsafe { f(dest, x, y, newcolor, comparemask, keepmask) },
         }
     }
     #[doc = r" # Safety"]
@@ -13566,7 +13611,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE_ThickFLine)
             ),
-            Some(f) => f(dest, x1, y1, x2, y2, color, alpha, mode, wid),
+            Some(f) => unsafe { f(dest, x1, y1, x2, y2, color, alpha, mode, wid) },
         }
     }
     #[doc = r" # Safety"]
@@ -13583,7 +13628,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LocalizeString)
             ),
-            Some(f) => f(src_string, section, flagsOptional),
+            Some(f) => unsafe { f(src_string, section, flagsOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -13599,7 +13644,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Loop_OnArrow)
             ),
-            Some(f) => f(project, direction),
+            Some(f) => unsafe { f(project, direction) },
         }
     }
     pub fn Main_OnCommand(&self, command: ::std::os::raw::c_int, flag: ::std::os::raw::c_int) {
@@ -13608,7 +13653,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Main_OnCommand)
             ),
-            Some(f) => f(command, flag),
+            Some(f) => unsafe { f(command, flag) },
         }
     }
     #[doc = r" # Safety"]
@@ -13625,7 +13670,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Main_OnCommandEx)
             ),
-            Some(f) => f(command, flag, proj),
+            Some(f) => unsafe { f(command, flag, proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -13637,7 +13682,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Main_openProject)
             ),
-            Some(f) => f(name),
+            Some(f) => unsafe { f(name) },
         }
     }
     #[doc = r" # Safety"]
@@ -13653,7 +13698,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Main_SaveProject)
             ),
-            Some(f) => f(proj, forceSaveAsInOptional),
+            Some(f) => unsafe { f(proj, forceSaveAsInOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -13670,7 +13715,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Main_SaveProjectEx)
             ),
-            Some(f) => f(proj, filename, options),
+            Some(f) => unsafe { f(proj, filename, options) },
         }
     }
     pub fn Main_UpdateLoopInfo(&self, ignoremask: ::std::os::raw::c_int) {
@@ -13679,7 +13724,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Main_UpdateLoopInfo)
             ),
-            Some(f) => f(ignoremask),
+            Some(f) => unsafe { f(ignoremask) },
         }
     }
     #[doc = r" # Safety"]
@@ -13691,7 +13736,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MarkProjectDirty)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -13707,7 +13752,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MarkTrackItemsDirty)
             ),
-            Some(f) => f(track, item),
+            Some(f) => unsafe { f(track, item) },
         }
     }
     #[doc = r" # Safety"]
@@ -13719,7 +13764,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Master_GetPlayRate)
             ),
-            Some(f) => f(project),
+            Some(f) => unsafe { f(project) },
         }
     }
     #[doc = r" # Safety"]
@@ -13731,7 +13776,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Master_GetPlayRateAtTime)
             ),
-            Some(f) => f(time_s, proj),
+            Some(f) => unsafe { f(time_s, proj) },
         }
     }
     pub fn Master_GetTempo(&self) -> f64 {
@@ -13740,7 +13785,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Master_GetTempo)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn Master_NormalizePlayRate(&self, playrate: f64, isnormalized: bool) -> f64 {
@@ -13749,7 +13794,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Master_NormalizePlayRate)
             ),
-            Some(f) => f(playrate, isnormalized),
+            Some(f) => unsafe { f(playrate, isnormalized) },
         }
     }
     pub fn Master_NormalizeTempo(&self, bpm: f64, isnormalized: bool) -> f64 {
@@ -13758,7 +13803,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Master_NormalizeTempo)
             ),
-            Some(f) => f(bpm, isnormalized),
+            Some(f) => unsafe { f(bpm, isnormalized) },
         }
     }
     #[doc = r" # Safety"]
@@ -13775,7 +13820,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MB)
             ),
-            Some(f) => f(msg, title, type_),
+            Some(f) => unsafe { f(msg, title, type_) },
         }
     }
     #[doc = r" # Safety"]
@@ -13791,7 +13836,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MediaItemDescendsFromTrack)
             ),
-            Some(f) => f(item, track),
+            Some(f) => unsafe { f(item, track) },
         }
     }
     #[doc = r" # Safety"]
@@ -13809,7 +13854,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Menu_GetHash)
             ),
-            Some(f) => f(menuname, flag, hashOut, hashOut_sz),
+            Some(f) => unsafe { f(menuname, flag, hashOut, hashOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -13827,7 +13872,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_CountEvts)
             ),
-            Some(f) => f(take, notecntOut, ccevtcntOut, textsyxevtcntOut),
+            Some(f) => unsafe { f(take, notecntOut, ccevtcntOut, textsyxevtcntOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -13843,7 +13888,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_DeleteCC)
             ),
-            Some(f) => f(take, ccidx),
+            Some(f) => unsafe { f(take, ccidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -13859,7 +13904,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_DeleteEvt)
             ),
-            Some(f) => f(take, evtidx),
+            Some(f) => unsafe { f(take, evtidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -13875,7 +13920,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_DeleteNote)
             ),
-            Some(f) => f(take, noteidx),
+            Some(f) => unsafe { f(take, noteidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -13891,7 +13936,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_DeleteTextSysexEvt)
             ),
-            Some(f) => f(take, textsyxevtidx),
+            Some(f) => unsafe { f(take, textsyxevtidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -13903,7 +13948,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_DisableSort)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     #[doc = r" # Safety"]
@@ -13919,7 +13964,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_EnumSelCC)
             ),
-            Some(f) => f(take, ccidx),
+            Some(f) => unsafe { f(take, ccidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -13935,7 +13980,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_EnumSelEvts)
             ),
-            Some(f) => f(take, evtidx),
+            Some(f) => unsafe { f(take, evtidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -13951,7 +13996,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_EnumSelNotes)
             ),
-            Some(f) => f(take, noteidx),
+            Some(f) => unsafe { f(take, noteidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -13967,7 +14012,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_EnumSelTextSysexEvts)
             ),
-            Some(f) => f(take, textsyxidx),
+            Some(f) => unsafe { f(take, textsyxidx) },
         }
     }
     pub fn MIDI_eventlist_Create(&self) -> *mut root::MIDI_eventlist {
@@ -13976,7 +14021,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_eventlist_Create)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -13988,7 +14033,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_eventlist_Destroy)
             ),
-            Some(f) => f(evtlist),
+            Some(f) => unsafe { f(evtlist) },
         }
     }
     #[doc = r" # Safety"]
@@ -14005,7 +14050,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetAllEvts)
             ),
-            Some(f) => f(take, bufOutNeedBig, bufOutNeedBig_sz),
+            Some(f) => unsafe { f(take, bufOutNeedBig, bufOutNeedBig_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -14028,17 +14073,19 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetCC)
             ),
-            Some(f) => f(
-                take,
-                ccidx,
-                selectedOut,
-                mutedOut,
-                ppqposOut,
-                chanmsgOut,
-                chanOut,
-                msg2Out,
-                msg3Out,
-            ),
+            Some(f) => unsafe {
+                f(
+                    take,
+                    ccidx,
+                    selectedOut,
+                    mutedOut,
+                    ppqposOut,
+                    chanmsgOut,
+                    chanOut,
+                    msg2Out,
+                    msg3Out,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -14056,7 +14103,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetCCShape)
             ),
-            Some(f) => f(take, ccidx, shapeOut, beztensionOut),
+            Some(f) => unsafe { f(take, ccidx, shapeOut, beztensionOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -14077,15 +14124,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetEvt)
             ),
-            Some(f) => f(
-                take,
-                evtidx,
-                selectedOut,
-                mutedOut,
-                ppqposOut,
-                msgOut,
-                msgOut_sz,
-            ),
+            Some(f) => unsafe {
+                f(
+                    take,
+                    evtidx,
+                    selectedOut,
+                    mutedOut,
+                    ppqposOut,
+                    msgOut,
+                    msgOut_sz,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -14102,7 +14151,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetGrid)
             ),
-            Some(f) => f(take, swingOutOptional, noteLenOutOptional),
+            Some(f) => unsafe { f(take, swingOutOptional, noteLenOutOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -14120,7 +14169,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetHash)
             ),
-            Some(f) => f(take, notesonly, hashOut, hashOut_sz),
+            Some(f) => unsafe { f(take, notesonly, hashOut, hashOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -14143,17 +14192,19 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetNote)
             ),
-            Some(f) => f(
-                take,
-                noteidx,
-                selectedOut,
-                mutedOut,
-                startppqposOut,
-                endppqposOut,
-                chanOut,
-                pitchOut,
-                velOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    take,
+                    noteidx,
+                    selectedOut,
+                    mutedOut,
+                    startppqposOut,
+                    endppqposOut,
+                    chanOut,
+                    pitchOut,
+                    velOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -14169,7 +14220,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetPPQPos_EndOfMeasure)
             ),
-            Some(f) => f(take, ppqpos),
+            Some(f) => unsafe { f(take, ppqpos) },
         }
     }
     #[doc = r" # Safety"]
@@ -14185,7 +14236,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetPPQPos_StartOfMeasure)
             ),
-            Some(f) => f(take, ppqpos),
+            Some(f) => unsafe { f(take, ppqpos) },
         }
     }
     #[doc = r" # Safety"]
@@ -14201,7 +14252,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetPPQPosFromProjQN)
             ),
-            Some(f) => f(take, projqn),
+            Some(f) => unsafe { f(take, projqn) },
         }
     }
     #[doc = r" # Safety"]
@@ -14217,7 +14268,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetPPQPosFromProjTime)
             ),
-            Some(f) => f(take, projtime),
+            Some(f) => unsafe { f(take, projtime) },
         }
     }
     #[doc = r" # Safety"]
@@ -14233,7 +14284,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetProjQNFromPPQPos)
             ),
-            Some(f) => f(take, ppqpos),
+            Some(f) => unsafe { f(take, ppqpos) },
         }
     }
     #[doc = r" # Safety"]
@@ -14249,7 +14300,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetProjTimeFromPPQPos)
             ),
-            Some(f) => f(take, ppqpos),
+            Some(f) => unsafe { f(take, ppqpos) },
         }
     }
     #[doc = r" # Safety"]
@@ -14270,15 +14321,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetRecentInputEvent)
             ),
-            Some(f) => f(
-                idx,
-                bufOut,
-                bufOut_sz,
-                tsOut,
-                devIdxOut,
-                projPosOut,
-                projLoopCntOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    idx,
+                    bufOut,
+                    bufOut_sz,
+                    tsOut,
+                    devIdxOut,
+                    projPosOut,
+                    projLoopCntOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -14297,7 +14350,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetScale)
             ),
-            Some(f) => f(take, rootOut, scaleOut, nameOut, nameOut_sz),
+            Some(f) => unsafe { f(take, rootOut, scaleOut, nameOut, nameOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -14319,16 +14372,18 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetTextSysexEvt)
             ),
-            Some(f) => f(
-                take,
-                textsyxevtidx,
-                selectedOutOptional,
-                mutedOutOptional,
-                ppqposOutOptional,
-                typeOutOptional,
-                msgOptional,
-                msgOptional_sz,
-            ),
+            Some(f) => unsafe {
+                f(
+                    take,
+                    textsyxevtidx,
+                    selectedOutOptional,
+                    mutedOutOptional,
+                    ppqposOutOptional,
+                    typeOutOptional,
+                    msgOptional,
+                    msgOptional_sz,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -14346,7 +14401,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_GetTrackHash)
             ),
-            Some(f) => f(track, notesonly, hashOut, hashOut_sz),
+            Some(f) => unsafe { f(track, notesonly, hashOut, hashOut_sz) },
         }
     }
     pub fn midi_init(
@@ -14359,7 +14414,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(midi_init)
             ),
-            Some(f) => f(force_reinit_input, force_reinit_output),
+            Some(f) => unsafe { f(force_reinit_input, force_reinit_output) },
         }
     }
     #[doc = r" # Safety"]
@@ -14381,7 +14436,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_InsertCC)
             ),
-            Some(f) => f(take, selected, muted, ppqpos, chanmsg, chan, msg2, msg3),
+            Some(f) => unsafe { f(take, selected, muted, ppqpos, chanmsg, chan, msg2, msg3) },
         }
     }
     #[doc = r" # Safety"]
@@ -14401,7 +14456,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_InsertEvt)
             ),
-            Some(f) => f(take, selected, muted, ppqpos, bytestr, bytestr_sz),
+            Some(f) => unsafe { f(take, selected, muted, ppqpos, bytestr, bytestr_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -14424,17 +14479,19 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_InsertNote)
             ),
-            Some(f) => f(
-                take,
-                selected,
-                muted,
-                startppqpos,
-                endppqpos,
-                chan,
-                pitch,
-                vel,
-                noSortInOptional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    take,
+                    selected,
+                    muted,
+                    startppqpos,
+                    endppqpos,
+                    chan,
+                    pitch,
+                    vel,
+                    noSortInOptional,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -14455,7 +14512,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_InsertTextSysexEvt)
             ),
-            Some(f) => f(take, selected, muted, ppqpos, type_, bytestr, bytestr_sz),
+            Some(f) => unsafe { f(take, selected, muted, ppqpos, type_, bytestr, bytestr_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -14467,7 +14524,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_RefreshEditors)
             ),
-            Some(f) => f(tk),
+            Some(f) => unsafe { f(tk) },
         }
     }
     pub fn midi_reinit(&self) {
@@ -14476,7 +14533,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(midi_reinit)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -14488,7 +14545,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SelectAll)
             ),
-            Some(f) => f(take, select),
+            Some(f) => unsafe { f(take, select) },
         }
     }
     #[doc = r" # Safety"]
@@ -14505,7 +14562,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetAllEvts)
             ),
-            Some(f) => f(take, buf, buf_sz),
+            Some(f) => unsafe { f(take, buf, buf_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -14529,18 +14586,20 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetCC)
             ),
-            Some(f) => f(
-                take,
-                ccidx,
-                selectedInOptional,
-                mutedInOptional,
-                ppqposInOptional,
-                chanmsgInOptional,
-                chanInOptional,
-                msg2InOptional,
-                msg3InOptional,
-                noSortInOptional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    take,
+                    ccidx,
+                    selectedInOptional,
+                    mutedInOptional,
+                    ppqposInOptional,
+                    chanmsgInOptional,
+                    chanInOptional,
+                    msg2InOptional,
+                    msg3InOptional,
+                    noSortInOptional,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -14559,7 +14618,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetCCShape)
             ),
-            Some(f) => f(take, ccidx, shape, beztension, noSortInOptional),
+            Some(f) => unsafe { f(take, ccidx, shape, beztension, noSortInOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -14581,16 +14640,18 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetEvt)
             ),
-            Some(f) => f(
-                take,
-                evtidx,
-                selectedInOptional,
-                mutedInOptional,
-                ppqposInOptional,
-                msgOptional,
-                msgOptional_sz,
-                noSortInOptional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    take,
+                    evtidx,
+                    selectedInOptional,
+                    mutedInOptional,
+                    ppqposInOptional,
+                    msgOptional,
+                    msgOptional_sz,
+                    noSortInOptional,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -14607,7 +14668,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetItemExtents)
             ),
-            Some(f) => f(item, startQN, endQN),
+            Some(f) => unsafe { f(item, startQN, endQN) },
         }
     }
     #[doc = r" # Safety"]
@@ -14631,18 +14692,20 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetNote)
             ),
-            Some(f) => f(
-                take,
-                noteidx,
-                selectedInOptional,
-                mutedInOptional,
-                startppqposInOptional,
-                endppqposInOptional,
-                chanInOptional,
-                pitchInOptional,
-                velInOptional,
-                noSortInOptional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    take,
+                    noteidx,
+                    selectedInOptional,
+                    mutedInOptional,
+                    startppqposInOptional,
+                    endppqposInOptional,
+                    chanInOptional,
+                    pitchInOptional,
+                    velInOptional,
+                    noSortInOptional,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -14665,17 +14728,19 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_SetTextSysexEvt)
             ),
-            Some(f) => f(
-                take,
-                textsyxevtidx,
-                selectedInOptional,
-                mutedInOptional,
-                ppqposInOptional,
-                typeInOptional,
-                msgOptional,
-                msgOptional_sz,
-                noSortInOptional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    take,
+                    textsyxevtidx,
+                    selectedInOptional,
+                    mutedInOptional,
+                    ppqposInOptional,
+                    typeInOptional,
+                    msgOptional,
+                    msgOptional_sz,
+                    noSortInOptional,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -14687,7 +14752,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDI_Sort)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     #[doc = r" # Safety"]
@@ -14704,7 +14769,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_EnumTakes)
             ),
-            Some(f) => f(midieditor, takeindex, editable_only),
+            Some(f) => unsafe { f(midieditor, takeindex, editable_only) },
         }
     }
     pub fn MIDIEditor_GetActive(&self) -> root::HWND {
@@ -14713,7 +14778,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_GetActive)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -14725,7 +14790,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_GetMode)
             ),
-            Some(f) => f(midieditor),
+            Some(f) => unsafe { f(midieditor) },
         }
     }
     #[doc = r" # Safety"]
@@ -14741,7 +14806,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_GetSetting_int)
             ),
-            Some(f) => f(midieditor, setting_desc),
+            Some(f) => unsafe { f(midieditor, setting_desc) },
         }
     }
     #[doc = r" # Safety"]
@@ -14759,7 +14824,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_GetSetting_str)
             ),
-            Some(f) => f(midieditor, setting_desc, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(midieditor, setting_desc, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -14771,7 +14836,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_GetTake)
             ),
-            Some(f) => f(midieditor),
+            Some(f) => unsafe { f(midieditor) },
         }
     }
     pub fn MIDIEditor_LastFocused_OnCommand(
@@ -14784,7 +14849,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_LastFocused_OnCommand)
             ),
-            Some(f) => f(command_id, islistviewcommand),
+            Some(f) => unsafe { f(command_id, islistviewcommand) },
         }
     }
     #[doc = r" # Safety"]
@@ -14800,7 +14865,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_OnCommand)
             ),
-            Some(f) => f(midieditor, command_id),
+            Some(f) => unsafe { f(midieditor, command_id) },
         }
     }
     #[doc = r" # Safety"]
@@ -14817,7 +14882,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditor_SetSetting_int)
             ),
-            Some(f) => f(midieditor, setting_desc, setting),
+            Some(f) => unsafe { f(midieditor, setting_desc, setting) },
         }
     }
     #[doc = r" # Safety"]
@@ -14835,7 +14900,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MIDIEditorFlagsForTrack)
             ),
-            Some(f) => f(track, pitchwheelrangeInOut, flagsInOut, is_set),
+            Some(f) => unsafe { f(track, pitchwheelrangeInOut, flagsInOut, is_set) },
         }
     }
     #[doc = r" # Safety"]
@@ -14847,7 +14912,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(mkpanstr)
             ),
-            Some(f) => f(strNeed64, pan),
+            Some(f) => unsafe { f(strNeed64, pan) },
         }
     }
     #[doc = r" # Safety"]
@@ -14859,7 +14924,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(mkvolpanstr)
             ),
-            Some(f) => f(strNeed64, vol, pan),
+            Some(f) => unsafe { f(strNeed64, vol, pan) },
         }
     }
     #[doc = r" # Safety"]
@@ -14871,7 +14936,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(mkvolstr)
             ),
-            Some(f) => f(strNeed64, vol),
+            Some(f) => unsafe { f(strNeed64, vol) },
         }
     }
     pub fn MoveEditCursor(&self, adjamt: f64, dosel: bool) {
@@ -14880,7 +14945,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MoveEditCursor)
             ),
-            Some(f) => f(adjamt, dosel),
+            Some(f) => unsafe { f(adjamt, dosel) },
         }
     }
     #[doc = r" # Safety"]
@@ -14896,7 +14961,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MoveMediaItemToTrack)
             ),
-            Some(f) => f(item, desttr),
+            Some(f) => unsafe { f(item, desttr) },
         }
     }
     pub fn MuteAllTracks(&self, mute: bool) {
@@ -14905,7 +14970,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(MuteAllTracks)
             ),
-            Some(f) => f(mute),
+            Some(f) => unsafe { f(mute) },
         }
     }
     #[doc = r" # Safety"]
@@ -14922,7 +14987,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(my_getViewport)
             ),
-            Some(f) => f(r, sr, wantWorkArea),
+            Some(f) => unsafe { f(r, sr, wantWorkArea) },
         }
     }
     #[doc = r" # Safety"]
@@ -14937,7 +15002,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(NamedCommandLookup)
             ),
-            Some(f) => f(command_name),
+            Some(f) => unsafe { f(command_name) },
         }
     }
     pub fn OnPauseButton(&self) {
@@ -14946,7 +15011,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OnPauseButton)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -14958,7 +15023,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OnPauseButtonEx)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     pub fn OnPlayButton(&self) {
@@ -14967,7 +15032,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OnPlayButton)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -14979,7 +15044,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OnPlayButtonEx)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     pub fn OnStopButton(&self) {
@@ -14988,7 +15053,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OnStopButton)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -15000,7 +15065,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OnStopButtonEx)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -15012,7 +15077,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OpenColorThemeFile)
             ),
-            Some(f) => f(fn_),
+            Some(f) => unsafe { f(fn_) },
         }
     }
     #[doc = r" # Safety"]
@@ -15028,7 +15093,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OpenMediaExplorer)
             ),
-            Some(f) => f(mediafn, play),
+            Some(f) => unsafe { f(mediafn, play) },
         }
     }
     #[doc = r" # Safety"]
@@ -15044,7 +15109,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(OscLocalMessageToHost)
             ),
-            Some(f) => f(message, valueInOptional),
+            Some(f) => unsafe { f(message, valueInOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -15056,7 +15121,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(parse_timestr)
             ),
-            Some(f) => f(buf),
+            Some(f) => unsafe { f(buf) },
         }
     }
     #[doc = r" # Safety"]
@@ -15073,7 +15138,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(parse_timestr_len)
             ),
-            Some(f) => f(buf, offset, modeoverride),
+            Some(f) => unsafe { f(buf, offset, modeoverride) },
         }
     }
     #[doc = r" # Safety"]
@@ -15089,7 +15154,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(parse_timestr_pos)
             ),
-            Some(f) => f(buf, modeoverride),
+            Some(f) => unsafe { f(buf, modeoverride) },
         }
     }
     #[doc = r" # Safety"]
@@ -15101,7 +15166,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(parsepanstr)
             ),
-            Some(f) => f(str_),
+            Some(f) => unsafe { f(str_) },
         }
     }
     #[doc = r" # Safety"]
@@ -15121,7 +15186,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_Create)
             ),
-            Some(f) => f(filename, cfg, cfg_sz, nch, srate, buildpeaks),
+            Some(f) => unsafe { f(filename, cfg, cfg_sz, nch, srate, buildpeaks) },
         }
     }
     #[doc = r" # Safety"]
@@ -15142,7 +15207,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_CreateEx)
             ),
-            Some(f) => f(proj, filename, cfg, cfg_sz, nch, srate, buildpeaks),
+            Some(f) => unsafe { f(proj, filename, cfg, cfg_sz, nch, srate, buildpeaks) },
         }
     }
     #[doc = r" # Safety"]
@@ -15161,7 +15226,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_CreateMIDIFile)
             ),
-            Some(f) => f(filename, cfg, cfg_sz, bpm, div),
+            Some(f) => unsafe { f(filename, cfg, cfg_sz, bpm, div) },
         }
     }
     #[doc = r" # Safety"]
@@ -15181,7 +15246,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_CreateMIDIFileEx)
             ),
-            Some(f) => f(proj, filename, cfg, cfg_sz, bpm, div),
+            Some(f) => unsafe { f(proj, filename, cfg, cfg_sz, bpm, div) },
         }
     }
     #[doc = r" # Safety"]
@@ -15197,7 +15262,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_Enum)
             ),
-            Some(f) => f(idx, descstrOut),
+            Some(f) => unsafe { f(idx, descstrOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -15213,7 +15278,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_GetExtension)
             ),
-            Some(f) => f(data, data_sz),
+            Some(f) => unsafe { f(data, data_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -15230,7 +15295,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Sink_ShowConfig)
             ),
-            Some(f) => f(cfg, cfg_sz, hwndParent),
+            Some(f) => unsafe { f(cfg, cfg_sz, hwndParent) },
         }
     }
     #[doc = r" # Safety"]
@@ -15246,7 +15311,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_BuildPeaks)
             ),
-            Some(f) => f(src, mode),
+            Some(f) => unsafe { f(src, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -15261,7 +15326,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_CreateFromFile)
             ),
-            Some(f) => f(filename),
+            Some(f) => unsafe { f(filename) },
         }
     }
     #[doc = r" # Safety"]
@@ -15277,7 +15342,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_CreateFromFileEx)
             ),
-            Some(f) => f(filename, forcenoMidiImp),
+            Some(f) => unsafe { f(filename, forcenoMidiImp) },
         }
     }
     #[doc = r" # Safety"]
@@ -15293,7 +15358,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_CreateFromSimple)
             ),
-            Some(f) => f(dec, fn_),
+            Some(f) => unsafe { f(dec, fn_) },
         }
     }
     #[doc = r" # Safety"]
@@ -15308,7 +15373,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_CreateFromType)
             ),
-            Some(f) => f(sourcetype),
+            Some(f) => unsafe { f(sourcetype) },
         }
     }
     #[doc = r" # Safety"]
@@ -15320,7 +15385,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_Destroy)
             ),
-            Some(f) => f(src),
+            Some(f) => unsafe { f(src) },
         }
     }
     #[doc = r" # Safety"]
@@ -15341,15 +15406,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_GetPeaks)
             ),
-            Some(f) => f(
-                src,
-                peakrate,
-                starttime,
-                numchannels,
-                numsamplesperchannel,
-                want_extra_type,
-                buf,
-            ),
+            Some(f) => unsafe {
+                f(
+                    src,
+                    peakrate,
+                    starttime,
+                    numchannels,
+                    numsamplesperchannel,
+                    want_extra_type,
+                    buf,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -15367,7 +15434,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PCM_Source_GetSectionInfo)
             ),
-            Some(f) => f(src, offsOut, lenOut, revOut),
+            Some(f) => unsafe { f(src, offsOut, lenOut, revOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -15385,7 +15452,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PeakBuild_Create)
             ),
-            Some(f) => f(src, fn_, srate, nch),
+            Some(f) => unsafe { f(src, fn_, srate, nch) },
         }
     }
     #[doc = r" # Safety"]
@@ -15404,7 +15471,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PeakBuild_CreateEx)
             ),
-            Some(f) => f(src, fn_, srate, nch, flags),
+            Some(f) => unsafe { f(src, fn_, srate, nch, flags) },
         }
     }
     #[doc = r" # Safety"]
@@ -15421,7 +15488,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PeakGet_Create)
             ),
-            Some(f) => f(fn_, srate, nch),
+            Some(f) => unsafe { f(fn_, srate, nch) },
         }
     }
     #[doc = r" # Safety"]
@@ -15440,7 +15507,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PitchShiftSubModeMenu)
             ),
-            Some(f) => f(hwnd, x, y, mode, submode_sel),
+            Some(f) => unsafe { f(hwnd, x, y, mode, submode_sel) },
         }
     }
     #[doc = r" # Safety"]
@@ -15455,7 +15522,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PlayPreview)
             ),
-            Some(f) => f(preview),
+            Some(f) => unsafe { f(preview) },
         }
     }
     #[doc = r" # Safety"]
@@ -15472,7 +15539,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PlayPreviewEx)
             ),
-            Some(f) => f(preview, bufflags, measure_align),
+            Some(f) => unsafe { f(preview, bufflags, measure_align) },
         }
     }
     #[doc = r" # Safety"]
@@ -15487,7 +15554,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PlayTrackPreview)
             ),
-            Some(f) => f(preview),
+            Some(f) => unsafe { f(preview) },
         }
     }
     #[doc = r" # Safety"]
@@ -15503,7 +15570,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PlayTrackPreview2)
             ),
-            Some(f) => f(proj, preview),
+            Some(f) => unsafe { f(proj, preview) },
         }
     }
     #[doc = r" # Safety"]
@@ -15521,7 +15588,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PlayTrackPreview2Ex)
             ),
-            Some(f) => f(proj, preview, flags, measure_align),
+            Some(f) => unsafe { f(proj, preview, flags, measure_align) },
         }
     }
     #[doc = r" # Safety"]
@@ -15536,7 +15603,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(plugin_getapi)
             ),
-            Some(f) => f(name),
+            Some(f) => unsafe { f(name) },
         }
     }
     pub fn plugin_getFilterList(&self) -> *const ::std::os::raw::c_char {
@@ -15545,7 +15612,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(plugin_getFilterList)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn plugin_getImportableProjectFilterList(&self) -> *const ::std::os::raw::c_char {
@@ -15554,7 +15621,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(plugin_getImportableProjectFilterList)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -15570,7 +15637,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(plugin_register)
             ),
-            Some(f) => f(name, infostruct),
+            Some(f) => unsafe { f(name, infostruct) },
         }
     }
     pub fn PluginWantsAlwaysRunFx(&self, amt: ::std::os::raw::c_int) {
@@ -15579,7 +15646,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PluginWantsAlwaysRunFx)
             ),
-            Some(f) => f(amt),
+            Some(f) => unsafe { f(amt) },
         }
     }
     pub fn PreventUIRefresh(&self, prevent_count: ::std::os::raw::c_int) {
@@ -15588,7 +15655,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PreventUIRefresh)
             ),
-            Some(f) => f(prevent_count),
+            Some(f) => unsafe { f(prevent_count) },
         }
     }
     #[doc = r" # Safety"]
@@ -15604,7 +15671,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(projectconfig_var_addr)
             ),
-            Some(f) => f(proj, idx),
+            Some(f) => unsafe { f(proj, idx) },
         }
     }
     #[doc = r" # Safety"]
@@ -15620,7 +15687,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(projectconfig_var_getoffs)
             ),
-            Some(f) => f(name, szOut),
+            Some(f) => unsafe { f(name, szOut) },
         }
     }
     pub fn PromptForAction(
@@ -15634,7 +15701,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(PromptForAction)
             ),
-            Some(f) => f(session_mode, init_id, section_id),
+            Some(f) => unsafe { f(session_mode, init_id, section_id) },
         }
     }
     pub fn realloc_cmd_clear(&self, tok: ::std::os::raw::c_int) {
@@ -15643,7 +15710,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(realloc_cmd_clear)
             ),
-            Some(f) => f(tok),
+            Some(f) => unsafe { f(tok) },
         }
     }
     #[doc = r" # Safety"]
@@ -15660,7 +15727,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(realloc_cmd_ptr)
             ),
-            Some(f) => f(ptr, ptr_size, new_size),
+            Some(f) => unsafe { f(ptr, ptr_size, new_size) },
         }
     }
     #[doc = r" # Safety"]
@@ -15676,7 +15743,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(realloc_cmd_register_buf)
             ),
-            Some(f) => f(ptr, ptr_size),
+            Some(f) => unsafe { f(ptr, ptr_size) },
         }
     }
     pub fn ReaperGetPitchShiftAPI(
@@ -15688,7 +15755,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ReaperGetPitchShiftAPI)
             ),
-            Some(f) => f(version),
+            Some(f) => unsafe { f(version) },
         }
     }
     #[doc = r" # Safety"]
@@ -15700,7 +15767,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ReaScriptError)
             ),
-            Some(f) => f(errmsg),
+            Some(f) => unsafe { f(errmsg) },
         }
     }
     #[doc = r" # Safety"]
@@ -15716,7 +15783,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RecursiveCreateDirectory)
             ),
-            Some(f) => f(path, ignored),
+            Some(f) => unsafe { f(path, ignored) },
         }
     }
     pub fn reduce_open_files(&self, flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
@@ -15725,7 +15792,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(reduce_open_files)
             ),
-            Some(f) => f(flags),
+            Some(f) => unsafe { f(flags) },
         }
     }
     pub fn RefreshToolbar(&self, command_id: ::std::os::raw::c_int) {
@@ -15734,7 +15801,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RefreshToolbar)
             ),
-            Some(f) => f(command_id),
+            Some(f) => unsafe { f(command_id) },
         }
     }
     pub fn RefreshToolbar2(
@@ -15747,7 +15814,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RefreshToolbar2)
             ),
-            Some(f) => f(section_id, command_id),
+            Some(f) => unsafe { f(section_id, command_id) },
         }
     }
     #[doc = r" # Safety"]
@@ -15764,7 +15831,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(relative_fn)
             ),
-            Some(f) => f(in_, out, out_sz),
+            Some(f) => unsafe { f(in_, out, out_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -15781,7 +15848,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RemoveTrackSend)
             ),
-            Some(f) => f(tr, category, sendidx),
+            Some(f) => unsafe { f(tr, category, sendidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -15800,13 +15867,15 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(RenderFileSection)
             ),
-            Some(f) => f(
-                source_filename,
-                target_filename,
-                start_percent,
-                end_percent,
-                playrate,
-            ),
+            Some(f) => unsafe {
+                f(
+                    source_filename,
+                    target_filename,
+                    start_percent,
+                    end_percent,
+                    playrate,
+                )
+            },
         }
     }
     pub fn ReorderSelectedTracks(
@@ -15819,7 +15888,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ReorderSelectedTracks)
             ),
-            Some(f) => f(beforeTrackIdx, makePrevFolder),
+            Some(f) => unsafe { f(beforeTrackIdx, makePrevFolder) },
         }
     }
     pub fn Resample_EnumModes(&self, mode: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char {
@@ -15828,7 +15897,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Resample_EnumModes)
             ),
-            Some(f) => f(mode),
+            Some(f) => unsafe { f(mode) },
         }
     }
     pub fn Resampler_Create(&self) -> *mut root::REAPER_Resample_Interface {
@@ -15837,7 +15906,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Resampler_Create)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -15854,7 +15923,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(resolve_fn)
             ),
-            Some(f) => f(in_, out, out_sz),
+            Some(f) => unsafe { f(in_, out, out_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -15872,7 +15941,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(resolve_fn2)
             ),
-            Some(f) => f(in_, out, out_sz, checkSubDirOptional),
+            Some(f) => unsafe { f(in_, out, out_sz, checkSubDirOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -15891,7 +15960,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ResolveRenderPattern)
             ),
-            Some(f) => f(project, path, pattern, targets, targets_sz),
+            Some(f) => unsafe { f(project, path, pattern, targets, targets_sz) },
         }
     }
     pub fn ReverseNamedCommandLookup(
@@ -15903,7 +15972,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ReverseNamedCommandLookup)
             ),
-            Some(f) => f(command_id),
+            Some(f) => unsafe { f(command_id) },
         }
     }
     pub fn ScaleFromEnvelopeMode(&self, scaling_mode: ::std::os::raw::c_int, val: f64) -> f64 {
@@ -15912,7 +15981,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ScaleFromEnvelopeMode)
             ),
-            Some(f) => f(scaling_mode, val),
+            Some(f) => unsafe { f(scaling_mode, val) },
         }
     }
     pub fn ScaleToEnvelopeMode(&self, scaling_mode: ::std::os::raw::c_int, val: f64) -> f64 {
@@ -15921,7 +15990,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ScaleToEnvelopeMode)
             ),
-            Some(f) => f(scaling_mode, val),
+            Some(f) => unsafe { f(scaling_mode, val) },
         }
     }
     #[doc = r" # Safety"]
@@ -15938,7 +16007,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(screenset_register)
             ),
-            Some(f) => f(id, callbackFunc, param),
+            Some(f) => unsafe { f(id, callbackFunc, param) },
         }
     }
     #[doc = r" # Safety"]
@@ -15955,7 +16024,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(screenset_registerNew)
             ),
-            Some(f) => f(id, callbackFunc, param),
+            Some(f) => unsafe { f(id, callbackFunc, param) },
         }
     }
     #[doc = r" # Safety"]
@@ -15967,7 +16036,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(screenset_unregister)
             ),
-            Some(f) => f(id),
+            Some(f) => unsafe { f(id) },
         }
     }
     #[doc = r" # Safety"]
@@ -15979,7 +16048,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(screenset_unregisterByParam)
             ),
-            Some(f) => f(param),
+            Some(f) => unsafe { f(param) },
         }
     }
     #[doc = r" # Safety"]
@@ -15991,7 +16060,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(screenset_updateLastFocus)
             ),
-            Some(f) => f(prevWin),
+            Some(f) => unsafe { f(prevWin) },
         }
     }
     pub fn SectionFromUniqueID(
@@ -16003,7 +16072,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SectionFromUniqueID)
             ),
-            Some(f) => f(uniqueID),
+            Some(f) => unsafe { f(uniqueID) },
         }
     }
     #[doc = r" # Safety"]
@@ -16015,7 +16084,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SelectAllMediaItems)
             ),
-            Some(f) => f(proj, selected),
+            Some(f) => unsafe { f(proj, selected) },
         }
     }
     #[doc = r" # Safety"]
@@ -16027,7 +16096,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SelectProjectInstance)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -16044,7 +16113,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SendLocalOscMessage)
             ),
-            Some(f) => f(local_osc_handler, msg, msglen),
+            Some(f) => unsafe { f(local_osc_handler, msg, msglen) },
         }
     }
     #[doc = r" # Safety"]
@@ -16061,7 +16130,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SendMIDIMessageToHardware)
             ),
-            Some(f) => f(output, msg, msg_sz),
+            Some(f) => unsafe { f(output, msg, msg_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -16073,7 +16142,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetActiveTake)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     pub fn SetAutomationMode(&self, mode: ::std::os::raw::c_int, onlySel: bool) {
@@ -16082,7 +16151,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetAutomationMode)
             ),
-            Some(f) => f(mode, onlySel),
+            Some(f) => unsafe { f(mode, onlySel) },
         }
     }
     #[doc = r" # Safety"]
@@ -16094,7 +16163,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetCurrentBPM)
             ),
-            Some(f) => f(__proj, bpm, wantUndo),
+            Some(f) => unsafe { f(__proj, bpm, wantUndo) },
         }
     }
     #[doc = r" # Safety"]
@@ -16110,7 +16179,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetCursorContext)
             ),
-            Some(f) => f(mode, envInOptional),
+            Some(f) => unsafe { f(mode, envInOptional) },
         }
     }
     pub fn SetEditCurPos(&self, time: f64, moveview: bool, seekplay: bool) {
@@ -16119,7 +16188,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetEditCurPos)
             ),
-            Some(f) => f(time, moveview, seekplay),
+            Some(f) => unsafe { f(time, moveview, seekplay) },
         }
     }
     #[doc = r" # Safety"]
@@ -16137,7 +16206,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetEditCurPos2)
             ),
-            Some(f) => f(proj, time, moveview, seekplay),
+            Some(f) => unsafe { f(proj, time, moveview, seekplay) },
         }
     }
     #[doc = r" # Safety"]
@@ -16159,16 +16228,18 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetEnvelopePoint)
             ),
-            Some(f) => f(
-                envelope,
-                ptidx,
-                timeInOptional,
-                valueInOptional,
-                shapeInOptional,
-                tensionInOptional,
-                selectedInOptional,
-                noSortInOptional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    envelope,
+                    ptidx,
+                    timeInOptional,
+                    valueInOptional,
+                    shapeInOptional,
+                    tensionInOptional,
+                    selectedInOptional,
+                    noSortInOptional,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -16191,17 +16262,19 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetEnvelopePointEx)
             ),
-            Some(f) => f(
-                envelope,
-                autoitem_idx,
-                ptidx,
-                timeInOptional,
-                valueInOptional,
-                shapeInOptional,
-                tensionInOptional,
-                selectedInOptional,
-                noSortInOptional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    envelope,
+                    autoitem_idx,
+                    ptidx,
+                    timeInOptional,
+                    valueInOptional,
+                    shapeInOptional,
+                    tensionInOptional,
+                    selectedInOptional,
+                    noSortInOptional,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -16218,7 +16291,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetEnvelopeStateChunk)
             ),
-            Some(f) => f(env, str_, isundoOptional),
+            Some(f) => unsafe { f(env, str_, isundoOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -16236,7 +16309,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetExtState)
             ),
-            Some(f) => f(section, key, value, persist),
+            Some(f) => unsafe { f(section, key, value, persist) },
         }
     }
     pub fn SetGlobalAutomationOverride(&self, mode: ::std::os::raw::c_int) {
@@ -16245,7 +16318,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetGlobalAutomationOverride)
             ),
-            Some(f) => f(mode),
+            Some(f) => unsafe { f(mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -16262,7 +16335,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetItemStateChunk)
             ),
-            Some(f) => f(item, str_, isundoOptional),
+            Some(f) => unsafe { f(item, str_, isundoOptional) },
         }
     }
     pub fn SetMasterTrackVisibility(&self, flag: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
@@ -16271,7 +16344,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMasterTrackVisibility)
             ),
-            Some(f) => f(flag),
+            Some(f) => unsafe { f(flag) },
         }
     }
     #[doc = r" # Safety"]
@@ -16288,7 +16361,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaItemInfo_Value)
             ),
-            Some(f) => f(item, parmname, newvalue),
+            Some(f) => unsafe { f(item, parmname, newvalue) },
         }
     }
     #[doc = r" # Safety"]
@@ -16305,7 +16378,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaItemLength)
             ),
-            Some(f) => f(item, length, refreshUI),
+            Some(f) => unsafe { f(item, length, refreshUI) },
         }
     }
     #[doc = r" # Safety"]
@@ -16322,7 +16395,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaItemPosition)
             ),
-            Some(f) => f(item, position, refreshUI),
+            Some(f) => unsafe { f(item, position, refreshUI) },
         }
     }
     #[doc = r" # Safety"]
@@ -16334,7 +16407,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaItemSelected)
             ),
-            Some(f) => f(item, selected),
+            Some(f) => unsafe { f(item, selected) },
         }
     }
     #[doc = r" # Safety"]
@@ -16350,7 +16423,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaItemTake_Source)
             ),
-            Some(f) => f(take, source),
+            Some(f) => unsafe { f(take, source) },
         }
     }
     #[doc = r" # Safety"]
@@ -16367,7 +16440,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaItemTakeInfo_Value)
             ),
-            Some(f) => f(take, parmname, newvalue),
+            Some(f) => unsafe { f(take, parmname, newvalue) },
         }
     }
     #[doc = r" # Safety"]
@@ -16384,7 +16457,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMediaTrackInfo_Value)
             ),
-            Some(f) => f(tr, parmname, newvalue),
+            Some(f) => unsafe { f(tr, parmname, newvalue) },
         }
     }
     #[doc = r" # Safety"]
@@ -16396,7 +16469,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMIDIEditorGrid)
             ),
-            Some(f) => f(project, division),
+            Some(f) => unsafe { f(project, division) },
         }
     }
     #[doc = r" # Safety"]
@@ -16411,7 +16484,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMixerScroll)
             ),
-            Some(f) => f(leftmosttrack),
+            Some(f) => unsafe { f(leftmosttrack) },
         }
     }
     #[doc = r" # Safety"]
@@ -16428,7 +16501,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetMouseModifier)
             ),
-            Some(f) => f(context, modifier_flag, action),
+            Some(f) => unsafe { f(context, modifier_flag, action) },
         }
     }
     #[doc = r" # Safety"]
@@ -16440,7 +16513,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetOnlyTrackSelected)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -16452,7 +16525,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectGrid)
             ),
-            Some(f) => f(project, division),
+            Some(f) => unsafe { f(project, division) },
         }
     }
     #[doc = r" # Safety"]
@@ -16471,7 +16544,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectMarker)
             ),
-            Some(f) => f(markrgnindexnumber, isrgn, pos, rgnend, name),
+            Some(f) => unsafe { f(markrgnindexnumber, isrgn, pos, rgnend, name) },
         }
     }
     #[doc = r" # Safety"]
@@ -16491,7 +16564,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectMarker2)
             ),
-            Some(f) => f(proj, markrgnindexnumber, isrgn, pos, rgnend, name),
+            Some(f) => unsafe { f(proj, markrgnindexnumber, isrgn, pos, rgnend, name) },
         }
     }
     #[doc = r" # Safety"]
@@ -16512,7 +16585,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectMarker3)
             ),
-            Some(f) => f(proj, markrgnindexnumber, isrgn, pos, rgnend, name, color),
+            Some(f) => unsafe { f(proj, markrgnindexnumber, isrgn, pos, rgnend, name, color) },
         }
     }
     #[doc = r" # Safety"]
@@ -16534,16 +16607,18 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectMarker4)
             ),
-            Some(f) => f(
-                proj,
-                markrgnindexnumber,
-                isrgn,
-                pos,
-                rgnend,
-                name,
-                color,
-                flags,
-            ),
+            Some(f) => unsafe {
+                f(
+                    proj,
+                    markrgnindexnumber,
+                    isrgn,
+                    pos,
+                    rgnend,
+                    name,
+                    color,
+                    flags,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -16565,7 +16640,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectMarkerByIndex)
             ),
-            Some(f) => f(proj, markrgnidx, isrgn, pos, rgnend, IDnumber, name, color),
+            Some(f) => unsafe { f(proj, markrgnidx, isrgn, pos, rgnend, IDnumber, name, color) },
         }
     }
     #[doc = r" # Safety"]
@@ -16588,9 +16663,11 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjectMarkerByIndex2)
             ),
-            Some(f) => f(
-                proj, markrgnidx, isrgn, pos, rgnend, IDnumber, name, color, flags,
-            ),
+            Some(f) => unsafe {
+                f(
+                    proj, markrgnidx, isrgn, pos, rgnend, IDnumber, name, color, flags,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -16608,7 +16685,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetProjExtState)
             ),
-            Some(f) => f(proj, extname, key, value),
+            Some(f) => unsafe { f(proj, extname, key, value) },
         }
     }
     #[doc = r" # Safety"]
@@ -16626,7 +16703,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetRegionRenderMatrix)
             ),
-            Some(f) => f(proj, regionindex, track, flag),
+            Some(f) => unsafe { f(proj, regionindex, track, flag) },
         }
     }
     #[doc = r" # Safety"]
@@ -16638,7 +16715,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetRenderLastError)
             ),
-            Some(f) => f(errorstr),
+            Some(f) => unsafe { f(errorstr) },
         }
     }
     #[doc = r" # Safety"]
@@ -16657,7 +16734,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTakeMarker)
             ),
-            Some(f) => f(take, idx, nameIn, srcposInOptional, colorInOptional),
+            Some(f) => unsafe { f(take, idx, nameIn, srcposInOptional, colorInOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -16675,7 +16752,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTakeStretchMarker)
             ),
-            Some(f) => f(take, idx, pos, srcposInOptional),
+            Some(f) => unsafe { f(take, idx, pos, srcposInOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -16692,7 +16769,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTakeStretchMarkerSlope)
             ),
-            Some(f) => f(take, idx, slope),
+            Some(f) => unsafe { f(take, idx, slope) },
         }
     }
     #[doc = r" # Safety"]
@@ -16715,17 +16792,19 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTempoTimeSigMarker)
             ),
-            Some(f) => f(
-                proj,
-                ptidx,
-                timepos,
-                measurepos,
-                beatpos,
-                bpm,
-                timesig_num,
-                timesig_denom,
-                lineartempo,
-            ),
+            Some(f) => unsafe {
+                f(
+                    proj,
+                    ptidx,
+                    timepos,
+                    measurepos,
+                    beatpos,
+                    bpm,
+                    timesig_num,
+                    timesig_denom,
+                    lineartempo,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -16742,7 +16821,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetThemeColor)
             ),
-            Some(f) => f(ini_key, color, flagsOptional),
+            Some(f) => unsafe { f(ini_key, color, flagsOptional) },
         }
     }
     pub fn SetToggleCommandState(
@@ -16756,7 +16835,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetToggleCommandState)
             ),
-            Some(f) => f(section_id, command_id, state),
+            Some(f) => unsafe { f(section_id, command_id, state) },
         }
     }
     #[doc = r" # Safety"]
@@ -16772,7 +16851,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackAutomationMode)
             ),
-            Some(f) => f(tr, mode),
+            Some(f) => unsafe { f(tr, mode) },
         }
     }
     #[doc = r" # Safety"]
@@ -16784,7 +16863,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackColor)
             ),
-            Some(f) => f(track, color),
+            Some(f) => unsafe { f(track, color) },
         }
     }
     #[doc = r" # Safety"]
@@ -16801,7 +16880,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackMIDILyrics)
             ),
-            Some(f) => f(track, flag, str_),
+            Some(f) => unsafe { f(track, flag, str_) },
         }
     }
     #[doc = r" # Safety"]
@@ -16819,7 +16898,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackMIDINoteName)
             ),
-            Some(f) => f(track, pitch, chan, name),
+            Some(f) => unsafe { f(track, pitch, chan, name) },
         }
     }
     #[doc = r" # Safety"]
@@ -16838,7 +16917,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackMIDINoteNameEx)
             ),
-            Some(f) => f(proj, track, pitch, chan, name),
+            Some(f) => unsafe { f(proj, track, pitch, chan, name) },
         }
     }
     #[doc = r" # Safety"]
@@ -16850,7 +16929,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackSelected)
             ),
-            Some(f) => f(track, selected),
+            Some(f) => unsafe { f(track, selected) },
         }
     }
     #[doc = r" # Safety"]
@@ -16869,7 +16948,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackSendInfo_Value)
             ),
-            Some(f) => f(tr, category, sendidx, parmname, newvalue),
+            Some(f) => unsafe { f(tr, category, sendidx, parmname, newvalue) },
         }
     }
     #[doc = r" # Safety"]
@@ -16887,7 +16966,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackSendUIPan)
             ),
-            Some(f) => f(track, send_idx, pan, isend),
+            Some(f) => unsafe { f(track, send_idx, pan, isend) },
         }
     }
     #[doc = r" # Safety"]
@@ -16905,7 +16984,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackSendUIVol)
             ),
-            Some(f) => f(track, send_idx, vol, isend),
+            Some(f) => unsafe { f(track, send_idx, vol, isend) },
         }
     }
     #[doc = r" # Safety"]
@@ -16922,7 +17001,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackStateChunk)
             ),
-            Some(f) => f(track, str_, isundoOptional),
+            Some(f) => unsafe { f(track, str_, isundoOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -16939,7 +17018,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackUIInputMonitor)
             ),
-            Some(f) => f(track, monitor, igngroupflags),
+            Some(f) => unsafe { f(track, monitor, igngroupflags) },
         }
     }
     #[doc = r" # Safety"]
@@ -16956,7 +17035,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackUIMute)
             ),
-            Some(f) => f(track, mute, igngroupflags),
+            Some(f) => unsafe { f(track, mute, igngroupflags) },
         }
     }
     #[doc = r" # Safety"]
@@ -16975,7 +17054,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackUIPan)
             ),
-            Some(f) => f(track, pan, relative, done, igngroupflags),
+            Some(f) => unsafe { f(track, pan, relative, done, igngroupflags) },
         }
     }
     #[doc = r" # Safety"]
@@ -16992,7 +17071,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackUIPolarity)
             ),
-            Some(f) => f(track, polarity, igngroupflags),
+            Some(f) => unsafe { f(track, polarity, igngroupflags) },
         }
     }
     #[doc = r" # Safety"]
@@ -17009,7 +17088,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackUIRecArm)
             ),
-            Some(f) => f(track, recarm, igngroupflags),
+            Some(f) => unsafe { f(track, recarm, igngroupflags) },
         }
     }
     #[doc = r" # Safety"]
@@ -17026,7 +17105,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackUISolo)
             ),
-            Some(f) => f(track, solo, igngroupflags),
+            Some(f) => unsafe { f(track, solo, igngroupflags) },
         }
     }
     #[doc = r" # Safety"]
@@ -17045,7 +17124,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackUIVolume)
             ),
-            Some(f) => f(track, volume, relative, done, igngroupflags),
+            Some(f) => unsafe { f(track, volume, relative, done, igngroupflags) },
         }
     }
     #[doc = r" # Safety"]
@@ -17064,7 +17143,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackUIWidth)
             ),
-            Some(f) => f(track, width, relative, done, igngroupflags),
+            Some(f) => unsafe { f(track, width, relative, done, igngroupflags) },
         }
     }
     #[doc = r" # Safety"]
@@ -17076,7 +17155,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ShowActionList)
             ),
-            Some(f) => f(section, callerWnd),
+            Some(f) => unsafe { f(section, callerWnd) },
         }
     }
     #[doc = r" # Safety"]
@@ -17088,7 +17167,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ShowConsoleMsg)
             ),
-            Some(f) => f(msg),
+            Some(f) => unsafe { f(msg) },
         }
     }
     #[doc = r" # Safety"]
@@ -17105,7 +17184,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ShowMessageBox)
             ),
-            Some(f) => f(msg, title, type_),
+            Some(f) => unsafe { f(msg, title, type_) },
         }
     }
     #[doc = r" # Safety"]
@@ -17126,15 +17205,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ShowPopupMenu)
             ),
-            Some(f) => f(
-                name,
-                x,
-                y,
-                hwndParentOptional,
-                ctxOptional,
-                ctx2Optional,
-                ctx3Optional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    name,
+                    x,
+                    y,
+                    hwndParentOptional,
+                    ctxOptional,
+                    ctx2Optional,
+                    ctx3Optional,
+                )
+            },
         }
     }
     pub fn SLIDER2DB(&self, y: f64) -> f64 {
@@ -17143,7 +17224,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SLIDER2DB)
             ),
-            Some(f) => f(y),
+            Some(f) => unsafe { f(y) },
         }
     }
     #[doc = r" # Safety"]
@@ -17155,7 +17236,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SnapToGrid)
             ),
-            Some(f) => f(project, time_pos),
+            Some(f) => unsafe { f(project, time_pos) },
         }
     }
     pub fn SoloAllTracks(&self, solo: ::std::os::raw::c_int) {
@@ -17164,7 +17245,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SoloAllTracks)
             ),
-            Some(f) => f(solo),
+            Some(f) => unsafe { f(solo) },
         }
     }
     pub fn Splash_GetWnd(&self) -> root::HWND {
@@ -17173,7 +17254,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Splash_GetWnd)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -17189,7 +17270,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SplitMediaItem)
             ),
-            Some(f) => f(item, position),
+            Some(f) => unsafe { f(item, position) },
         }
     }
     #[doc = r" # Safety"]
@@ -17204,7 +17285,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(StopPreview)
             ),
-            Some(f) => f(preview),
+            Some(f) => unsafe { f(preview) },
         }
     }
     #[doc = r" # Safety"]
@@ -17219,7 +17300,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(StopTrackPreview)
             ),
-            Some(f) => f(preview),
+            Some(f) => unsafe { f(preview) },
         }
     }
     #[doc = r" # Safety"]
@@ -17235,7 +17316,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(StopTrackPreview2)
             ),
-            Some(f) => f(proj, preview),
+            Some(f) => unsafe { f(proj, preview) },
         }
     }
     #[doc = r" # Safety"]
@@ -17247,7 +17328,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(stringToGuid)
             ),
-            Some(f) => f(str_, g),
+            Some(f) => unsafe { f(str_, g) },
         }
     }
     pub fn StuffMIDIMessage(
@@ -17262,7 +17343,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(StuffMIDIMessage)
             ),
-            Some(f) => f(mode, msg1, msg2, msg3),
+            Some(f) => unsafe { f(mode, msg1, msg2, msg3) },
         }
     }
     #[doc = r" # Safety"]
@@ -17279,7 +17360,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_AddByName)
             ),
-            Some(f) => f(take, fxname, instantiate),
+            Some(f) => unsafe { f(take, fxname, instantiate) },
         }
     }
     #[doc = r" # Safety"]
@@ -17298,7 +17379,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_CopyToTake)
             ),
-            Some(f) => f(src_take, src_fx, dest_take, dest_fx, is_move),
+            Some(f) => unsafe { f(src_take, src_fx, dest_take, dest_fx, is_move) },
         }
     }
     #[doc = r" # Safety"]
@@ -17317,7 +17398,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_CopyToTrack)
             ),
-            Some(f) => f(src_take, src_fx, dest_track, dest_fx, is_move),
+            Some(f) => unsafe { f(src_take, src_fx, dest_track, dest_fx, is_move) },
         }
     }
     #[doc = r" # Safety"]
@@ -17333,7 +17414,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_Delete)
             ),
-            Some(f) => f(take, fx),
+            Some(f) => unsafe { f(take, fx) },
         }
     }
     #[doc = r" # Safety"]
@@ -17350,7 +17431,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_EndParamEdit)
             ),
-            Some(f) => f(take, fx, param),
+            Some(f) => unsafe { f(take, fx, param) },
         }
     }
     #[doc = r" # Safety"]
@@ -17370,7 +17451,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_FormatParamValue)
             ),
-            Some(f) => f(take, fx, param, val, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(take, fx, param, val, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -17390,7 +17471,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_FormatParamValueNormalized)
             ),
-            Some(f) => f(take, fx, param, value, buf, buf_sz),
+            Some(f) => unsafe { f(take, fx, param, value, buf, buf_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -17405,7 +17486,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetChainVisible)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     #[doc = r" # Safety"]
@@ -17417,7 +17498,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetCount)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     #[doc = r" # Safety"]
@@ -17433,7 +17514,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetEnabled)
             ),
-            Some(f) => f(take, fx),
+            Some(f) => unsafe { f(take, fx) },
         }
     }
     #[doc = r" # Safety"]
@@ -17451,7 +17532,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetEnvelope)
             ),
-            Some(f) => f(take, fxindex, parameterindex, create),
+            Some(f) => unsafe { f(take, fxindex, parameterindex, create) },
         }
     }
     #[doc = r" # Safety"]
@@ -17467,7 +17548,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetFloatingWindow)
             ),
-            Some(f) => f(take, index),
+            Some(f) => unsafe { f(take, index) },
         }
     }
     #[doc = r" # Safety"]
@@ -17486,7 +17567,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetFormattedParamValue)
             ),
-            Some(f) => f(take, fx, param, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(take, fx, param, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -17502,7 +17583,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetFXGUID)
             ),
-            Some(f) => f(take, fx),
+            Some(f) => unsafe { f(take, fx) },
         }
     }
     #[doc = r" # Safety"]
@@ -17520,7 +17601,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetFXName)
             ),
-            Some(f) => f(take, fx, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(take, fx, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -17538,7 +17619,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetIOSize)
             ),
-            Some(f) => f(take, fx, inputPinsOut, outputPinsOut),
+            Some(f) => unsafe { f(take, fx, inputPinsOut, outputPinsOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -17557,7 +17638,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetNamedConfigParm)
             ),
-            Some(f) => f(take, fx, parmname, bufOutNeedBig, bufOutNeedBig_sz),
+            Some(f) => unsafe { f(take, fx, parmname, bufOutNeedBig, bufOutNeedBig_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -17573,7 +17654,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetNumParams)
             ),
-            Some(f) => f(take, fx),
+            Some(f) => unsafe { f(take, fx) },
         }
     }
     #[doc = r" # Safety"]
@@ -17589,7 +17670,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetOffline)
             ),
-            Some(f) => f(take, fx),
+            Some(f) => unsafe { f(take, fx) },
         }
     }
     #[doc = r" # Safety"]
@@ -17605,7 +17686,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetOpen)
             ),
-            Some(f) => f(take, fx),
+            Some(f) => unsafe { f(take, fx) },
         }
     }
     #[doc = r" # Safety"]
@@ -17624,7 +17705,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetParam)
             ),
-            Some(f) => f(take, fx, param, minvalOut, maxvalOut),
+            Some(f) => unsafe { f(take, fx, param, minvalOut, maxvalOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -17645,15 +17726,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetParameterStepSizes)
             ),
-            Some(f) => f(
-                take,
-                fx,
-                param,
-                stepOut,
-                smallstepOut,
-                largestepOut,
-                istoggleOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    take,
+                    fx,
+                    param,
+                    stepOut,
+                    smallstepOut,
+                    largestepOut,
+                    istoggleOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -17673,7 +17756,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetParamEx)
             ),
-            Some(f) => f(take, fx, param, minvalOut, maxvalOut, midvalOut),
+            Some(f) => unsafe { f(take, fx, param, minvalOut, maxvalOut, midvalOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -17690,7 +17773,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetParamFromIdent)
             ),
-            Some(f) => f(take, fx, ident_str),
+            Some(f) => unsafe { f(take, fx, ident_str) },
         }
     }
     #[doc = r" # Safety"]
@@ -17709,7 +17792,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetParamIdent)
             ),
-            Some(f) => f(take, fx, param, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(take, fx, param, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -17728,7 +17811,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetParamName)
             ),
-            Some(f) => f(take, fx, param, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(take, fx, param, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -17745,7 +17828,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetParamNormalized)
             ),
-            Some(f) => f(take, fx, param),
+            Some(f) => unsafe { f(take, fx, param) },
         }
     }
     #[doc = r" # Safety"]
@@ -17764,7 +17847,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetPinMappings)
             ),
-            Some(f) => f(take, fx, isoutput, pin, high32Out),
+            Some(f) => unsafe { f(take, fx, isoutput, pin, high32Out) },
         }
     }
     #[doc = r" # Safety"]
@@ -17782,7 +17865,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetPreset)
             ),
-            Some(f) => f(take, fx, presetnameOut, presetnameOut_sz),
+            Some(f) => unsafe { f(take, fx, presetnameOut, presetnameOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -17799,7 +17882,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetPresetIndex)
             ),
-            Some(f) => f(take, fx, numberOfPresetsOut),
+            Some(f) => unsafe { f(take, fx, numberOfPresetsOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -17817,7 +17900,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_GetUserPresetFilename)
             ),
-            Some(f) => f(take, fx, fnOut, fnOut_sz),
+            Some(f) => unsafe { f(take, fx, fnOut, fnOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -17834,7 +17917,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_NavigatePresets)
             ),
-            Some(f) => f(take, fx, presetmove),
+            Some(f) => unsafe { f(take, fx, presetmove) },
         }
     }
     #[doc = r" # Safety"]
@@ -17851,7 +17934,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetEnabled)
             ),
-            Some(f) => f(take, fx, enabled),
+            Some(f) => unsafe { f(take, fx, enabled) },
         }
     }
     #[doc = r" # Safety"]
@@ -17869,7 +17952,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetNamedConfigParm)
             ),
-            Some(f) => f(take, fx, parmname, value),
+            Some(f) => unsafe { f(take, fx, parmname, value) },
         }
     }
     #[doc = r" # Safety"]
@@ -17886,7 +17969,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetOffline)
             ),
-            Some(f) => f(take, fx, offline),
+            Some(f) => unsafe { f(take, fx, offline) },
         }
     }
     #[doc = r" # Safety"]
@@ -17903,7 +17986,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetOpen)
             ),
-            Some(f) => f(take, fx, open),
+            Some(f) => unsafe { f(take, fx, open) },
         }
     }
     #[doc = r" # Safety"]
@@ -17921,7 +18004,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetParam)
             ),
-            Some(f) => f(take, fx, param, val),
+            Some(f) => unsafe { f(take, fx, param, val) },
         }
     }
     #[doc = r" # Safety"]
@@ -17939,7 +18022,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetParamNormalized)
             ),
-            Some(f) => f(take, fx, param, value),
+            Some(f) => unsafe { f(take, fx, param, value) },
         }
     }
     #[doc = r" # Safety"]
@@ -17959,7 +18042,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetPinMappings)
             ),
-            Some(f) => f(take, fx, isoutput, pin, low32bits, hi32bits),
+            Some(f) => unsafe { f(take, fx, isoutput, pin, low32bits, hi32bits) },
         }
     }
     #[doc = r" # Safety"]
@@ -17976,7 +18059,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetPreset)
             ),
-            Some(f) => f(take, fx, presetname),
+            Some(f) => unsafe { f(take, fx, presetname) },
         }
     }
     #[doc = r" # Safety"]
@@ -17993,7 +18076,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_SetPresetByIndex)
             ),
-            Some(f) => f(take, fx, idx),
+            Some(f) => unsafe { f(take, fx, idx) },
         }
     }
     #[doc = r" # Safety"]
@@ -18010,7 +18093,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeFX_Show)
             ),
-            Some(f) => f(take, index, showFlag),
+            Some(f) => unsafe { f(take, index, showFlag) },
         }
     }
     #[doc = r" # Safety"]
@@ -18022,7 +18105,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TakeIsMIDI)
             ),
-            Some(f) => f(take),
+            Some(f) => unsafe { f(take) },
         }
     }
     #[doc = r" # Safety"]
@@ -18040,7 +18123,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ThemeLayout_GetLayout)
             ),
-            Some(f) => f(section, idx, nameOut, nameOut_sz),
+            Some(f) => unsafe { f(section, idx, nameOut, nameOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -18060,14 +18143,16 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ThemeLayout_GetParameter)
             ),
-            Some(f) => f(
-                wp,
-                descOutOptional,
-                valueOutOptional,
-                defValueOutOptional,
-                minValueOutOptional,
-                maxValueOutOptional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    wp,
+                    descOutOptional,
+                    valueOutOptional,
+                    defValueOutOptional,
+                    minValueOutOptional,
+                    maxValueOutOptional,
+                )
+            },
         }
     }
     pub fn ThemeLayout_RefreshAll(&self) {
@@ -18076,7 +18161,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ThemeLayout_RefreshAll)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -18092,7 +18177,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ThemeLayout_SetLayout)
             ),
-            Some(f) => f(section, layout),
+            Some(f) => unsafe { f(section, layout) },
         }
     }
     pub fn ThemeLayout_SetParameter(
@@ -18106,7 +18191,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ThemeLayout_SetParameter)
             ),
-            Some(f) => f(wp, value, persist),
+            Some(f) => unsafe { f(wp, value, persist) },
         }
     }
     pub fn time_precise(&self) -> f64 {
@@ -18115,7 +18200,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(time_precise)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -18132,7 +18217,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap2_beatsToTime)
             ),
-            Some(f) => f(proj, tpos, measuresInOptional),
+            Some(f) => unsafe { f(proj, tpos, measuresInOptional) },
         }
     }
     #[doc = r" # Safety"]
@@ -18148,7 +18233,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap2_GetDividedBpmAtTime)
             ),
-            Some(f) => f(proj, time),
+            Some(f) => unsafe { f(proj, time) },
         }
     }
     #[doc = r" # Safety"]
@@ -18160,7 +18245,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap2_GetNextChangeTime)
             ),
-            Some(f) => f(proj, time),
+            Some(f) => unsafe { f(proj, time) },
         }
     }
     #[doc = r" # Safety"]
@@ -18172,7 +18257,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap2_QNToTime)
             ),
-            Some(f) => f(proj, qn),
+            Some(f) => unsafe { f(proj, qn) },
         }
     }
     #[doc = r" # Safety"]
@@ -18192,14 +18277,16 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap2_timeToBeats)
             ),
-            Some(f) => f(
-                proj,
-                tpos,
-                measuresOutOptional,
-                cmlOutOptional,
-                fullbeatsOutOptional,
-                cdenomOutOptional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    proj,
+                    tpos,
+                    measuresOutOptional,
+                    cmlOutOptional,
+                    fullbeatsOutOptional,
+                    cdenomOutOptional,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -18211,7 +18298,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap2_timeToQN)
             ),
-            Some(f) => f(proj, tpos),
+            Some(f) => unsafe { f(proj, tpos) },
         }
     }
     #[doc = r" # Safety"]
@@ -18227,7 +18314,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_curFrameRate)
             ),
-            Some(f) => f(proj, dropFrameOut),
+            Some(f) => unsafe { f(proj, dropFrameOut) },
         }
     }
     pub fn TimeMap_GetDividedBpmAtTime(&self, time: f64) -> f64 {
@@ -18236,7 +18323,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_GetDividedBpmAtTime)
             ),
-            Some(f) => f(time),
+            Some(f) => unsafe { f(time) },
         }
     }
     #[doc = r" # Safety"]
@@ -18257,15 +18344,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_GetMeasureInfo)
             ),
-            Some(f) => f(
-                proj,
-                measure,
-                qn_startOut,
-                qn_endOut,
-                timesig_numOut,
-                timesig_denomOut,
-                tempoOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    proj,
+                    measure,
+                    qn_startOut,
+                    qn_endOut,
+                    timesig_numOut,
+                    timesig_denomOut,
+                    tempoOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -18283,7 +18372,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_GetMetronomePattern)
             ),
-            Some(f) => f(proj, time, pattern, pattern_sz),
+            Some(f) => unsafe { f(proj, time, pattern, pattern_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -18302,7 +18391,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_GetTimeSigAtTime)
             ),
-            Some(f) => f(proj, time, timesig_numOut, timesig_denomOut, tempoOut),
+            Some(f) => unsafe { f(proj, time, timesig_numOut, timesig_denomOut, tempoOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -18320,7 +18409,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_QNToMeasures)
             ),
-            Some(f) => f(proj, qn, qnMeasureStartOutOptional, qnMeasureEndOutOptional),
+            Some(f) => unsafe { f(proj, qn, qnMeasureStartOutOptional, qnMeasureEndOutOptional) },
         }
     }
     pub fn TimeMap_QNToTime(&self, qn: f64) -> f64 {
@@ -18329,7 +18418,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_QNToTime)
             ),
-            Some(f) => f(qn),
+            Some(f) => unsafe { f(qn) },
         }
     }
     #[doc = r" # Safety"]
@@ -18341,7 +18430,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_QNToTime_abs)
             ),
-            Some(f) => f(proj, qn),
+            Some(f) => unsafe { f(proj, qn) },
         }
     }
     pub fn TimeMap_timeToQN(&self, tpos: f64) -> f64 {
@@ -18350,7 +18439,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_timeToQN)
             ),
-            Some(f) => f(tpos),
+            Some(f) => unsafe { f(tpos) },
         }
     }
     #[doc = r" # Safety"]
@@ -18362,7 +18451,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TimeMap_timeToQN_abs)
             ),
-            Some(f) => f(proj, tpos),
+            Some(f) => unsafe { f(proj, tpos) },
         }
     }
     #[doc = r" # Safety"]
@@ -18378,7 +18467,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ToggleTrackSendUIMute)
             ),
-            Some(f) => f(track, send_idx),
+            Some(f) => unsafe { f(track, send_idx) },
         }
     }
     #[doc = r" # Safety"]
@@ -18395,7 +18484,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Track_GetPeakHoldDB)
             ),
-            Some(f) => f(track, channel, clear),
+            Some(f) => unsafe { f(track, channel, clear) },
         }
     }
     #[doc = r" # Safety"]
@@ -18411,7 +18500,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Track_GetPeakInfo)
             ),
-            Some(f) => f(track, channel),
+            Some(f) => unsafe { f(track, channel) },
         }
     }
     #[doc = r" # Safety"]
@@ -18429,7 +18518,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackCtl_SetToolTip)
             ),
-            Some(f) => f(fmt, xpos, ypos, topmost),
+            Some(f) => unsafe { f(fmt, xpos, ypos, topmost) },
         }
     }
     #[doc = r" # Safety"]
@@ -18447,7 +18536,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_AddByName)
             ),
-            Some(f) => f(track, fxname, recFX, instantiate),
+            Some(f) => unsafe { f(track, fxname, recFX, instantiate) },
         }
     }
     #[doc = r" # Safety"]
@@ -18466,7 +18555,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_CopyToTake)
             ),
-            Some(f) => f(src_track, src_fx, dest_take, dest_fx, is_move),
+            Some(f) => unsafe { f(src_track, src_fx, dest_take, dest_fx, is_move) },
         }
     }
     #[doc = r" # Safety"]
@@ -18485,7 +18574,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_CopyToTrack)
             ),
-            Some(f) => f(src_track, src_fx, dest_track, dest_fx, is_move),
+            Some(f) => unsafe { f(src_track, src_fx, dest_track, dest_fx, is_move) },
         }
     }
     #[doc = r" # Safety"]
@@ -18501,7 +18590,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_Delete)
             ),
-            Some(f) => f(track, fx),
+            Some(f) => unsafe { f(track, fx) },
         }
     }
     #[doc = r" # Safety"]
@@ -18518,7 +18607,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_EndParamEdit)
             ),
-            Some(f) => f(track, fx, param),
+            Some(f) => unsafe { f(track, fx, param) },
         }
     }
     #[doc = r" # Safety"]
@@ -18538,7 +18627,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_FormatParamValue)
             ),
-            Some(f) => f(track, fx, param, val, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(track, fx, param, val, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -18558,7 +18647,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_FormatParamValueNormalized)
             ),
-            Some(f) => f(track, fx, param, value, buf, buf_sz),
+            Some(f) => unsafe { f(track, fx, param, value, buf, buf_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -18575,7 +18664,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetByName)
             ),
-            Some(f) => f(track, fxname, instantiate),
+            Some(f) => unsafe { f(track, fxname, instantiate) },
         }
     }
     #[doc = r" # Safety"]
@@ -18590,7 +18679,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetChainVisible)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -18602,7 +18691,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetCount)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -18618,7 +18707,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetEnabled)
             ),
-            Some(f) => f(track, fx),
+            Some(f) => unsafe { f(track, fx) },
         }
     }
     #[doc = r" # Safety"]
@@ -18634,7 +18723,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetEQ)
             ),
-            Some(f) => f(track, instantiate),
+            Some(f) => unsafe { f(track, instantiate) },
         }
     }
     #[doc = r" # Safety"]
@@ -18652,7 +18741,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetEQBandEnabled)
             ),
-            Some(f) => f(track, fxidx, bandtype, bandidx),
+            Some(f) => unsafe { f(track, fxidx, bandtype, bandidx) },
         }
     }
     #[doc = r" # Safety"]
@@ -18673,15 +18762,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetEQParam)
             ),
-            Some(f) => f(
-                track,
-                fxidx,
-                paramidx,
-                bandtypeOut,
-                bandidxOut,
-                paramtypeOut,
-                normvalOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    track,
+                    fxidx,
+                    paramidx,
+                    bandtypeOut,
+                    bandidxOut,
+                    paramtypeOut,
+                    normvalOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -18697,7 +18788,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetFloatingWindow)
             ),
-            Some(f) => f(track, index),
+            Some(f) => unsafe { f(track, index) },
         }
     }
     #[doc = r" # Safety"]
@@ -18716,7 +18807,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetFormattedParamValue)
             ),
-            Some(f) => f(track, fx, param, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(track, fx, param, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -18732,7 +18823,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetFXGUID)
             ),
-            Some(f) => f(track, fx),
+            Some(f) => unsafe { f(track, fx) },
         }
     }
     #[doc = r" # Safety"]
@@ -18750,7 +18841,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetFXName)
             ),
-            Some(f) => f(track, fx, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(track, fx, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -18765,7 +18856,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetInstrument)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -18783,7 +18874,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetIOSize)
             ),
-            Some(f) => f(track, fx, inputPinsOut, outputPinsOut),
+            Some(f) => unsafe { f(track, fx, inputPinsOut, outputPinsOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -18802,7 +18893,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetNamedConfigParm)
             ),
-            Some(f) => f(track, fx, parmname, bufOutNeedBig, bufOutNeedBig_sz),
+            Some(f) => unsafe { f(track, fx, parmname, bufOutNeedBig, bufOutNeedBig_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -18818,7 +18909,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetNumParams)
             ),
-            Some(f) => f(track, fx),
+            Some(f) => unsafe { f(track, fx) },
         }
     }
     #[doc = r" # Safety"]
@@ -18834,7 +18925,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetOffline)
             ),
-            Some(f) => f(track, fx),
+            Some(f) => unsafe { f(track, fx) },
         }
     }
     #[doc = r" # Safety"]
@@ -18850,7 +18941,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetOpen)
             ),
-            Some(f) => f(track, fx),
+            Some(f) => unsafe { f(track, fx) },
         }
     }
     #[doc = r" # Safety"]
@@ -18869,7 +18960,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetParam)
             ),
-            Some(f) => f(track, fx, param, minvalOut, maxvalOut),
+            Some(f) => unsafe { f(track, fx, param, minvalOut, maxvalOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -18890,15 +18981,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetParameterStepSizes)
             ),
-            Some(f) => f(
-                track,
-                fx,
-                param,
-                stepOut,
-                smallstepOut,
-                largestepOut,
-                istoggleOut,
-            ),
+            Some(f) => unsafe {
+                f(
+                    track,
+                    fx,
+                    param,
+                    stepOut,
+                    smallstepOut,
+                    largestepOut,
+                    istoggleOut,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -18918,7 +19011,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetParamEx)
             ),
-            Some(f) => f(track, fx, param, minvalOut, maxvalOut, midvalOut),
+            Some(f) => unsafe { f(track, fx, param, minvalOut, maxvalOut, midvalOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -18935,7 +19028,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetParamFromIdent)
             ),
-            Some(f) => f(track, fx, ident_str),
+            Some(f) => unsafe { f(track, fx, ident_str) },
         }
     }
     #[doc = r" # Safety"]
@@ -18954,7 +19047,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetParamIdent)
             ),
-            Some(f) => f(track, fx, param, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(track, fx, param, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -18973,7 +19066,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetParamName)
             ),
-            Some(f) => f(track, fx, param, bufOut, bufOut_sz),
+            Some(f) => unsafe { f(track, fx, param, bufOut, bufOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -18990,7 +19083,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetParamNormalized)
             ),
-            Some(f) => f(track, fx, param),
+            Some(f) => unsafe { f(track, fx, param) },
         }
     }
     #[doc = r" # Safety"]
@@ -19009,7 +19102,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetPinMappings)
             ),
-            Some(f) => f(tr, fx, isoutput, pin, high32Out),
+            Some(f) => unsafe { f(tr, fx, isoutput, pin, high32Out) },
         }
     }
     #[doc = r" # Safety"]
@@ -19027,7 +19120,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetPreset)
             ),
-            Some(f) => f(track, fx, presetnameOut, presetnameOut_sz),
+            Some(f) => unsafe { f(track, fx, presetnameOut, presetnameOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -19044,7 +19137,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetPresetIndex)
             ),
-            Some(f) => f(track, fx, numberOfPresetsOut),
+            Some(f) => unsafe { f(track, fx, numberOfPresetsOut) },
         }
     }
     #[doc = r" # Safety"]
@@ -19059,7 +19152,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetRecChainVisible)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -19074,7 +19167,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetRecCount)
             ),
-            Some(f) => f(track),
+            Some(f) => unsafe { f(track) },
         }
     }
     #[doc = r" # Safety"]
@@ -19092,7 +19185,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_GetUserPresetFilename)
             ),
-            Some(f) => f(track, fx, fnOut, fnOut_sz),
+            Some(f) => unsafe { f(track, fx, fnOut, fnOut_sz) },
         }
     }
     #[doc = r" # Safety"]
@@ -19109,7 +19202,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_NavigatePresets)
             ),
-            Some(f) => f(track, fx, presetmove),
+            Some(f) => unsafe { f(track, fx, presetmove) },
         }
     }
     #[doc = r" # Safety"]
@@ -19126,7 +19219,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetEnabled)
             ),
-            Some(f) => f(track, fx, enabled),
+            Some(f) => unsafe { f(track, fx, enabled) },
         }
     }
     #[doc = r" # Safety"]
@@ -19145,7 +19238,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetEQBandEnabled)
             ),
-            Some(f) => f(track, fxidx, bandtype, bandidx, enable),
+            Some(f) => unsafe { f(track, fxidx, bandtype, bandidx, enable) },
         }
     }
     #[doc = r" # Safety"]
@@ -19166,7 +19259,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetEQParam)
             ),
-            Some(f) => f(track, fxidx, bandtype, bandidx, paramtype, val, isnorm),
+            Some(f) => unsafe { f(track, fxidx, bandtype, bandidx, paramtype, val, isnorm) },
         }
     }
     #[doc = r" # Safety"]
@@ -19184,7 +19277,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetNamedConfigParm)
             ),
-            Some(f) => f(track, fx, parmname, value),
+            Some(f) => unsafe { f(track, fx, parmname, value) },
         }
     }
     #[doc = r" # Safety"]
@@ -19201,7 +19294,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetOffline)
             ),
-            Some(f) => f(track, fx, offline),
+            Some(f) => unsafe { f(track, fx, offline) },
         }
     }
     #[doc = r" # Safety"]
@@ -19218,7 +19311,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetOpen)
             ),
-            Some(f) => f(track, fx, open),
+            Some(f) => unsafe { f(track, fx, open) },
         }
     }
     #[doc = r" # Safety"]
@@ -19236,7 +19329,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetParam)
             ),
-            Some(f) => f(track, fx, param, val),
+            Some(f) => unsafe { f(track, fx, param, val) },
         }
     }
     #[doc = r" # Safety"]
@@ -19254,7 +19347,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetParamNormalized)
             ),
-            Some(f) => f(track, fx, param, value),
+            Some(f) => unsafe { f(track, fx, param, value) },
         }
     }
     #[doc = r" # Safety"]
@@ -19274,7 +19367,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetPinMappings)
             ),
-            Some(f) => f(tr, fx, isoutput, pin, low32bits, hi32bits),
+            Some(f) => unsafe { f(tr, fx, isoutput, pin, low32bits, hi32bits) },
         }
     }
     #[doc = r" # Safety"]
@@ -19291,7 +19384,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetPreset)
             ),
-            Some(f) => f(track, fx, presetname),
+            Some(f) => unsafe { f(track, fx, presetname) },
         }
     }
     #[doc = r" # Safety"]
@@ -19308,7 +19401,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_SetPresetByIndex)
             ),
-            Some(f) => f(track, fx, idx),
+            Some(f) => unsafe { f(track, fx, idx) },
         }
     }
     #[doc = r" # Safety"]
@@ -19325,7 +19418,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackFX_Show)
             ),
-            Some(f) => f(track, index, showFlag),
+            Some(f) => unsafe { f(track, index, showFlag) },
         }
     }
     pub fn TrackList_AdjustWindows(&self, isMinor: bool) {
@@ -19334,7 +19427,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackList_AdjustWindows)
             ),
-            Some(f) => f(isMinor),
+            Some(f) => unsafe { f(isMinor) },
         }
     }
     pub fn TrackList_UpdateAllExternalSurfaces(&self) {
@@ -19343,7 +19436,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(TrackList_UpdateAllExternalSurfaces)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     pub fn Undo_BeginBlock(&self) {
@@ -19352,7 +19445,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_BeginBlock)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -19364,7 +19457,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_BeginBlock2)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -19379,7 +19472,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_CanRedo2)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -19394,7 +19487,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_CanUndo2)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -19406,7 +19499,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_DoRedo2)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -19418,7 +19511,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_DoUndo2)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     #[doc = r" # Safety"]
@@ -19434,7 +19527,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_EndBlock)
             ),
-            Some(f) => f(descchange, extraflags),
+            Some(f) => unsafe { f(descchange, extraflags) },
         }
     }
     #[doc = r" # Safety"]
@@ -19451,7 +19544,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_EndBlock2)
             ),
-            Some(f) => f(proj, descchange, extraflags),
+            Some(f) => unsafe { f(proj, descchange, extraflags) },
         }
     }
     #[doc = r" # Safety"]
@@ -19463,7 +19556,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_OnStateChange)
             ),
-            Some(f) => f(descchange),
+            Some(f) => unsafe { f(descchange) },
         }
     }
     #[doc = r" # Safety"]
@@ -19479,7 +19572,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_OnStateChange2)
             ),
-            Some(f) => f(proj, descchange),
+            Some(f) => unsafe { f(proj, descchange) },
         }
     }
     #[doc = r" # Safety"]
@@ -19496,7 +19589,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_OnStateChange_Item)
             ),
-            Some(f) => f(proj, name, item),
+            Some(f) => unsafe { f(proj, name, item) },
         }
     }
     #[doc = r" # Safety"]
@@ -19513,7 +19606,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_OnStateChangeEx)
             ),
-            Some(f) => f(descchange, whichStates, trackparm),
+            Some(f) => unsafe { f(descchange, whichStates, trackparm) },
         }
     }
     #[doc = r" # Safety"]
@@ -19531,7 +19624,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(Undo_OnStateChangeEx2)
             ),
-            Some(f) => f(proj, descchange, whichStates, trackparm),
+            Some(f) => unsafe { f(proj, descchange, whichStates, trackparm) },
         }
     }
     pub fn update_disk_counters(
@@ -19544,7 +19637,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(update_disk_counters)
             ),
-            Some(f) => f(readamt, writeamt),
+            Some(f) => unsafe { f(readamt, writeamt) },
         }
     }
     pub fn UpdateArrange(&self) {
@@ -19553,7 +19646,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(UpdateArrange)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -19565,7 +19658,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(UpdateItemInProject)
             ),
-            Some(f) => f(item),
+            Some(f) => unsafe { f(item) },
         }
     }
     #[doc = r" # Safety"]
@@ -19577,7 +19670,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(UpdateItemLanes)
             ),
-            Some(f) => f(proj),
+            Some(f) => unsafe { f(proj) },
         }
     }
     pub fn UpdateTimeline(&self) {
@@ -19586,7 +19679,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(UpdateTimeline)
             ),
-            Some(f) => f(),
+            Some(f) => unsafe { f() },
         }
     }
     #[doc = r" # Safety"]
@@ -19602,7 +19695,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ValidatePtr)
             ),
-            Some(f) => f(pointer, ctypename),
+            Some(f) => unsafe { f(pointer, ctypename) },
         }
     }
     #[doc = r" # Safety"]
@@ -19619,7 +19712,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ValidatePtr2)
             ),
-            Some(f) => f(proj, pointer, ctypename),
+            Some(f) => unsafe { f(proj, pointer, ctypename) },
         }
     }
     #[doc = r" # Safety"]
@@ -19635,7 +19728,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(ViewPrefs)
             ),
-            Some(f) => f(page, pageByName),
+            Some(f) => unsafe { f(page, pageByName) },
         }
     }
     #[doc = r" # Safety"]
@@ -19661,9 +19754,11 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(WDL_VirtualWnd_ScaledBlitBG)
             ),
-            Some(f) => f(
-                dest, src, destx, desty, destw, desth, clipx, clipy, clipw, cliph, alpha, mode,
-            ),
+            Some(f) => unsafe {
+                f(
+                    dest, src, destx, desty, destw, desth, clipx, clipy, clipw, cliph, alpha, mode,
+                )
+            },
         }
     }
     pub fn GetMidiInput(&self, idx: ::std::os::raw::c_int) -> *mut root::midi_Input {
@@ -19672,7 +19767,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMidiInput)
             ),
-            Some(f) => f(idx),
+            Some(f) => unsafe { f(idx) },
         }
     }
     pub fn GetMidiOutput(&self, idx: ::std::os::raw::c_int) -> *mut root::midi_Output {
@@ -19681,7 +19776,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetMidiOutput)
             ),
-            Some(f) => f(idx),
+            Some(f) => unsafe { f(idx) },
         }
     }
     #[doc = r" # Safety"]
@@ -19698,7 +19793,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(fxDoReaperPresetAction)
             ),
-            Some(f) => f(fx, name, flag),
+            Some(f) => unsafe { f(fx, name, flag) },
         }
     }
     #[doc = r" # Safety"]
@@ -19719,15 +19814,17 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddCustomMenuOrToolbarItem)
             ),
-            Some(f) => f(
-                menuname,
-                pos,
-                command_id,
-                toolbarflags,
-                str_,
-                iconfn,
-                extra_flags,
-            ),
+            Some(f) => unsafe {
+                f(
+                    menuname,
+                    pos,
+                    command_id,
+                    toolbarflags,
+                    str_,
+                    iconfn,
+                    extra_flags,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -19744,7 +19841,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(DeleteCustomMenuOrToolbarItem)
             ),
-            Some(f) => f(menuname, pos, extra_flags),
+            Some(f) => unsafe { f(menuname, pos, extra_flags) },
         }
     }
     #[doc = r" # Safety"]
@@ -19764,14 +19861,16 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetCustomMenuOrToolbarItem)
             ),
-            Some(f) => f(
-                menuname,
-                pos,
-                commandOutOptional,
-                toolbarFlagsOutOptional,
-                strOutOptional,
-                iconFnOutOptional,
-            ),
+            Some(f) => unsafe {
+                f(
+                    menuname,
+                    pos,
+                    commandOutOptional,
+                    toolbarFlagsOutOptional,
+                    strOutOptional,
+                    iconFnOutOptional,
+                )
+            },
         }
     }
     #[doc = r" # Safety"]
@@ -19792,7 +19891,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AdvancePlaybackPosition)
             ),
-            Some(f) => f(__proj, opos, npos, loopcnt, srate, max_spls, sf),
+            Some(f) => unsafe { f(__proj, opos, npos, loopcnt, srate, max_spls, sf) },
         }
     }
     #[doc = r" # Safety"]
@@ -19808,7 +19907,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetPlayLoopCnt)
             ),
-            Some(f) => f(__proj, something),
+            Some(f) => unsafe { f(__proj, something) },
         }
     }
     #[doc = r" # Safety"]
@@ -19820,7 +19919,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(InitializeCoolSB)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[doc = r" # Safety"]
@@ -19832,7 +19931,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(UninitializeCoolSB)
             ),
-            Some(f) => f(hwnd),
+            Some(f) => unsafe { f(hwnd) },
         }
     }
     #[doc = r" # Safety"]
@@ -19849,7 +19948,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_SetMinThumbSize)
             ),
-            Some(f) => f(hwnd, wBar, size),
+            Some(f) => unsafe { f(hwnd, wBar, size) },
         }
     }
     #[doc = r" # Safety"]
@@ -19866,7 +19965,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_GetScrollInfo)
             ),
-            Some(f) => f(hwnd, fnBar, lpsi),
+            Some(f) => unsafe { f(hwnd, fnBar, lpsi) },
         }
     }
     #[doc = r" # Safety"]
@@ -19884,7 +19983,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_SetScrollInfo)
             ),
-            Some(f) => f(hwnd, fnBar, lpsi, fRedraw),
+            Some(f) => unsafe { f(hwnd, fnBar, lpsi, fRedraw) },
         }
     }
     #[doc = r" # Safety"]
@@ -19902,7 +20001,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_SetScrollPos)
             ),
-            Some(f) => f(hwnd, nBar, nPos, fRedraw),
+            Some(f) => unsafe { f(hwnd, nBar, nPos, fRedraw) },
         }
     }
     #[doc = r" # Safety"]
@@ -19921,7 +20020,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_SetScrollRange)
             ),
-            Some(f) => f(hwnd, nBar, nMinPos, nMaxPos, fRedraw),
+            Some(f) => unsafe { f(hwnd, nBar, nMinPos, nMaxPos, fRedraw) },
         }
     }
     #[doc = r" # Safety"]
@@ -19938,7 +20037,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_ShowScrollBar)
             ),
-            Some(f) => f(hwnd, wBar, fShow),
+            Some(f) => unsafe { f(hwnd, wBar, fShow) },
         }
     }
     #[doc = r" # Safety"]
@@ -19954,7 +20053,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_SetResizingThumb)
             ),
-            Some(f) => f(hwnd, active),
+            Some(f) => unsafe { f(hwnd, active) },
         }
     }
     #[doc = r" # Safety"]
@@ -19970,7 +20069,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(CoolSB_SetThemeIndex)
             ),
-            Some(f) => f(hwnd, idx),
+            Some(f) => unsafe { f(hwnd, idx) },
         }
     }
 }
