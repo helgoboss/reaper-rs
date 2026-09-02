@@ -507,11 +507,11 @@ impl Swell {
         byPos: root::BOOL,
         mi: *mut root::MENUITEMINFO,
     ) -> root::BOOL {
-        let mut mi = *mi;
+        let mi = &mut *mi;
         if !mi.dwTypeData.is_null() {
             todo!("Getting string information from menu item is not yet implemented.")
         }
-        let mut utf16_mi = utf8_to_16_menu_item_info(&mi);
+        let mut utf16_mi = utf8_to_16_menu_item_info(mi);
         let result = winapi::um::winuser::GetMenuItemInfoW(
             hMenu as _,
             pos as _,
