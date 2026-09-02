@@ -3,7 +3,7 @@ name = "reaper-test"
 version = "0.1.0"
 authors = ["Benjamin Klum <benjamin.klum@helgoboss.org>"]
 license = "MIT"
-edition = "2021"
+edition = "2024"
 publish = false
 
 

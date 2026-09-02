@@ -7,7 +7,7 @@ description = "Bindings for the REAPER C++ API - high-level API"
 repository = "https://github.com/helgoboss/reaper-rs"
 readme = "../../README.md"
 keywords = ["reaper", "daw", "plug-in", "audio", "midi"]
-edition = "2021"
+edition = "2024"
 categories = ["api-bindings", "multimedia", "multimedia::audio"]
 publish = false
 
