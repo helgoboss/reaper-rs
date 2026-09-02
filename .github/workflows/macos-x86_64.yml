@@ -22,7 +22,7 @@ jobs:
           submodules: recursive
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.84.0
+        uses: dtolnay/rust-toolchain@1.96.0
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
