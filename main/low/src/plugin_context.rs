@@ -157,19 +157,21 @@ impl PluginContext {
     /// REAPER can crash if you pass an invalid pointer.
     #[allow(overflowing_literals)]
     pub unsafe fn GetFunc(&self, name: *const c_char) -> *mut c_void {
-        use TypeSpecificPluginContext::*;
-        match &self.type_specific {
-            Extension(context) => (context.get_func)(name),
-            Vst(context) => {
-                // Invoke host callback
-                (context.host_callback)(
-                    null_mut(),
-                    0xdead_beef,
-                    0xdead_f00d,
-                    0,
-                    name as *mut c_void,
-                    0.0,
-                ) as *mut c_void
+        unsafe {
+            use TypeSpecificPluginContext::*;
+            match &self.type_specific {
+                Extension(context) => (context.get_func)(name),
+                Vst(context) => {
+                    // Invoke host callback
+                    (context.host_callback)(
+                        null_mut(),
+                        0xdead_beef,
+                        0xdead_f00d,
+                        0,
+                        name as *mut c_void,
+                        0.0,
+                    ) as *mut c_void
+                }
             }
         }
     }
@@ -234,7 +236,9 @@ impl ExtensionPluginContext {
         name: *const ::std::os::raw::c_char,
         infostruct: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int {
-        (self.register)(name, infostruct)
+        unsafe {
+            (self.register)(name, infostruct)
+        }
     }
 
     /// Returns the original REAPER plug-in info struct that was passed to the entry point.

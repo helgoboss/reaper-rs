@@ -229,10 +229,15 @@ unsafe extern "C" fn use_context_adapter_callback(
     ctx: *mut raw::ProjectStateContext,
     low_level_user_data_ptr: *mut c_void,
 ) {
-    let project_state_context = BorrowedProjectStateContext::from_raw_mut(&mut *ctx);
-    let low_level_user_data = &mut *(low_level_user_data_ptr as *mut LowLevelUserData);
-    let medium_level_user_data = &mut *low_level_user_data.medium_level_user_data;
-    (low_level_user_data.medium_level_fn_pointer)(project_state_context, medium_level_user_data);
+    unsafe {
+        let project_state_context = BorrowedProjectStateContext::from_raw_mut(&mut *ctx);
+        let low_level_user_data = &mut *(low_level_user_data_ptr as *mut LowLevelUserData);
+        let medium_level_user_data = &mut *low_level_user_data.medium_level_user_data;
+        (low_level_user_data.medium_level_fn_pointer)(
+            project_state_context,
+            medium_level_user_data,
+        );
+    }
 }
 
 struct LowLevelUserData {

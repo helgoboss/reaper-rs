@@ -66,7 +66,7 @@ impl Swell {
         param: root::LPARAM,
     ) -> root::HWND {
         #[cfg(target_family = "unix")]
-        {
+        unsafe {
             self.SWELL_CreateDialog(
                 root::SWELL_curmodule_dialogresource_head,
                 resid,
@@ -77,7 +77,7 @@ impl Swell {
         }
         #[cfg(target_family = "windows")]
         #[allow(clippy::cast_ptr_alignment)]
-        {
+        unsafe {
             // TODO-low winapi-rs is expecting the dlgproc function pointer to be `extern "system"`.
             //  What we have is `extern "C"`. This caught cause issues on Windows i686 (32-bit)
             //  builds. However, in practice it didn't show any issues (tested with ReaLearn). So
@@ -111,12 +111,12 @@ impl Swell {
         resid: *const ::std::os::raw::c_char,
     ) -> root::HMENU {
         #[cfg(target_family = "unix")]
-        {
+        unsafe {
             self.SWELL_LoadMenu(root::SWELL_curmodule_menuresource_head, resid)
         }
         #[cfg(target_family = "windows")]
         #[allow(clippy::cast_ptr_alignment)]
-        {
+        unsafe {
             winapi::um::winuser::LoadMenuW(hinst as _, resid as _) as _
         }
     }
@@ -126,12 +126,12 @@ impl Swell {
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn FillRect(&self, ctx: root::HDC, r: *const root::RECT, br: root::HBRUSH) {
         #[cfg(target_family = "unix")]
-        {
+        unsafe {
             self.SWELL_FillRect(ctx, r, br);
         }
         #[cfg(target_family = "windows")]
         #[allow(clippy::cast_ptr_alignment)]
-        {
+        unsafe {
             winapi::um::winuser::FillRect(ctx as _, r as _, br as _);
         }
     }
@@ -148,12 +148,12 @@ impl Swell {
         align: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
         #[cfg(target_family = "unix")]
-        {
+        unsafe {
             self.SWELL_DrawText(ctx, buf, len, r, align)
         }
         #[cfg(target_family = "windows")]
         #[allow(clippy::cast_ptr_alignment)]
-        {
+        unsafe {
             let utf16_string = utf8_to_16(buf);
             let result = winapi::um::winuser::DrawTextW(
                 ctx as _,
@@ -176,11 +176,11 @@ impl Swell {
         text: *const ::std::os::raw::c_char,
     ) -> root::BOOL {
         #[cfg(target_family = "unix")]
-        {
+        unsafe {
             self.SetDlgItemText(hwnd, 0, text)
         }
         #[cfg(target_family = "windows")]
-        {
+        unsafe {
             let utf16_string = utf8_to_16(text);
             let result = winapi::um::winuser::SetWindowTextW(hwnd as _, utf16_string.as_ptr());
             std::mem::drop(utf16_string);
@@ -202,11 +202,11 @@ impl Swell {
         nMaxCount: std::os::raw::c_int,
     ) -> root::BOOL {
         #[cfg(target_family = "unix")]
-        {
+        unsafe {
             self.GetDlgItemText(hwnd, 0, lpString, nMaxCount)
         }
         #[cfg(target_family = "windows")]
-        {
+        unsafe {
             let len = with_utf16_to_8(lpString, nMaxCount, |buffer, max_size| {
                 winapi::um::winuser::GetWindowTextW(hwnd as _, buffer, max_size) as _
             });

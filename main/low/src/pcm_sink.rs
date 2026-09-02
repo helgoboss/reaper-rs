@@ -16,7 +16,9 @@ impl raw::PCM_sink {
         buf: *mut ::std::os::raw::c_char,
         buflen: ::std::os::raw::c_int,
     ) {
-        rust_to_cpp_PCM_sink_GetOutputInfoString(self as *const _ as _, buf, buflen);
+        unsafe {
+            rust_to_cpp_PCM_sink_GetOutputInfoString(self as *const _ as _, buf, buflen);
+        }
     }
 
     pub fn GetStartTime(&self) -> f64 {
@@ -54,7 +56,9 @@ impl raw::PCM_sink {
         len: ::std::os::raw::c_int,
         samplerate: f64,
     ) {
-        rust_to_cpp_PCM_sink_WriteMIDI(self as *const _ as _, events, len, samplerate);
+        unsafe {
+            rust_to_cpp_PCM_sink_WriteMIDI(self as *const _ as _, events, len, samplerate);
+        }
     }
 
     /// # Safety
@@ -68,14 +72,16 @@ impl raw::PCM_sink {
         offset: ::std::os::raw::c_int,
         spacing: ::std::os::raw::c_int,
     ) {
-        rust_to_cpp_PCM_sink_WriteDoubles(
-            self as *const _ as _,
-            samples,
-            len,
-            nch,
-            offset,
-            spacing,
-        );
+        unsafe {
+            rust_to_cpp_PCM_sink_WriteDoubles(
+                self as *const _ as _,
+                samples,
+                len,
+                nch,
+                offset,
+                spacing,
+            );
+        }
     }
 
     pub fn WantMIDI(&self) -> bool {
@@ -90,14 +96,16 @@ impl raw::PCM_sink {
         sz: ::std::os::raw::c_int,
         buf: *mut raw::ReaSample,
     ) -> ::std::os::raw::c_int {
-        rust_to_cpp_PCM_sink_GetLastSecondPeaks(self as *const _ as _, sz, buf)
+        unsafe { rust_to_cpp_PCM_sink_GetLastSecondPeaks(self as *const _ as _, sz, buf) }
     }
 
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn GetPeakInfo(&self, block: *mut raw::PCM_source_peaktransfer_t) {
-        rust_to_cpp_PCM_sink_GetPeakInfo(self as *const _ as _, block);
+        unsafe {
+            rust_to_cpp_PCM_sink_GetPeakInfo(self as *const _ as _, block);
+        }
     }
 
     /// # Safety
@@ -110,7 +118,7 @@ impl raw::PCM_sink {
         parm2: *mut ::std::os::raw::c_void,
         parm3: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int {
-        rust_to_cpp_PCM_sink_Extended(self as *const _ as _, call, parm1, parm2, parm3)
+        unsafe { rust_to_cpp_PCM_sink_Extended(self as *const _ as _, call, parm1, parm2, parm3) }
     }
 }
 
@@ -198,10 +206,12 @@ pub trait PCM_sink {
 pub unsafe fn create_cpp_to_rust_pcm_sink(
     callback_target: NonNull<Box<dyn PCM_sink>>,
 ) -> NonNull<raw::PCM_sink> {
-    let instance = crate::bindings::root::reaper_pcm_sink::create_cpp_to_rust_pcm_sink(
-        callback_target.as_ptr() as *mut c_void,
-    );
-    NonNull::new_unchecked(instance)
+    unsafe {
+        let instance = crate::bindings::root::reaper_pcm_sink::create_cpp_to_rust_pcm_sink(
+            callback_target.as_ptr() as *mut c_void,
+        );
+        NonNull::new_unchecked(instance)
+    }
 }
 
 /// Destroys a C++ `PCM_sink` object.
@@ -215,7 +225,9 @@ pub unsafe fn create_cpp_to_rust_pcm_sink(
 ///
 /// [`create_cpp_to_rust_pcm_sink()`]: fn.create_cpp_to_rust_pcm_sink.html
 pub unsafe fn delete_cpp_pcm_sink(sink: NonNull<raw::PCM_sink>) {
-    crate::bindings::root::reaper_pcm_sink::delete_pcm_sink(sink.as_ptr());
+    unsafe {
+        crate::bindings::root::reaper_pcm_sink::delete_pcm_sink(sink.as_ptr());
+    }
 }
 
 #[unsafe(no_mangle)]

@@ -139,7 +139,7 @@ impl<K: Copy, T> GenericRegistrationHandle<K, T> {
     /// Make sure you have leaked the other box after having taken it out from its storage.
     /// Otherwise there will be a double drop.
     pub(crate) unsafe fn restore_original(&self) -> Box<T> {
-        Box::from_raw(self.medium_ptr.as_ptr())
+        unsafe { Box::from_raw(self.medium_ptr.as_ptr()) }
     }
 
     pub(crate) fn key(&self) -> K {

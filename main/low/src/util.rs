@@ -38,7 +38,7 @@ pub unsafe fn bootstrap_extension_plugin(
     init: fn(PluginContext) -> Result<(), Box<dyn Error>>,
 ) -> i32 {
     // TODO-low Log early errors
-    firewall(|| {
+    firewall(|| unsafe {
         if rec.is_null() {
             return 0;
         }

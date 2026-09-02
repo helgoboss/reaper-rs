@@ -359,7 +359,7 @@ impl ItemGroupId {
     ///
     /// You must ensure that the given value is not 0.
     pub const unsafe fn new_unchecked(value: i32) -> ItemGroupId {
-        ItemGroupId(NonZeroI32::new_unchecked(value))
+        unsafe { ItemGroupId(NonZeroI32::new_unchecked(value)) }
     }
 
     /// Returns the wrapped value.

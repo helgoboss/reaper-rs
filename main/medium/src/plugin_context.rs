@@ -135,8 +135,10 @@ impl<'a> VstPluginContext<'a> {
         ptr: *mut c_void,
         opt: f32,
     ) -> isize {
-        self.low
-            .host_callback(effect, opcode, index, value, ptr, opt)
+        unsafe {
+            self.low
+                .host_callback(effect, opcode, index, value, ptr, opt)
+        }
     }
 
     /// Returns the REAPER project in which the given VST plug-in is running.
@@ -145,7 +147,7 @@ impl<'a> VstPluginContext<'a> {
     ///
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn request_containing_project(self, effect: NonNull<AEffect>) -> ReaProject {
-        let ptr = self.request_context(effect, 3) as *mut raw::ReaProject;
+        let ptr = unsafe { self.request_context(effect, 3) as *mut raw::ReaProject };
         ReaProject::new(ptr).expect("a VST should always run in the context of a project")
     }
 
@@ -157,7 +159,7 @@ impl<'a> VstPluginContext<'a> {
     ///
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn request_containing_track(self, effect: NonNull<AEffect>) -> Option<MediaTrack> {
-        let ptr = self.request_context(effect, 1) as *mut raw::MediaTrack;
+        let ptr = unsafe { self.request_context(effect, 1) as *mut raw::MediaTrack };
         MediaTrack::new(ptr)
     }
 
@@ -169,7 +171,7 @@ impl<'a> VstPluginContext<'a> {
     ///
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn request_containing_take(self, effect: NonNull<AEffect>) -> Option<MediaItemTake> {
-        let ptr = self.request_context(effect, 2) as *mut raw::MediaItem_Take;
+        let ptr = unsafe { self.request_context(effect, 2) as *mut raw::MediaItem_Take };
         MediaItemTake::new(ptr)
     }
 
@@ -193,7 +195,7 @@ impl<'a> VstPluginContext<'a> {
         self,
         effect: NonNull<AEffect>,
     ) -> Option<TrackFxLocation> {
-        let result = self.request_context(effect, 6) as i32;
+        let result = unsafe { self.request_context(effect, 6) as i32 };
         if result <= 0 {
             // Not supported
             return None;
@@ -210,18 +212,20 @@ impl<'a> VstPluginContext<'a> {
     ///
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn request_containing_track_channel_count(self, effect: NonNull<AEffect>) -> i32 {
-        self.request_context(effect, 5) as i32
+        unsafe { self.request_context(effect, 5) as i32 }
     }
 
     unsafe fn request_context(self, effect: NonNull<AEffect>, request: isize) -> isize {
-        #[allow(overflowing_literals)]
-        self.host_callback(
-            effect.as_ptr(),
-            0xdead_beef,
-            0xdead_f00e,
-            request,
-            null_mut(),
-            0.0,
-        )
+        unsafe {
+            #[allow(overflowing_literals)]
+            self.host_callback(
+                effect.as_ptr(),
+                0xdead_beef,
+                0xdead_f00e,
+                request,
+                null_mut(),
+                0.0,
+            )
+        }
     }
 }

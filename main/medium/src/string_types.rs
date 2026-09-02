@@ -255,7 +255,7 @@ impl ReaperStr {
     // Don't make this public, it's unsafe because a CStr can be non-UTF-8!
     // This uses the same technique like `Path`.
     pub(crate) unsafe fn new(inner: &CStr) -> &ReaperStr {
-        &*(inner as *const CStr as *const ReaperStr)
+        unsafe { &*(inner as *const CStr as *const ReaperStr) }
     }
 
     /// Wraps a raw C string with a safe Reaper string wrapper.
@@ -264,7 +264,7 @@ impl ReaperStr {
     ///
     /// You must ensure that the given pointer refers to a valid UTF-8 encoded C string.
     pub unsafe fn from_ptr<'a>(ptr: *const c_char) -> &'a ReaperStr {
-        ReaperStr::new(CStr::from_ptr(ptr))
+        unsafe { ReaperStr::new(CStr::from_ptr(ptr)) }
     }
 
     /// Returns a raw pointer to the string.

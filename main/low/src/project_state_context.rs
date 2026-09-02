@@ -14,7 +14,9 @@ impl raw::ProjectStateContext {
     ///
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn AddLine(&mut self, line: *const ::std::os::raw::c_char) {
-        rust_to_cpp_ProjectStateContext_AddLine(self as *const _ as _, line);
+        unsafe {
+            rust_to_cpp_ProjectStateContext_AddLine(self as *const _ as _, line);
+        }
     }
 
     /// # Safety
@@ -25,7 +27,7 @@ impl raw::ProjectStateContext {
         buf: *mut ::std::os::raw::c_char,
         buflen: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
-        rust_to_cpp_ProjectStateContext_GetLine(self as *const _ as _, buf, buflen)
+        unsafe { rust_to_cpp_ProjectStateContext_GetLine(self as *const _ as _, buf, buflen) }
     }
 
     pub fn GetOutputSize(&mut self) -> ::std::os::raw::c_longlong {
@@ -82,10 +84,12 @@ pub trait ProjectStateContext {
 pub unsafe fn create_cpp_to_rust_project_state_context(
     callback_target: NonNull<Box<dyn ProjectStateContext>>,
 ) -> NonNull<raw::ProjectStateContext> {
-    let instance = crate::bindings::root::reaper_project_state_context::create_cpp_to_rust_project_state_context(
-        callback_target.as_ptr() as *mut c_void,
-    );
-    NonNull::new_unchecked(instance)
+    unsafe {
+        let instance = crate::bindings::root::reaper_project_state_context::create_cpp_to_rust_project_state_context(
+            callback_target.as_ptr() as *mut c_void,
+        );
+        NonNull::new_unchecked(instance)
+    }
 }
 
 /// Destroys a C++ `ProjectStateContext` object.
@@ -99,9 +103,11 @@ pub unsafe fn create_cpp_to_rust_project_state_context(
 ///
 /// [`create_cpp_to_rust_project_state_context()`]: fn.create_cpp_to_rust_project_state_context.html
 pub unsafe fn delete_cpp_project_state_context(context: NonNull<raw::ProjectStateContext>) {
-    crate::bindings::root::reaper_project_state_context::delete_project_state_context(
-        context.as_ptr(),
-    );
+    unsafe {
+        crate::bindings::root::reaper_project_state_context::delete_project_state_context(
+            context.as_ptr(),
+        );
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -156,9 +162,11 @@ pub unsafe fn invoke_with_cpp_to_rust_project_state_context_intern(
     user_data: *mut c_void,
     op: RustCallback,
 ) {
-    crate::bindings::root::reaper_project_state_context::invoke_with_cpp_to_rust_project_state_context(
-        callback_target,
-        user_data,
-        op
-    );
+    unsafe {
+        crate::bindings::root::reaper_project_state_context::invoke_with_cpp_to_rust_project_state_context(
+            callback_target,
+            user_data,
+            op
+        );
+    }
 }

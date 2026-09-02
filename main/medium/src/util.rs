@@ -13,7 +13,7 @@ pub unsafe fn create_passing_c_str<'a>(ptr: *const c_char) -> Option<&'a ReaperS
     if ptr.is_null() {
         return None;
     }
-    Some(ReaperStr::from_ptr(ptr))
+    Some(unsafe { ReaperStr::from_ptr(ptr) })
 }
 
 pub fn with_string_buffer<T>(

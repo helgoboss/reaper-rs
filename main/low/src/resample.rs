@@ -33,7 +33,7 @@ impl REAPER_Resample_Interface {
         nch: ::std::os::raw::c_int,
         inbuffer: *mut *mut ReaSample,
     ) -> ::std::os::raw::c_int {
-        REAPER_Resample_Interface_ResamplePrepare(self as _, out_samples, nch, inbuffer)
+        unsafe { REAPER_Resample_Interface_ResamplePrepare(self as _, out_samples, nch, inbuffer) }
     }
 
     /// # Safety
@@ -46,7 +46,7 @@ impl REAPER_Resample_Interface {
         nsamples_out: ::std::os::raw::c_int,
         nch: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
-        REAPER_Resample_Interface_ResampleOut(self as _, out, nsamples_in, nsamples_out, nch)
+        unsafe {  REAPER_Resample_Interface_ResampleOut(self as _, out, nsamples_in, nsamples_out, nch) }
     }
 
     /// # Safety
@@ -59,7 +59,7 @@ impl REAPER_Resample_Interface {
         parm2: *mut ::std::os::raw::c_void,
         parm3: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int {
-        REAPER_Resample_Interface_Extended(self as _, call, parm1, parm2, parm3)
+        unsafe { REAPER_Resample_Interface_Extended(self as _, call, parm1, parm2, parm3) }
     }
 }
 
@@ -76,7 +76,9 @@ impl REAPER_Resample_Interface {
 pub unsafe fn delete_cpp_reaper_resample_interface(
     resample_interface: NonNull<raw::REAPER_Resample_Interface>,
 ) {
-    crate::bindings::root::reaper_resample::delete_reaper_resample_interface(
-        resample_interface.as_ptr(),
-    );
+    unsafe {
+        crate::bindings::root::reaper_resample::delete_reaper_resample_interface(
+            resample_interface.as_ptr(),
+        );
+    }
 }

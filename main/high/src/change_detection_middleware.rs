@@ -1585,9 +1585,11 @@ unsafe fn get_track_visibility(
     reaper: &reaper_medium::Reaper,
     track: MediaTrack,
 ) -> TrackVisibility {
-    TrackVisibility {
-        tcp: get_boolean_track_prop(reaper, track, TrackAttributeKey::ShowInTcp),
-        mcp: get_boolean_track_prop(reaper, track, TrackAttributeKey::ShowInMixer),
+    unsafe {
+        TrackVisibility {
+            tcp: get_boolean_track_prop(reaper, track, TrackAttributeKey::ShowInTcp),
+            mcp: get_boolean_track_prop(reaper, track, TrackAttributeKey::ShowInMixer),
+        }
     }
 }
 
@@ -1596,5 +1598,5 @@ unsafe fn get_boolean_track_prop(
     track: MediaTrack,
     key: TrackAttributeKey,
 ) -> bool {
-    reaper.get_media_track_info_value(track, key) != 0.0
+    unsafe { reaper.get_media_track_info_value(track, key) != 0.0 }
 }

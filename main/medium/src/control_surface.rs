@@ -686,31 +686,33 @@ impl ControlSurfaceAdapter {
         media_item_ptr: *mut c_void,
         fx_index_ptr: *mut c_void,
     ) -> Option<QualifiedFxLocation> {
-        if media_track_ptr.is_null() {
-            return None;
+        unsafe {
+            if media_track_ptr.is_null() {
+                return None;
+            }
+            Some(QualifiedFxLocation {
+                track: require_media_track_panic(media_track_ptr as *mut raw::MediaTrack),
+                fx_location: if media_item_ptr.is_null() {
+                    VersionDependentFxLocation::TrackFx(
+                        self.get_as_version_dependent_track_fx_ref(fx_index_ptr),
+                    )
+                } else {
+                    VersionDependentFxLocation::TakeFx {
+                        item_index: deref_as::<i32>(media_item_ptr).expect("media item pointer is null")
+                            as u32,
+                        fx_index: deref_as::<i32>(fx_index_ptr).expect("FX index pointer is null")
+                            as u32,
+                    }
+                },
+            })
         }
-        Some(QualifiedFxLocation {
-            track: require_media_track_panic(media_track_ptr as *mut raw::MediaTrack),
-            fx_location: if media_item_ptr.is_null() {
-                VersionDependentFxLocation::TrackFx(
-                    self.get_as_version_dependent_track_fx_ref(fx_index_ptr),
-                )
-            } else {
-                VersionDependentFxLocation::TakeFx {
-                    item_index: deref_as::<i32>(media_item_ptr).expect("media item pointer is null")
-                        as u32,
-                    fx_index: deref_as::<i32>(fx_index_ptr).expect("FX index pointer is null")
-                        as u32,
-                }
-            },
-        })
     }
 
     unsafe fn get_as_version_dependent_track_fx_ref(
         &self,
         ptr: *mut c_void,
     ) -> VersionDependentTrackFxLocation {
-        let fx_index = deref_as::<i32>(ptr).expect("FX index is null");
+        let fx_index = unsafe { deref_as::<i32>(ptr).expect("FX index is null") };
         if self.supports_detection_of_input_fx {
             VersionDependentTrackFxLocation::New(TrackFxLocation::from_raw(fx_index))
         } else {
@@ -1036,7 +1038,7 @@ unsafe fn deref_as<T: Copy>(ptr: *const c_void) -> Option<T> {
         return None;
     }
     let ptr = ptr as *const T;
-    Some(*ptr)
+    Some(unsafe { *ptr })
 }
 
 unsafe fn interpret_as_bool(ptr: *mut c_void) -> bool {
@@ -1044,6 +1046,6 @@ unsafe fn interpret_as_bool(ptr: *mut c_void) -> bool {
 }
 
 unsafe fn get_as_track_fx_location(ptr: *mut c_void) -> TrackFxLocation {
-    let fx_index = deref_as::<i32>(ptr).expect("FX index is null");
+    let fx_index = unsafe { deref_as::<i32>(ptr).expect("FX index is null") };
     TrackFxLocation::from_raw(fx_index)
 }

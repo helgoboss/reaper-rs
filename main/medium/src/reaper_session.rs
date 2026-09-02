@@ -195,7 +195,7 @@ impl ReaperSession {
         let key_ptr = reg.key.as_ptr();
         let value = reg.value;
         self.plugin_registrations.insert(reg);
-        let result = self.reaper.low().plugin_register(key_ptr, value);
+        let result = unsafe { self.reaper.low().plugin_register(key_ptr, value) };
         if result == 0 {
             return Err(ReaperFunctionError::new("couldn't register thing"));
         }
@@ -214,15 +214,16 @@ impl ReaperSession {
     ///
     /// [`plugin_register_add()`]: #method.plugin_register_add
     pub unsafe fn plugin_register_remove(&mut self, object: RegistrationObject) -> i32 {
-        self.plugin_register_remove_internal(object.into_raw())
+        unsafe { self.plugin_register_remove_internal(object.into_raw()) }
     }
 
     unsafe fn plugin_register_remove_internal(&mut self, reg: PluginRegistration) -> i32 {
         let name_with_minus = concat_reaper_strs(reaper_str!("-"), reg.key.as_ref());
-        let result = self
-            .reaper
-            .low()
-            .plugin_register(name_with_minus.as_ptr(), reg.value);
+        let result = unsafe {
+            self.reaper
+                .low()
+                .plugin_register(name_with_minus.as_ptr(), reg.value)
+        };
         self.plugin_registrations.remove(&reg);
         result
     }
@@ -588,10 +589,12 @@ impl ReaperSession {
     ) -> ReaperFunctionResult<()> {
         // Register function
         let function_name = function_name.into().into_inner();
-        self.plugin_register_add(RegistrationObject::Api(
-            function_name.as_ref().into(),
-            function_ptr,
-        ))?;
+        unsafe {
+            self.plugin_register_add(RegistrationObject::Api(
+                function_name.as_ref().into(),
+                function_ptr,
+            ))?
+        };
         // Register function definition
         fn to_c_chars<'a>(text: &'a ReaperStringArg) -> impl Iterator<Item = c_char> + 'a {
             text.as_reaper_str()
@@ -607,15 +610,17 @@ impl ReaperSession {
             .collect();
         let ptr = null_separated_fields.as_ptr();
         self.api_defs.push(null_separated_fields);
-        self.plugin_register_add(RegistrationObject::ApiDef(
-            function_name.as_ref().into(),
-            ptr,
-        ))?;
-        // Make available to ReaScript
-        self.plugin_register_add(RegistrationObject::ApiVararg(
-            function_name,
-            vararg_function_ptr,
-        ))?;
+        unsafe {
+            self.plugin_register_add(RegistrationObject::ApiDef(
+                function_name.as_ref().into(),
+                ptr,
+            ))?;
+            // Make available to ReaScript
+            self.plugin_register_add(RegistrationObject::ApiVararg(
+                function_name,
+                vararg_function_ptr,
+            ))?;
+        }
         Ok(())
     }
 
@@ -764,11 +769,11 @@ impl ReaperSession {
         measure_alignment: MeasureAlignment,
     ) -> ReaperFunctionResult<()> {
         self.playing_preview_registers.insert(preview);
-        let result = self.reaper.low().PlayPreviewEx(
+        let result = unsafe { self.reaper.low().PlayPreviewEx(
             preview.as_ptr(),
             buffering_behavior.bits() as i32,
             measure_alignment.to_raw(),
-        );
+        ) };
         if result == 0 {
             return Err(ReaperFunctionError::new("couldn't play preview"));
         }
@@ -795,7 +800,7 @@ impl ReaperSession {
         &mut self,
         register: Handle<raw::preview_register_t>,
     ) -> ReaperFunctionResult<()> {
-        let successful = self.reaper.low().StopPreview(register.as_ptr());
+        let successful = unsafe {  self.reaper.low().StopPreview(register.as_ptr()) };
         // If not successful, it usually means the preview is stopped already. Let's remove
         // the handle now so that we don't try stopping again when dropping the session.
         self.playing_preview_registers.remove(&register);
@@ -828,12 +833,12 @@ impl ReaperSession {
     ) -> ReaperFunctionResult<()> {
         self.playing_track_preview_registers
             .insert((project, preview));
-        let result = self.reaper.low().PlayTrackPreview2Ex(
+        let result = unsafe { self.reaper.low().PlayTrackPreview2Ex(
             project.to_raw(),
             preview.as_ptr(),
             buffering_behavior.bits() as i32,
             measure_alignment.to_raw(),
-        );
+        ) };
         if result == 0 {
             return Err(ReaperFunctionError::new("couldn't play track preview"));
         }
@@ -861,10 +866,10 @@ impl ReaperSession {
         project: ProjectContext,
         register: Handle<raw::preview_register_t>,
     ) -> ReaperFunctionResult<()> {
-        let successful = self
+        let successful = unsafe { self
             .reaper
             .low()
-            .StopTrackPreview2(project.to_raw() as _, register.as_ptr());
+            .StopTrackPreview2(project.to_raw() as _, register.as_ptr()) };
         // If not successful, it usually means the preview is stopped already. Let's remove
         // the handle now so that we don't try stopping again when dropping the session.
         self.playing_track_preview_registers
@@ -1152,9 +1157,11 @@ impl ReaperSession {
         let double_boxed_low_cs = self.csurf_insts.remove(&handle.key())?;
         // Unregister the C++ control surface from REAPER
         let cpp_cs_ptr = handle.key().cast();
-        self.plugin_register_remove(RegistrationObject::CsurfInst(cpp_cs_ptr));
-        // Remove the C++ counterpart surface
-        delete_cpp_control_surface(cpp_cs_ptr.get());
+        unsafe {
+            self.plugin_register_remove(RegistrationObject::CsurfInst(cpp_cs_ptr));
+            // Remove the C++ counterpart surface
+            delete_cpp_control_surface(cpp_cs_ptr.get());
+        }
         // Reconstruct the initial value for handing ownership back to the consumer
         let low_cs = double_boxed_low_cs
             .into_any()
@@ -1168,7 +1175,7 @@ impl ReaperSession {
         // Here we pick up the content again and treat it as a Box - but this
         // time not a trait object box (Box<dyn ControlSurface> = fat pointer) but a
         // normal box (Box<T> = thin pointer) ... original type restored.
-        let control_surface = handle.restore_original();
+        let control_surface = unsafe { handle.restore_original() };
         Some(control_surface)
     }
 
@@ -1196,10 +1203,10 @@ impl ReaperSession {
         register: Handle<audio_hook_register_t>,
     ) -> ReaperFunctionResult<()> {
         self.audio_hook_registrations.insert(register);
-        let result = self
+        let result = unsafe { self
             .reaper
             .low()
-            .Audio_RegHardwareHook(true, register.as_ptr());
+            .Audio_RegHardwareHook(true, register.as_ptr()) };
         if result == 0 {
             return Err(ReaperFunctionError::new("couldn't register audio hook"));
         }
@@ -1223,9 +1230,11 @@ impl ReaperSession {
         &mut self,
         register: Handle<audio_hook_register_t>,
     ) {
-        self.reaper
-            .low()
-            .Audio_RegHardwareHook(false, register.as_ptr());
+        unsafe {
+            self.reaper
+                .low()
+                .Audio_RegHardwareHook(false, register.as_ptr());
+        }
         self.audio_hook_registrations.remove(&register);
     }
 

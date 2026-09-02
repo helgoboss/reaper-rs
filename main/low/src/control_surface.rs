@@ -165,11 +165,13 @@ downcast_rs::impl_downcast!(IReaperControlSurface);
 pub unsafe fn create_cpp_to_rust_control_surface(
     callback_target: NonNull<Box<dyn IReaperControlSurface>>,
 ) -> NonNull<raw::IReaperControlSurface> {
-    let instance =
-        crate::bindings::root::reaper_control_surface::create_cpp_to_rust_control_surface(
-            callback_target.as_ptr() as *mut c_void,
-        );
-    NonNull::new_unchecked(instance)
+    unsafe {
+        let instance =
+            crate::bindings::root::reaper_control_surface::create_cpp_to_rust_control_surface(
+                callback_target.as_ptr() as *mut c_void,
+            );
+        NonNull::new_unchecked(instance)
+    }
 }
 
 /// Destroys a C++ `IReaperControlSurface` object.
@@ -183,7 +185,7 @@ pub unsafe fn create_cpp_to_rust_control_surface(
 ///
 /// [`create_cpp_to_rust_control_surface()`]: fn.create_cpp_to_rust_control_surface.html
 pub unsafe fn delete_cpp_control_surface(surface: NonNull<raw::IReaperControlSurface>) {
-    crate::bindings::root::reaper_control_surface::delete_control_surface(surface.as_ptr());
+    unsafe { crate::bindings::root::reaper_control_surface::delete_control_surface(surface.as_ptr()) };
 }
 
 #[unsafe(no_mangle)]

@@ -1509,7 +1509,9 @@ impl Track {
     /// Subsequently, this can crash REAPER. This confusion was leading to
     /// https://github.com/helgoboss/helgobox/issues/1304, for example.
     unsafe fn load_if_necessary_or_complain_unchecked(&self) {
-        self.load_if_necessary_or_err_unchecked().unwrap();
+        unsafe {
+            self.load_if_necessary_or_err_unchecked().unwrap();
+        }
     }
 
     /// # Safety

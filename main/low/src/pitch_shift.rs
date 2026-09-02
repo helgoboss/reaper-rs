@@ -72,7 +72,7 @@ impl IReaperPitchShift {
         requested_output: ::std::os::raw::c_int,
         buffer: *mut ReaSample,
     ) -> ::std::os::raw::c_int {
-        IReaperPitchShift_GetSamples(self as _, requested_output, buffer)
+        unsafe { IReaperPitchShift_GetSamples(self as _, requested_output, buffer) }
     }
 
     pub fn SetQualityParameter(&mut self, parm: ::std::os::raw::c_int) {
@@ -91,7 +91,7 @@ impl IReaperPitchShift {
         parm2: *mut ::std::os::raw::c_void,
         parm3: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int {
-        IReaperPitchShift_Extended(self as _, call, parm1, parm2, parm3)
+        unsafe { IReaperPitchShift_Extended(self as _, call, parm1, parm2, parm3) }
     }
 }
 
@@ -106,5 +106,7 @@ impl IReaperPitchShift {
 ///
 /// [`ReaperGetPitchShiftAPI()`]: struct.Reaper.html#method.ReaperGetPitchShiftAPI
 pub unsafe fn delete_cpp_reaper_pitch_shift(pitch_shift: NonNull<raw::IReaperPitchShift>) {
-    crate::bindings::root::reaper_pitch_shift::delete_reaper_pitch_shift(pitch_shift.as_ptr());
+    unsafe {
+        crate::bindings::root::reaper_pitch_shift::delete_reaper_pitch_shift(pitch_shift.as_ptr());
+    }
 }

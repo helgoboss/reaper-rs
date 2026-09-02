@@ -115,7 +115,7 @@ impl PcmSourceTransfer {
     ///
     /// TODO-high-unstable
     pub unsafe fn samples_as_slice(&self) -> &[f64] {
-        std::slice::from_raw_parts(self.0.samples, (self.0.length * self.0.nch) as usize)
+        unsafe { std::slice::from_raw_parts(self.0.samples, (self.0.length * self.0.nch) as usize) }
     }
 
     /// Returns the samples as mutable slice.
@@ -126,7 +126,9 @@ impl PcmSourceTransfer {
     ///
     /// TODO-high-unstable
     pub unsafe fn samples_as_mut_slice(&mut self) -> &mut [f64] {
-        std::slice::from_raw_parts_mut(self.0.samples, (self.0.length * self.0.nch) as usize)
+        unsafe {
+            std::slice::from_raw_parts_mut(self.0.samples, (self.0.length * self.0.nch) as usize)
+        }
     }
 
     /// Sets the sample(pair)s to be rendered.
@@ -323,7 +325,7 @@ impl BorrowedPcmSource {
     /// Returned string's lifetime is unbounded.
     pub unsafe fn get_type_unchecked(&self) -> &ReaperStr {
         let ptr = self.0.GetType();
-        create_passing_c_str(ptr).unwrap_or_default()
+        unsafe { create_passing_c_str(ptr).unwrap_or_default() }
     }
 
     /// Grants temporary access to the file of this source.
@@ -346,7 +348,7 @@ impl BorrowedPcmSource {
     /// Returned string's lifetime is unbounded.
     pub unsafe fn get_file_name_unchecked(&self) -> Option<&ReaperStr> {
         let ptr = self.0.GetFileName();
-        let file_name = create_passing_c_str(ptr);
+        let file_name = unsafe { create_passing_c_str(ptr) };
         file_name.filter(|s| !s.to_str().is_empty())
     }
 
@@ -420,7 +422,7 @@ impl BorrowedPcmSource {
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn properties_window(&self, parent_window: Option<Hwnd>) -> i32 {
         let ptr = parent_window.map(|w| w.as_ptr()).unwrap_or(null_mut());
-        self.0.PropertiesWindow(ptr)
+        unsafe { self.0.PropertiesWindow(ptr) }
     }
 
     /// Unstable!!!
@@ -429,7 +431,9 @@ impl BorrowedPcmSource {
     ///
     /// API still unstable.
     pub unsafe fn get_samples(&self, block: &PcmSourceTransfer) {
-        self.0.GetSamples(block.as_ptr().as_ptr());
+        unsafe {
+            self.0.GetSamples(block.as_ptr().as_ptr());
+        }
     }
 
     /// Unstable!!!
@@ -438,7 +442,9 @@ impl BorrowedPcmSource {
     ///
     /// API still unstable.
     pub unsafe fn get_peak_info(&self, block: &PcmSourcePeakTransfer) {
-        self.0.GetPeakInfo(block.as_ptr().as_ptr());
+        unsafe {
+            self.0.GetPeakInfo(block.as_ptr().as_ptr());
+        }
     }
 
     /// Unstable!!!
@@ -447,7 +453,9 @@ impl BorrowedPcmSource {
     ///
     /// API still unstable.
     pub unsafe fn save_state(&self, context: &BorrowedProjectStateContext) {
-        self.0.SaveState(context.as_ptr().as_ptr());
+        unsafe {
+            self.0.SaveState(context.as_ptr().as_ptr());
+        }
     }
 
     /// Unstable!!!
@@ -460,9 +468,10 @@ impl BorrowedPcmSource {
         first_line: &ReaperStr,
         context: &BorrowedProjectStateContext,
     ) -> Result<(), &'static str> {
-        let res = self
-            .0
-            .LoadState(first_line.as_ptr(), context.as_ptr().as_ptr());
+        let res = unsafe {
+            self.0
+                .LoadState(first_line.as_ptr(), context.as_ptr().as_ptr())
+        };
         if res == -1 {
             return Err("load state failed");
         }
@@ -499,7 +508,7 @@ impl BorrowedPcmSource {
         parm_2: *mut c_void,
         parm_3: *mut c_void,
     ) -> i32 {
-        self.0.Extended(call, parm_1, parm_2, parm_3)
+        unsafe { self.0.Extended(call, parm_1, parm_2, parm_3) }
     }
 
     /// Unstable!!!
@@ -647,12 +656,14 @@ impl BorrowedPcmSource {
     ///
     /// REAPER can crash if you pass an invalid window.
     pub unsafe fn ext_open_editor(&self, hwnd: Hwnd, track_index: u32) -> ReaperFunctionResult<()> {
-        let supported = self.as_ref().Extended(
-            raw::PCM_SOURCE_EXT_OPENEDITOR as _,
-            hwnd.as_ptr() as _,
-            track_index as isize as _,
-            null_mut(),
-        );
+        let supported = unsafe {
+            self.as_ref().Extended(
+                raw::PCM_SOURCE_EXT_OPENEDITOR as _,
+                hwnd.as_ptr() as _,
+                track_index as isize as _,
+                null_mut(),
+            )
+        };
         if supported == 0 {
             return Err(ReaperFunctionError::new(
                 "PCM_SOURCE_EXT_OPENEDITOR not supported by source",
