@@ -236,9 +236,7 @@ impl ExtensionPluginContext {
         name: *const ::std::os::raw::c_char,
         infostruct: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int {
-        unsafe {
-            (self.register)(name, infostruct)
-        }
+        unsafe { (self.register)(name, infostruct) }
     }
 
     /// Returns the original REAPER plug-in info struct that was passed to the entry point.

@@ -769,11 +769,13 @@ impl ReaperSession {
         measure_alignment: MeasureAlignment,
     ) -> ReaperFunctionResult<()> {
         self.playing_preview_registers.insert(preview);
-        let result = unsafe { self.reaper.low().PlayPreviewEx(
-            preview.as_ptr(),
-            buffering_behavior.bits() as i32,
-            measure_alignment.to_raw(),
-        ) };
+        let result = unsafe {
+            self.reaper.low().PlayPreviewEx(
+                preview.as_ptr(),
+                buffering_behavior.bits() as i32,
+                measure_alignment.to_raw(),
+            )
+        };
         if result == 0 {
             return Err(ReaperFunctionError::new("couldn't play preview"));
         }
@@ -800,7 +802,7 @@ impl ReaperSession {
         &mut self,
         register: Handle<raw::preview_register_t>,
     ) -> ReaperFunctionResult<()> {
-        let successful = unsafe {  self.reaper.low().StopPreview(register.as_ptr()) };
+        let successful = unsafe { self.reaper.low().StopPreview(register.as_ptr()) };
         // If not successful, it usually means the preview is stopped already. Let's remove
         // the handle now so that we don't try stopping again when dropping the session.
         self.playing_preview_registers.remove(&register);
@@ -833,12 +835,14 @@ impl ReaperSession {
     ) -> ReaperFunctionResult<()> {
         self.playing_track_preview_registers
             .insert((project, preview));
-        let result = unsafe { self.reaper.low().PlayTrackPreview2Ex(
-            project.to_raw(),
-            preview.as_ptr(),
-            buffering_behavior.bits() as i32,
-            measure_alignment.to_raw(),
-        ) };
+        let result = unsafe {
+            self.reaper.low().PlayTrackPreview2Ex(
+                project.to_raw(),
+                preview.as_ptr(),
+                buffering_behavior.bits() as i32,
+                measure_alignment.to_raw(),
+            )
+        };
         if result == 0 {
             return Err(ReaperFunctionError::new("couldn't play track preview"));
         }
@@ -866,10 +870,11 @@ impl ReaperSession {
         project: ProjectContext,
         register: Handle<raw::preview_register_t>,
     ) -> ReaperFunctionResult<()> {
-        let successful = unsafe { self
-            .reaper
-            .low()
-            .StopTrackPreview2(project.to_raw() as _, register.as_ptr()) };
+        let successful = unsafe {
+            self.reaper
+                .low()
+                .StopTrackPreview2(project.to_raw() as _, register.as_ptr())
+        };
         // If not successful, it usually means the preview is stopped already. Let's remove
         // the handle now so that we don't try stopping again when dropping the session.
         self.playing_track_preview_registers
@@ -1203,10 +1208,11 @@ impl ReaperSession {
         register: Handle<audio_hook_register_t>,
     ) -> ReaperFunctionResult<()> {
         self.audio_hook_registrations.insert(register);
-        let result = unsafe { self
-            .reaper
-            .low()
-            .Audio_RegHardwareHook(true, register.as_ptr()) };
+        let result = unsafe {
+            self.reaper
+                .low()
+                .Audio_RegHardwareHook(true, register.as_ptr())
+        };
         if result == 0 {
             return Err(ReaperFunctionError::new("couldn't register audio hook"));
         }

@@ -698,7 +698,8 @@ impl ControlSurfaceAdapter {
                     )
                 } else {
                     VersionDependentFxLocation::TakeFx {
-                        item_index: deref_as::<i32>(media_item_ptr).expect("media item pointer is null")
+                        item_index: deref_as::<i32>(media_item_ptr)
+                            .expect("media item pointer is null")
                             as u32,
                         fx_index: deref_as::<i32>(fx_index_ptr).expect("FX index pointer is null")
                             as u32,

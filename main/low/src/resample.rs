@@ -46,7 +46,9 @@ impl REAPER_Resample_Interface {
         nsamples_out: ::std::os::raw::c_int,
         nch: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
-        unsafe {  REAPER_Resample_Interface_ResampleOut(self as _, out, nsamples_in, nsamples_out, nch) }
+        unsafe {
+            REAPER_Resample_Interface_ResampleOut(self as _, out, nsamples_in, nsamples_out, nch)
+        }
     }
 
     /// # Safety

@@ -185,7 +185,9 @@ pub unsafe fn create_cpp_to_rust_control_surface(
 ///
 /// [`create_cpp_to_rust_control_surface()`]: fn.create_cpp_to_rust_control_surface.html
 pub unsafe fn delete_cpp_control_surface(surface: NonNull<raw::IReaperControlSurface>) {
-    unsafe { crate::bindings::root::reaper_control_surface::delete_control_surface(surface.as_ptr()) };
+    unsafe {
+        crate::bindings::root::reaper_control_surface::delete_control_surface(surface.as_ptr())
+    };
 }
 
 #[unsafe(no_mangle)]
