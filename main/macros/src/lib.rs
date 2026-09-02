@@ -5,6 +5,7 @@
 //! This crate is part of [reaper-rs](https://github.com/helgoboss/reaper-rs) and contains a
 //! [simple attribute macro](attr.reaper_extension_plugin.html) to simplify bootstrapping REAPER
 //! extension plug-ins.
+use darling::ast::NestedMeta;
 use darling::FromMeta;
 use proc_macro::TokenStream;
 use quote::quote;
@@ -46,7 +47,12 @@ use quote::quote;
 #[proc_macro_attribute]
 pub fn reaper_extension_plugin(attr: TokenStream, input: TokenStream) -> TokenStream {
     // Parse attributes
-    let args = syn::parse_macro_input!(attr as syn::AttributeArgs);
+    let args = match NestedMeta::parse_meta_list(attr.into()) {
+        Ok(v) => v,
+        Err(e) => {
+            return e.to_compile_error().into();
+        }
+    };
     let args = match ReaperExtensionPluginMacroArgs::from_list(&args) {
         Ok(v) => v,
         Err(e) => {

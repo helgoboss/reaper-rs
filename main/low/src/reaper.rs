@@ -10433,7 +10433,7 @@ impl Reaper {
     pub unsafe fn GetSetEnvelopeState(
         &self,
         env: *mut root::TrackEnvelope,
-        str: *mut ::std::os::raw::c_char,
+        str_: *mut ::std::os::raw::c_char,
         str_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetSetEnvelopeState {
@@ -10441,7 +10441,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetEnvelopeState)
             ),
-            Some(f) => f(env, str, str_sz),
+            Some(f) => f(env, str_, str_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -10450,7 +10450,7 @@ impl Reaper {
     pub unsafe fn GetSetEnvelopeState2(
         &self,
         env: *mut root::TrackEnvelope,
-        str: *mut ::std::os::raw::c_char,
+        str_: *mut ::std::os::raw::c_char,
         str_sz: ::std::os::raw::c_int,
         isundo: bool,
     ) -> bool {
@@ -10459,7 +10459,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetEnvelopeState2)
             ),
-            Some(f) => f(env, str, str_sz, isundo),
+            Some(f) => f(env, str_, str_sz, isundo),
         }
     }
     #[doc = r" # Safety"]
@@ -10468,7 +10468,7 @@ impl Reaper {
     pub unsafe fn GetSetItemState(
         &self,
         item: *mut root::MediaItem,
-        str: *mut ::std::os::raw::c_char,
+        str_: *mut ::std::os::raw::c_char,
         str_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetSetItemState {
@@ -10476,7 +10476,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetItemState)
             ),
-            Some(f) => f(item, str, str_sz),
+            Some(f) => f(item, str_, str_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -10485,7 +10485,7 @@ impl Reaper {
     pub unsafe fn GetSetItemState2(
         &self,
         item: *mut root::MediaItem,
-        str: *mut ::std::os::raw::c_char,
+        str_: *mut ::std::os::raw::c_char,
         str_sz: ::std::os::raw::c_int,
         isundo: bool,
     ) -> bool {
@@ -10494,7 +10494,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetItemState2)
             ),
-            Some(f) => f(item, str, str_sz, isundo),
+            Some(f) => f(item, str_, str_sz, isundo),
         }
     }
     #[doc = r" # Safety"]
@@ -10608,14 +10608,14 @@ impl Reaper {
     pub unsafe fn GetSetObjectState(
         &self,
         obj: *mut ::std::os::raw::c_void,
-        str: *const ::std::os::raw::c_char,
+        str_: *const ::std::os::raw::c_char,
     ) -> *mut ::std::os::raw::c_char {
         match self.pointers.GetSetObjectState {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetObjectState)
             ),
-            Some(f) => f(obj, str),
+            Some(f) => f(obj, str_),
         }
     }
     #[doc = r" # Safety"]
@@ -10624,7 +10624,7 @@ impl Reaper {
     pub unsafe fn GetSetObjectState2(
         &self,
         obj: *mut ::std::os::raw::c_void,
-        str: *const ::std::os::raw::c_char,
+        str_: *const ::std::os::raw::c_char,
         isundo: bool,
     ) -> *mut ::std::os::raw::c_char {
         match self.pointers.GetSetObjectState2 {
@@ -10632,7 +10632,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetObjectState2)
             ),
-            Some(f) => f(obj, str, isundo),
+            Some(f) => f(obj, str_, isundo),
         }
     }
     #[doc = r" # Safety"]
@@ -10893,7 +10893,7 @@ impl Reaper {
     pub unsafe fn GetSetTrackState(
         &self,
         track: *mut root::MediaTrack,
-        str: *mut ::std::os::raw::c_char,
+        str_: *mut ::std::os::raw::c_char,
         str_sz: ::std::os::raw::c_int,
     ) -> bool {
         match self.pointers.GetSetTrackState {
@@ -10901,7 +10901,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackState)
             ),
-            Some(f) => f(track, str, str_sz),
+            Some(f) => f(track, str_, str_sz),
         }
     }
     #[doc = r" # Safety"]
@@ -10910,7 +10910,7 @@ impl Reaper {
     pub unsafe fn GetSetTrackState2(
         &self,
         track: *mut root::MediaTrack,
-        str: *mut ::std::os::raw::c_char,
+        str_: *mut ::std::os::raw::c_char,
         str_sz: ::std::os::raw::c_int,
         isundo: bool,
     ) -> bool {
@@ -10919,7 +10919,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(GetSetTrackState2)
             ),
-            Some(f) => f(track, str, str_sz, isundo),
+            Some(f) => f(track, str_, str_sz, isundo),
         }
     }
     #[doc = r" # Safety"]
@@ -12561,7 +12561,7 @@ impl Reaper {
         &self,
         font: *mut root::reaper_functions::LICE_IFont,
         bm: *mut root::reaper_functions::LICE_IBitmap,
-        str: *const ::std::os::raw::c_char,
+        str_: *const ::std::os::raw::c_char,
         strcnt: ::std::os::raw::c_int,
         rect: *mut root::RECT,
         dtFlags: root::UINT,
@@ -12571,7 +12571,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(LICE__DrawText)
             ),
-            Some(f) => f(font, bm, str, strcnt, rect, dtFlags),
+            Some(f) => f(font, bm, str_, strcnt, rect, dtFlags),
         }
     }
     #[doc = r" # Safety"]
@@ -15095,13 +15095,13 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn parsepanstr(&self, str: *const ::std::os::raw::c_char) -> f64 {
+    pub unsafe fn parsepanstr(&self, str_: *const ::std::os::raw::c_char) -> f64 {
         match self.pointers.parsepanstr {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(parsepanstr)
             ),
-            Some(f) => f(str),
+            Some(f) => f(str_),
         }
     }
     #[doc = r" # Safety"]
@@ -16210,7 +16210,7 @@ impl Reaper {
     pub unsafe fn SetEnvelopeStateChunk(
         &self,
         env: *mut root::TrackEnvelope,
-        str: *const ::std::os::raw::c_char,
+        str_: *const ::std::os::raw::c_char,
         isundoOptional: bool,
     ) -> bool {
         match self.pointers.SetEnvelopeStateChunk {
@@ -16218,7 +16218,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetEnvelopeStateChunk)
             ),
-            Some(f) => f(env, str, isundoOptional),
+            Some(f) => f(env, str_, isundoOptional),
         }
     }
     #[doc = r" # Safety"]
@@ -16254,7 +16254,7 @@ impl Reaper {
     pub unsafe fn SetItemStateChunk(
         &self,
         item: *mut root::MediaItem,
-        str: *const ::std::os::raw::c_char,
+        str_: *const ::std::os::raw::c_char,
         isundoOptional: bool,
     ) -> bool {
         match self.pointers.SetItemStateChunk {
@@ -16262,7 +16262,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetItemStateChunk)
             ),
-            Some(f) => f(item, str, isundoOptional),
+            Some(f) => f(item, str_, isundoOptional),
         }
     }
     pub fn SetMasterTrackVisibility(&self, flag: ::std::os::raw::c_int) -> ::std::os::raw::c_int {
@@ -16794,14 +16794,14 @@ impl Reaper {
         &self,
         track: *mut root::MediaTrack,
         flag: ::std::os::raw::c_int,
-        str: *const ::std::os::raw::c_char,
+        str_: *const ::std::os::raw::c_char,
     ) -> bool {
         match self.pointers.SetTrackMIDILyrics {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackMIDILyrics)
             ),
-            Some(f) => f(track, flag, str),
+            Some(f) => f(track, flag, str_),
         }
     }
     #[doc = r" # Safety"]
@@ -16914,7 +16914,7 @@ impl Reaper {
     pub unsafe fn SetTrackStateChunk(
         &self,
         track: *mut root::MediaTrack,
-        str: *const ::std::os::raw::c_char,
+        str_: *const ::std::os::raw::c_char,
         isundoOptional: bool,
     ) -> bool {
         match self.pointers.SetTrackStateChunk {
@@ -16922,7 +16922,7 @@ impl Reaper {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SetTrackStateChunk)
             ),
-            Some(f) => f(track, str, isundoOptional),
+            Some(f) => f(track, str_, isundoOptional),
         }
     }
     #[doc = r" # Safety"]
@@ -17241,13 +17241,13 @@ impl Reaper {
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
-    pub unsafe fn stringToGuid(&self, str: *const ::std::os::raw::c_char, g: *mut root::GUID) {
+    pub unsafe fn stringToGuid(&self, str_: *const ::std::os::raw::c_char, g: *mut root::GUID) {
         match self.pointers.stringToGuid {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(stringToGuid)
             ),
-            Some(f) => f(str, g),
+            Some(f) => f(str_, g),
         }
     }
     pub fn StuffMIDIMessage(
@@ -19710,7 +19710,7 @@ impl Reaper {
         pos: ::std::os::raw::c_int,
         command_id: ::std::os::raw::c_int,
         toolbarflags: ::std::os::raw::c_int,
-        str: *const ::std::os::raw::c_char,
+        str_: *const ::std::os::raw::c_char,
         iconfn: *const ::std::os::raw::c_char,
         extra_flags: ::std::os::raw::c_int,
     ) -> bool {
@@ -19724,7 +19724,7 @@ impl Reaper {
                 pos,
                 command_id,
                 toolbarflags,
-                str,
+                str_,
                 iconfn,
                 extra_flags,
             ),
@@ -21313,14 +21313,14 @@ pub struct ReaperFunctionPointers {
     pub GetSetEnvelopeState: Option<
         unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
-            str: *mut ::std::os::raw::c_char,
+            str_: *mut ::std::os::raw::c_char,
             str_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub GetSetEnvelopeState2: Option<
         unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
-            str: *mut ::std::os::raw::c_char,
+            str_: *mut ::std::os::raw::c_char,
             str_sz: ::std::os::raw::c_int,
             isundo: bool,
         ) -> bool,
@@ -21328,14 +21328,14 @@ pub struct ReaperFunctionPointers {
     pub GetSetItemState: Option<
         unsafe extern "C" fn(
             item: *mut root::MediaItem,
-            str: *mut ::std::os::raw::c_char,
+            str_: *mut ::std::os::raw::c_char,
             str_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub GetSetItemState2: Option<
         unsafe extern "C" fn(
             item: *mut root::MediaItem,
-            str: *mut ::std::os::raw::c_char,
+            str_: *mut ::std::os::raw::c_char,
             str_sz: ::std::os::raw::c_int,
             isundo: bool,
         ) -> bool,
@@ -21388,13 +21388,13 @@ pub struct ReaperFunctionPointers {
     pub GetSetObjectState: Option<
         unsafe extern "C" fn(
             obj: *mut ::std::os::raw::c_void,
-            str: *const ::std::os::raw::c_char,
+            str_: *const ::std::os::raw::c_char,
         ) -> *mut ::std::os::raw::c_char,
     >,
     pub GetSetObjectState2: Option<
         unsafe extern "C" fn(
             obj: *mut ::std::os::raw::c_void,
-            str: *const ::std::os::raw::c_char,
+            str_: *const ::std::os::raw::c_char,
             isundo: bool,
         ) -> *mut ::std::os::raw::c_char,
     >,
@@ -21509,14 +21509,14 @@ pub struct ReaperFunctionPointers {
     pub GetSetTrackState: Option<
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
-            str: *mut ::std::os::raw::c_char,
+            str_: *mut ::std::os::raw::c_char,
             str_sz: ::std::os::raw::c_int,
         ) -> bool,
     >,
     pub GetSetTrackState2: Option<
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
-            str: *mut ::std::os::raw::c_char,
+            str_: *mut ::std::os::raw::c_char,
             str_sz: ::std::os::raw::c_int,
             isundo: bool,
         ) -> bool,
@@ -22080,7 +22080,7 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             font: *mut root::reaper_functions::LICE_IFont,
             bm: *mut root::reaper_functions::LICE_IBitmap,
-            str: *const ::std::os::raw::c_char,
+            str_: *const ::std::os::raw::c_char,
             strcnt: ::std::os::raw::c_int,
             rect: *mut root::RECT,
             dtFlags: root::UINT,
@@ -23034,7 +23034,7 @@ pub struct ReaperFunctionPointers {
             modeoverride: ::std::os::raw::c_int,
         ) -> f64,
     >,
-    pub parsepanstr: Option<unsafe extern "C" fn(str: *const ::std::os::raw::c_char) -> f64>,
+    pub parsepanstr: Option<unsafe extern "C" fn(str_: *const ::std::os::raw::c_char) -> f64>,
     pub PCM_Sink_Create: Option<
         unsafe extern "C" fn(
             filename: *const ::std::os::raw::c_char,
@@ -23402,7 +23402,7 @@ pub struct ReaperFunctionPointers {
     pub SetEnvelopeStateChunk: Option<
         unsafe extern "C" fn(
             env: *mut root::TrackEnvelope,
-            str: *const ::std::os::raw::c_char,
+            str_: *const ::std::os::raw::c_char,
             isundoOptional: bool,
         ) -> bool,
     >,
@@ -23418,7 +23418,7 @@ pub struct ReaperFunctionPointers {
     pub SetItemStateChunk: Option<
         unsafe extern "C" fn(
             item: *mut root::MediaItem,
-            str: *const ::std::os::raw::c_char,
+            str_: *const ::std::os::raw::c_char,
             isundoOptional: bool,
         ) -> bool,
     >,
@@ -23615,7 +23615,7 @@ pub struct ReaperFunctionPointers {
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
             flag: ::std::os::raw::c_int,
-            str: *const ::std::os::raw::c_char,
+            str_: *const ::std::os::raw::c_char,
         ) -> bool,
     >,
     pub SetTrackMIDINoteName: Option<
@@ -23665,7 +23665,7 @@ pub struct ReaperFunctionPointers {
     pub SetTrackStateChunk: Option<
         unsafe extern "C" fn(
             track: *mut root::MediaTrack,
-            str: *const ::std::os::raw::c_char,
+            str_: *const ::std::os::raw::c_char,
             isundoOptional: bool,
         ) -> bool,
     >,
@@ -23773,7 +23773,7 @@ pub struct ReaperFunctionPointers {
         ) -> ::std::os::raw::c_int,
     >,
     pub stringToGuid:
-        Option<unsafe extern "C" fn(str: *const ::std::os::raw::c_char, g: *mut root::GUID)>,
+        Option<unsafe extern "C" fn(str_: *const ::std::os::raw::c_char, g: *mut root::GUID)>,
     pub StuffMIDIMessage: Option<
         extern "C" fn(
             mode: ::std::os::raw::c_int,
@@ -24674,7 +24674,7 @@ pub struct ReaperFunctionPointers {
             pos: ::std::os::raw::c_int,
             command_id: ::std::os::raw::c_int,
             toolbarflags: ::std::os::raw::c_int,
-            str: *const ::std::os::raw::c_char,
+            str_: *const ::std::os::raw::c_char,
             iconfn: *const ::std::os::raw::c_char,
             extra_flags: ::std::os::raw::c_int,
         ) -> bool,

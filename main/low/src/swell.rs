@@ -4602,14 +4602,14 @@ impl Swell {
         pos: ::std::os::raw::c_int,
         flag: ::std::os::raw::c_uint,
         idx: root::UINT_PTR,
-        str: *const ::std::os::raw::c_char,
+        str_: *const ::std::os::raw::c_char,
     ) {
         match self.pointers.SWELL_InsertMenu {
             None => panic!(
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(SWELL_InsertMenu)
             ),
-            Some(f) => f(menu, pos, flag, idx, str),
+            Some(f) => f(menu, pos, flag, idx, str_),
         }
     }
     #[cfg(target_family = "unix")]
@@ -7144,7 +7144,7 @@ impl Swell {
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
     pub unsafe fn AddFontResourceEx(
         &self,
-        str: root::LPCTSTR,
+        str_: root::LPCTSTR,
         fl: root::DWORD,
         pdv: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int {
@@ -7153,7 +7153,7 @@ impl Swell {
                 "Attempt to use a function that has not been loaded: {}",
                 stringify!(AddFontResourceEx)
             ),
-            Some(f) => f(str, fl, pdv),
+            Some(f) => f(str_, fl, pdv),
         }
     }
     #[cfg(target_family = "unix")]
@@ -8618,7 +8618,7 @@ pub struct SwellFunctionPointers {
             pos: ::std::os::raw::c_int,
             flag: ::std::os::raw::c_uint,
             idx: root::UINT_PTR,
-            str: *const ::std::os::raw::c_char,
+            str_: *const ::std::os::raw::c_char,
         ),
     >,
     pub GetMenuItemInfo: Option<
@@ -9285,7 +9285,7 @@ pub struct SwellFunctionPointers {
         Option<unsafe extern "C" fn(hwnd: root::HWND, r: *mut root::RECT)>,
     pub AddFontResourceEx: Option<
         unsafe extern "C" fn(
-            str: root::LPCTSTR,
+            str_: root::LPCTSTR,
             fl: root::DWORD,
             pdv: *mut ::std::os::raw::c_void,
         ) -> ::std::os::raw::c_int,

@@ -106,7 +106,7 @@ mod codegen {
             }
 
             fn include_file(&self, filename: &str) {
-                bindgen::CargoCallbacks.include_file(filename);
+                bindgen::CargoCallbacks::new().include_file(filename);
             }
         }
 
@@ -121,6 +121,7 @@ mod codegen {
                 .derive_hash(true)
                 .derive_default(true)
                 .clang_arg("-xc++")
+                .clang_arg("-DWDL_NO_DEFINE_MINMAX")
                 .enable_cxx_namespaces()
                 // If we activate layout tests, we would have to regenerate at each build because
                 // tests will fail on Linux if generated on Windows and vice versa.
@@ -133,74 +134,76 @@ mod codegen {
                 .raw_line("#![allow(non_camel_case_types)]")
                 .raw_line("#![allow(non_snake_case)]")
                 .raw_line("#![allow(dead_code)]")
+                .raw_line("#![allow(unpredictable_function_pointer_comparisons)]")
                 .module_raw_line("root", include_str!("src/manual_bindings.rs"))
-                .whitelist_var("reaper_functions::.*")
-                .whitelist_var("swell_functions::.*")
-                .whitelist_var("SWELL_.*")
-                .whitelist_var("CSURF_EXT_.*")
-                .whitelist_var("PCM_SINK_EXT_.*")
-                .whitelist_var("PCM_SOURCE_EXT_.*")
-                .whitelist_var("RESAMPLE_EXT_.*")
-                .whitelist_var("REAPER_PLUGIN_VERSION")
-                .whitelist_var("REAPER_PITCHSHIFT_API_VER")
-                .whitelist_var("UNDO_STATE_.*")
-                .whitelist_var("NULL_BRUSH")
-                .whitelist_var("NULL_PEN")
-                .whitelist_var("VK_.*")
-                .whitelist_var("BM_.*")
-                .whitelist_var("BST_.*")
-                .whitelist_var("SW_.*")
-                .whitelist_var("SM_.*")
-                .whitelist_var("SWP_.*")
-                .whitelist_var("CB_.*")
-                .whitelist_var("MB_.*")
-                .whitelist_var("CBN_.*")
-                .whitelist_var("WM_.*")
-                .whitelist_var("WS_.*")
-                .whitelist_var("GW_.*")
-                .whitelist_var("GWL_.*")
-                .whitelist_var("SIF_.*")
-                .whitelist_var("SB_.*")
-                .whitelist_var("EN_.*")
-                .whitelist_var("MIIM_.*")
-                .whitelist_var("MF_.*")
-                .whitelist_var("TB_.*")
-                .whitelist_var("TBM_.*")
-                .whitelist_var("TPM_.*")
-                .whitelist_var("CF_.*")
-                .whitelist_var("DT_.*")
-                .whitelist_var("GMEM_.*")
-                .whitelist_var("COLOR_.*")
-                .whitelist_var("THREAD_PRIORITY_.*")
-                .whitelist_var("THREAD_BASE_PRIORITY_.*")
-                .whitelist_var("SRCCOPY")
-                .whitelist_var("SRCCOPY_USEALPHACHAN")
-                .whitelist_var("ID.*")
-                .whitelist_var("DLL_PROCESS_ATTACH")
-                .whitelist_var("DLL_PROCESS_DETACH")
-                .whitelist_var("TRANSPARENT")
-                .whitelist_var("OPAQUE")
-                .whitelist_var("TWENTY_OVER_LN10")
-                .whitelist_var("LN10_OVER_TWENTY")
-                .whitelist_type("HINSTANCE")
-                .whitelist_type("reaper_plugin_info_t")
-                .whitelist_type("gaccel_register_t")
-                .whitelist_type("accelerator_register_t")
-                .whitelist_type("audio_hook_register_t")
-                .whitelist_type("midi_realtime_write_struct_t")
-                .whitelist_type("midi_quantize_mode_t")
-                .whitelist_type("KbdSectionInfo")
-                .whitelist_type("GUID")
-                .whitelist_type("LPSTR")
-                .whitelist_type("SCROLLINFO")
-                .whitelist_function("reaper_control_surface::.*")
-                .whitelist_function("reaper_midi::.*")
-                .whitelist_function("reaper_pcm_source::.*")
-                .whitelist_function("reaper_pcm_sink::.*")
-                .whitelist_function("reaper_resample::.*")
-                .whitelist_function("reaper_pitch_shift::.*")
-                .whitelist_function("reaper_project_state_context::.*")
-                .blacklist_type("preview_register_t");
+                .allowlist_var("reaper_functions::.*")
+                .allowlist_var("swell_functions::.*")
+                .allowlist_var("SWELL_.*")
+                .allowlist_var("CSURF_EXT_.*")
+                .allowlist_var("PCM_SINK_EXT_.*")
+                .allowlist_var("PCM_SOURCE_EXT_.*")
+                .allowlist_var("RESAMPLE_EXT_.*")
+                .allowlist_var("REAPER_PLUGIN_VERSION")
+                .allowlist_var("REAPER_PITCHSHIFT_API_VER")
+                .allowlist_var("UNDO_STATE_.*")
+                .allowlist_var("NULL_BRUSH")
+                .allowlist_var("NULL_PEN")
+                .allowlist_var("VK_.*")
+                .allowlist_var("BM_.*")
+                .allowlist_var("BST_.*")
+                .allowlist_var("SW_.*")
+                .allowlist_var("SM_.*")
+                .allowlist_var("SWP_.*")
+                .allowlist_var("CB_.*")
+                .allowlist_var("MB_.*")
+                .allowlist_var("CBN_.*")
+                .allowlist_var("WM_.*")
+                .allowlist_var("WS_.*")
+                .allowlist_var("GW_.*")
+                .allowlist_var("GWL_.*")
+                .allowlist_var("SIF_.*")
+                .allowlist_var("SB_.*")
+                .allowlist_var("EN_.*")
+                .allowlist_var("MIIM_.*")
+                .allowlist_var("MF_.*")
+                .allowlist_var("TB_.*")
+                .allowlist_var("TBM_.*")
+                .allowlist_var("TPM_.*")
+                .allowlist_var("CF_.*")
+                .allowlist_var("DT_.*")
+                .allowlist_var("GMEM_.*")
+                .allowlist_var("COLOR_.*")
+                .allowlist_var("THREAD_PRIORITY_.*")
+                .allowlist_var("THREAD_BASE_PRIORITY_.*")
+                .allowlist_var("SRCCOPY")
+                .allowlist_var("SRCCOPY_USEALPHACHAN")
+                .allowlist_var("ID.*")
+                .allowlist_var("DLL_PROCESS_ATTACH")
+                .allowlist_var("DLL_PROCESS_DETACH")
+                .allowlist_var("TRANSPARENT")
+                .allowlist_var("OPAQUE")
+                .allowlist_var("TWENTY_OVER_LN10")
+                .allowlist_var("LN10_OVER_TWENTY")
+                .allowlist_type("HINSTANCE")
+                .allowlist_type("reaper_plugin_info_t")
+                .allowlist_type("gaccel_register_t")
+                .allowlist_type("accelerator_register_t")
+                .allowlist_type("audio_hook_register_t")
+                .allowlist_type("midi_realtime_write_struct_t")
+                .allowlist_type("midi_quantize_mode_t")
+                .allowlist_type("KbdSectionInfo")
+                .allowlist_type("GUID")
+                .allowlist_type("LPSTR")
+                .allowlist_type("SCROLLINFO")
+                // We have our own more accurate version of preview_register_t in manual_bindings.rs
+                .blocklist_type("preview_register_t")
+                .allowlist_function("reaper_control_surface::.*")
+                .allowlist_function("reaper_midi::.*")
+                .allowlist_function("reaper_pcm_source::.*")
+                .allowlist_function("reaper_pcm_sink::.*")
+                .allowlist_function("reaper_resample::.*")
+                .allowlist_function("reaper_pitch_shift::.*")
+                .allowlist_function("reaper_project_state_context::.*");
             #[cfg(target_os = "macos")]
             let builder = builder.clang_arg("-stdlib=libc++");
             let bindings = builder.generate().expect("Unable to generate bindings");
@@ -220,9 +223,9 @@ mod codegen {
         use syn::token::{And, Colon, Extern, Fn, Paren, Pub, SelfValue, Unsafe};
         use syn::{
             Abi, Block, Expr, ExprCall, ExprPath, FnArg, ForeignItem, ForeignItemFn,
-            ForeignItemStatic, GenericArgument, Ident, ImplItem, ImplItemMethod, Item,
-            ItemForeignMod, ItemMod, Pat, PatIdent, PatType, Path, PathArguments, PathSegment,
-            Receiver, Signature, Type, TypeBareFn, VisPublic, Visibility,
+            ForeignItemStatic, GenericArgument, Ident, ImplItem, ImplItemFn, Item, ItemForeignMod,
+            ItemMod, Pat, PatIdent, PatType, Path, PathArguments, PathSegment, Receiver,
+            ReceiverKind, Safety, Signature, Type, TypeFnPtr, Visibility,
         };
 
         /// For these functions exposed by REAPER the function pointers need to use
@@ -373,6 +376,7 @@ mod codegen {
 
         /// Generates `reaper.rs` and `swell.rs` from the previously generated `bindings.rs`
         pub fn generate_reaper_and_swell() {
+            println!("cargo:rerun-if-changed=src/bindings.rs");
             let file = parse_file("src/bindings.rs");
             generate_reaper(&file);
             generate_swell(&file);
@@ -654,7 +658,7 @@ mod codegen {
                         } else {
                             "C"
                         };
-                        TypeBareFn {
+                        TypeFnPtr {
                             abi: Some(Abi {
                                 extern_token: Extern {
                                     span: Span::call_site(),
@@ -716,14 +720,12 @@ mod codegen {
                     },
                 ]
             };
-            ImplItem::Method(ImplItemMethod {
+            ImplItem::Fn(ImplItemFn {
                 attrs,
-                vis: Visibility::Public(VisPublic {
-                    pub_token: Pub {
-                        span: Span::call_site(),
-                    },
+                vis: Visibility::Public(Pub {
+                    span: Span::call_site(),
                 }),
-                defaultness: None,
+                modifiers: Default::default(),
                 sig: extract_signature(ptr, ptr.name.clone(), !is_safe, true),
                 block: body,
             })
@@ -733,21 +735,19 @@ mod codegen {
         fn generate_function(ptr: &FnPtr, name: Ident, extern_type: &str) -> Item {
             Item::ForeignMod(ItemForeignMod {
                 attrs: vec![],
+                unsafety: None,
                 abi: Abi {
                     extern_token: Extern {
                         span: Span::call_site(),
                     },
                     name: Some(syn::LitStr::new(extern_type, Span::call_site())),
                 },
-                brace_token: syn::token::Brace {
-                    span: Span::call_site(),
-                },
+                brace_token: syn::token::Brace::default(),
                 items: vec![ForeignItem::Fn(ForeignItemFn {
                     attrs: vec![],
-                    vis: Visibility::Public(VisPublic {
-                        pub_token: Pub {
-                            span: Span::call_site(),
-                        },
+                    modifiers: Default::default(),
+                    vis: Visibility::Public(Pub {
+                        span: Span::call_site(),
                     }),
                     sig: extract_signature(ptr, name, false, false),
                     semi_token: syn::token::Semi {
@@ -766,12 +766,12 @@ mod codegen {
             Signature {
                 constness: None,
                 asyncness: None,
-                unsafety: if make_unsafe {
-                    Some(Unsafe {
+                safety: if make_unsafe {
+                    Safety::Unsafe(Unsafe {
                         span: Span::call_site(),
                     })
                 } else {
-                    None
+                    Safety::Default
                 },
                 abi: None,
                 fn_token: Fn {
@@ -779,9 +779,7 @@ mod codegen {
                 },
                 ident: name,
                 generics: Default::default(),
-                paren_token: Paren {
-                    span: Span::call_site(),
-                },
+                paren_token: Paren::default(),
                 inputs: {
                     let actual_args = ptr.signature.inputs.iter().map(|a| {
                         FnArg::Typed(PatType {
@@ -802,12 +800,13 @@ mod codegen {
                     if as_method {
                         let receiver = FnArg::Receiver(Receiver {
                             attrs: vec![],
-                            reference: Some((
+                            kind: ReceiverKind::Reference(
                                 And {
                                     spans: [Span::call_site()],
                                 },
                                 None,
-                            )),
+                                None,
+                            ),
                             mutability: None,
                             self_token: SelfValue {
                                 span: Span::call_site(),
@@ -854,7 +853,7 @@ mod codegen {
         }
 
         /// Generates the actual function pointer call in the body of a method in `impl Reaper`
-        fn generate_fn_ptr_call(signature: &TypeBareFn, fn_name: Ident) -> Expr {
+        fn generate_fn_ptr_call(signature: &TypeFnPtr, fn_name: Ident) -> Expr {
             Expr::Call(ExprCall {
                 attrs: vec![],
                 func: Box::new(Expr::Path(ExprPath {
@@ -873,9 +872,7 @@ mod codegen {
                         },
                     },
                 })),
-                paren_token: Paren {
-                    span: Span::call_site(),
-                },
+                paren_token: Paren::default(),
                 args: signature
                     .inputs
                     .iter()
@@ -928,12 +925,19 @@ mod codegen {
                 .expect("function pointer mod not found");
             fn_ptr_mod_items
                 .iter()
-                .filter_map(|item| match item {
-                    Item::ForeignMod(ItemForeignMod { items, .. }) => match items.as_slice() {
-                        [ForeignItem::Static(i)] => Some(i),
+                .filter_map(|item| {
+                    // let formatted = format!("{:#?}", item);
+                    // if formatted.contains("SWELL_CreateDialog") {
+                    //     panic!("DEBUG {:#?}", item);
+                    // }
+                    match item {
+                        // This matches simple 'extern "C"' blocks
+                        Item::ForeignMod(ItemForeignMod { items, .. }) => match items.as_slice() {
+                            [ForeignItem::Static(i)] => Some(i),
+                            _ => None,
+                        },
                         _ => None,
-                    },
-                    _ => None,
+                    }
                 })
                 .collect()
         }
@@ -954,7 +958,7 @@ mod codegen {
                 PathArguments::AngleBracketed(a) => {
                     let generic_arg = a.args.first().expect("Angle bracket must have arg");
                     match generic_arg {
-                        GenericArgument::Type(Type::BareFn(bare_fn)) => bare_fn,
+                        GenericArgument::Type(Type::FnPtr(bare_fn)) => bare_fn,
                         _ => panic!("Generic argument is not a BareFn"),
                     }
                 }
@@ -968,15 +972,15 @@ mod codegen {
 
         struct Compartments {
             pub names: Vec<Ident>,
-            pub fn_ptr_signatures: Vec<TypeBareFn>,
+            pub fn_ptr_signatures: Vec<TypeFnPtr>,
             pub methods: Vec<ImplItem>,
         }
 
         /// Contains the name and signature of a relevant function pointer
-        #[derive(Clone)]
+        #[derive(Clone, Debug)]
         struct FnPtr {
             name: Ident,
-            signature: TypeBareFn,
+            signature: TypeFnPtr,
         }
 
         impl FnPtr {

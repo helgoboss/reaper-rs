@@ -32,9 +32,9 @@ winapi = "0.3"
 libc = "0.2"
 version-sync = "0.9.2"
 cc = "1.2.10"
-bindgen = "0.52.0"
+bindgen = "0.72.1"
 quote = "1.0.2"
-syn = "1.0.14"
+syn = { version = "3.0.4", features = ["extra-traits"] }
 proc-macro2 = "1.0.8"
 phf = "0.8"
 nutype = { git = "https://github.com/helgoboss/nutype.git", branch = "feature/new_unchecked_const" }
@@ -62,7 +62,7 @@ itertools = "0.10.5"
 camino = "1.1.7"
 derivative = "2.2.0"
 sentry = { version = "0.35.0", default-features = false }
-darling = "0.10.2"
+darling = "0.24.1"
 doc-comment = "0.3.3"
 splitty = "1.0.1"
 rxrust = { git = "https://github.com/rxRust/rxRust", rev = "349e50b3197e05926e2378ef8fc45cb67ad43b83" }
