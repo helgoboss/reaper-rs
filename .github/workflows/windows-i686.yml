@@ -20,7 +20,7 @@ jobs:
           submodules: recursive
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.96.0
+        uses: dtolnay/rust-toolchain@1.98.0
         with:
           targets: i686-pc-windows-msvc
 
