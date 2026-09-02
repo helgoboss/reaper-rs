@@ -235,7 +235,7 @@ where
     }
 
     /// Returns the plug-in context.
-    pub fn plugin_context(&self) -> PluginContext<UsageScope> {
+    pub fn plugin_context(&self) -> PluginContext<'_, UsageScope> {
         PluginContext::new(self.low.plugin_context())
     }
 

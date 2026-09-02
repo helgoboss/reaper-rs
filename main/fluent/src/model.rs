@@ -6,15 +6,15 @@ use reaper_medium::ProjectRef;
 pub struct Model<A>(pub(crate) A);
 
 impl<A> Model<A> {
-    pub fn current_project(&self) -> Project<ReadAccess> {
+    pub fn current_project(&self) -> Project<'_, ReadAccess> {
         self.current_project_internal()
     }
 
-    pub fn current_project_mut(&mut self) -> Project<WriteAccess> {
+    pub fn current_project_mut(&mut self) -> Project<'_, WriteAccess> {
         self.current_project_internal()
     }
 
-    fn current_project_internal<B>(&self) -> Project<B> {
+    fn current_project_internal<B>(&self) -> Project<'_, B> {
         let raw = Reaper::get()
             .medium_reaper()
             .enum_projects(ProjectRef::Current, 0)

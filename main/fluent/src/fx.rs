@@ -53,7 +53,7 @@ impl<'a, A> Fx<'a, A> {
         }
     }
 
-    pub fn fx_chain(&self) -> FxChain<ReadAccess> {
+    pub fn fx_chain(&self) -> FxChain<'_, ReadAccess> {
         self.fx_chain
     }
 

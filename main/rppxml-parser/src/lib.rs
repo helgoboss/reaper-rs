@@ -37,7 +37,7 @@ impl<S> StreamingParser<S> {
 #[allow(clippy::should_implement_trait)]
 impl<S: BufRead> StreamingParser<S> {
     /// Repeatedly call `next` to read the events.
-    pub fn next(&mut self) -> Option<Item> {
+    pub fn next(&mut self) -> Option<Item<'_>> {
         self.buffer.clear();
         if self.source.read_line(&mut self.buffer).ok()? == 0 {
             return None;
@@ -67,7 +67,7 @@ impl<'a> OneShotParser<'a> {
         Self { source }
     }
 
-    pub fn events(&self) -> impl Iterator<Item = Event> {
+    pub fn events(&self) -> impl Iterator<Item = Event<'_>> {
         self.source.lines().map(|l| {
             let (start, end) = get_range(self.source, l);
             Event::new(self.source, start, end, Item::parse_from_line(l))

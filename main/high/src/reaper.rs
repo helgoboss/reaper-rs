@@ -382,7 +382,7 @@ impl Reaper {
         Ok(())
     }
 
-    pub fn medium_session(&self) -> RefMut<reaper_medium::ReaperSession> {
+    pub fn medium_session(&self) -> RefMut<'_, reaper_medium::ReaperSession> {
         self.reaper_main.get().medium_session.borrow_mut()
     }
 

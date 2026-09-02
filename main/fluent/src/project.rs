@@ -59,7 +59,7 @@ impl<A> Project<'_, A> {
         &mut self,
         index: u32,
         behavior: TrackDefaultsBehavior,
-    ) -> Track<WriteAccess>
+    ) -> Track<'_, WriteAccess>
     where
         A: Mut,
     {
@@ -82,7 +82,7 @@ impl<A> Project<'_, A> {
 
     pub fn tracks(
         &self,
-    ) -> impl ExactSizeIterator<Item = Track<ReadAccess>> + FusedIterator + DoubleEndedIterator
+    ) -> impl ExactSizeIterator<Item = Track<'_, ReadAccess>> + FusedIterator + DoubleEndedIterator
     {
         let r = Reaper::get().medium_reaper();
         (0..self.track_count()).map(|i| {

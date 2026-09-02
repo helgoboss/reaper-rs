@@ -738,6 +738,7 @@ impl Project {
         Some(*self.get_setting_ref(name).ok()?)
     }
 
+    #[allow(clippy::mut_from_ref)]
     fn get_setting_ref<'a, T>(
         &self,
         name: impl Into<ReaperStringArg<'a>>,

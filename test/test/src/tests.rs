@@ -2469,13 +2469,13 @@ fn global_instances() -> TestStep {
         let res = reaper_low::Reaper::make_available_globally(*medium_reaper.low());
         assert!(res.is_err());
         let low = reaper_low::Reaper::get();
-        println!("reaper_low::Reaper {:?}", &low);
+        println!("reaper_low::Reaper {:?}", low);
         unsafe {
             low.ShowConsoleMsg(c_str!("- Hello from low-level API\n").as_ptr());
         }
         // Low-level SWELL
         let swell = Swell::load(*medium_reaper.low().plugin_context());
-        println!("reaper_low::Swell {:?}", &swell);
+        println!("reaper_low::Swell {:?}", swell);
         Swell::make_available_globally(swell).unwrap();
         let _ = Swell::get();
         // Medium-level REAPER

@@ -45,7 +45,7 @@ impl<A> Track<'_, A> {
         todo!()
     }
 
-    pub fn normal_fx_chain(&self) -> FxChain<ReadAccess> {
+    pub fn normal_fx_chain(&self) -> FxChain<'_, ReadAccess> {
         self.normal_fx_chain_internal()
     }
 
@@ -57,15 +57,15 @@ impl<A> Track<'_, A> {
         }
     }
 
-    pub fn normal_fx_chain_mut(&self) -> FxChain<WriteAccess> {
+    pub fn normal_fx_chain_mut(&self) -> FxChain<'_, WriteAccess> {
         self.normal_fx_chain_internal()
     }
 
-    fn normal_fx_chain_internal<B>(&self) -> FxChain<B> {
+    fn normal_fx_chain_internal<B>(&self) -> FxChain<'_, B> {
         FxChain::new(Track::new(self.raw), TrackFxChainType::NormalFxChain)
     }
 
-    pub fn project(&self) -> Project<ReadAccess> {
+    pub fn project(&self) -> Project<'_, ReadAccess> {
         let raw = unsafe {
             Reaper::get()
                 .medium_reaper()

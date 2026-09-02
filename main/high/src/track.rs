@@ -1546,16 +1546,10 @@ impl Track {
         };
         self.attempt_to_fill_project_if_necessary();
         match self.rea_project.get() {
-            None => false,
-            Some(rea_project) => {
-                if Project::new(rea_project).is_available() {
-                    Reaper::get()
-                        .medium_reaper()
-                        .validate_ptr_2(Proj(rea_project), media_track)
-                } else {
-                    false
-                }
-            }
+            Some(rea_project) if Project::new(rea_project).is_available() => Reaper::get()
+                .medium_reaper()
+                .validate_ptr_2(Proj(rea_project), media_track),
+            _ => false,
         }
     }
 

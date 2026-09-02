@@ -43,7 +43,7 @@ impl<'a, A> FxChain<'a, A> {
         }
     }
 
-    pub fn track(&self) -> Track<ReadAccess> {
+    pub fn track(&self) -> Track<'_, ReadAccess> {
         self.track
     }
 
@@ -55,7 +55,7 @@ impl<'a, A> FxChain<'a, A> {
         &mut self,
         name: impl Into<ReaperStringArg<'b>>,
         behavior: AddFxBehavior,
-    ) -> Result<Fx<WriteAccess>, ReaperFunctionError>
+    ) -> Result<Fx<'_, WriteAccess>, ReaperFunctionError>
     where
         A: Mut,
     {
@@ -75,7 +75,8 @@ impl<'a, A> FxChain<'a, A> {
 
     pub fn fxs(
         &self,
-    ) -> impl ExactSizeIterator<Item = Fx<ReadAccess>> + DoubleEndedIterator + FusedIterator {
+    ) -> impl ExactSizeIterator<Item = Fx<'_, ReadAccess>> + DoubleEndedIterator + FusedIterator
+    {
         (0..self.fx_count()).map(|i| Fx::new(FxChain::new(self.track, self.kind), i))
     }
 

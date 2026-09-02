@@ -696,14 +696,14 @@ impl ChangeDetectionMiddleware {
         }
     }
 
-    fn find_track_data_in_normal_state(&self, track: MediaTrack) -> Option<RefMut<TrackData>> {
+    fn find_track_data_in_normal_state(&self, track: MediaTrack) -> Option<RefMut<'_, TrackData>> {
         if self.state() == State::PropagatingTrackSetChanges {
             return None;
         }
         self.find_track_data(track)
     }
 
-    fn find_project_data(&self, rea_project: ReaProject) -> Option<RefMut<ProjectData>> {
+    fn find_project_data(&self, rea_project: ReaProject) -> Option<RefMut<'_, ProjectData>> {
         if !self.project_datas.borrow().contains_key(&rea_project) {
             return None;
         }
@@ -718,7 +718,7 @@ impl ChangeDetectionMiddleware {
             .replace(previous_value - 1);
     }
 
-    fn find_track_data(&self, track: MediaTrack) -> Option<RefMut<TrackData>> {
+    fn find_track_data(&self, track: MediaTrack) -> Option<RefMut<'_, TrackData>> {
         let project = unsafe {
             Reaper::get()
                 .medium_reaper

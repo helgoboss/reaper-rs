@@ -57,7 +57,7 @@ struct MyOnAudioBuffer {
 
 impl OnAudioBuffer for MyOnAudioBuffer {
     fn call(&mut self, args: OnAudioBufferArgs) {
-        if self.counter % 100 == 0 {
+        if self.counter.is_multiple_of(100) {
             self.sender
                 .send(format!(
                     "Counter: {}, Args: {:?}, Channels: {:?}\n",

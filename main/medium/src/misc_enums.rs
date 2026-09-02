@@ -1579,7 +1579,7 @@ impl SectionContext<'_> {
         }
     }
 
-    pub(crate) fn from_medium(value: Option<&KbdSectionInfo>) -> SectionContext {
+    pub(crate) fn from_medium(value: Option<&KbdSectionInfo>) -> SectionContext<'_> {
         use SectionContext::*;
         match value {
             None => MainSection,

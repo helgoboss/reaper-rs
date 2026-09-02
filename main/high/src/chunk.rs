@@ -207,7 +207,7 @@ impl ChunkRegion {
         })
     }
 
-    pub fn content(&self) -> Ref<str> {
+    pub fn content(&self) -> Ref<'_, str> {
         if self.is_valid() {
             Ref::map(self.parent_chunk.content.borrow(), |r| {
                 &r[self.start_pos..(self.start_pos + self.length)]

@@ -34,11 +34,11 @@ impl Reaper {
             .expect("You must first call `Reaper::install_globally` in order to use this function.")
     }
 
-    pub fn medium_session(&self) -> Ref<ReaperSession> {
+    pub fn medium_session(&self) -> Ref<'_, ReaperSession> {
         self.medium_session.get().borrow()
     }
 
-    pub fn medium_session_mut(&self) -> RefMut<ReaperSession> {
+    pub fn medium_session_mut(&self) -> RefMut<'_, ReaperSession> {
         self.medium_session.get().borrow_mut()
     }
 
@@ -58,12 +58,12 @@ impl Reaper {
             .plugin_register_add_timer(call_and_unregister_timer::<F>);
     }
 
-    pub fn model(&self) -> Ref<Model<ReadAccess>> {
+    pub fn model(&self) -> Ref<'_, Model<ReadAccess>> {
         // self.model.get().borrow();
         todo!()
     }
 
-    pub fn model_mut(&self) -> RefMut<Model<WriteAccess>> {
+    pub fn model_mut(&self) -> RefMut<'_, Model<WriteAccess>> {
         self.model.get().borrow_mut()
     }
 }

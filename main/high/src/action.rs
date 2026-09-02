@@ -318,7 +318,7 @@ impl Action {
         Ok(())
     }
 
-    fn load_if_necessary_or_complain(&self) -> ReaperResult<Ref<RuntimeData>> {
+    fn load_if_necessary_or_complain(&self) -> ReaperResult<Ref<'_, RuntimeData>> {
         let is_loaded = self.runtime_data.borrow().is_none();
         if is_loaded && !self.load_by_command_name() {
             return Err(ReaperError::new("Action not loadable"));
@@ -346,7 +346,7 @@ impl Action {
         true
     }
 
-    fn fix_command_name(command_name: &ReaperStr) -> Cow<ReaperStr> {
+    fn fix_command_name(command_name: &ReaperStr) -> Cow<'_, ReaperStr> {
         let bytes = command_name.as_c_str().to_bytes();
         if !bytes.len() == 0 && bytes[0] == b'_' {
             // Command already contains underscore. Great.

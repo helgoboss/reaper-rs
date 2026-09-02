@@ -58,7 +58,7 @@ impl<'a, UsageScope> PluginContext<'a, UsageScope> {
     }
 
     /// Returns the type-specific plug-in context.
-    pub fn type_specific(&self) -> TypeSpecificPluginContext
+    pub fn type_specific(&self) -> TypeSpecificPluginContext<'_>
     where
         UsageScope: AnyThread,
     {

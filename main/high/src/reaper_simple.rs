@@ -223,7 +223,7 @@ impl Reaper {
         self.projects().count() as u32
     }
 
-    pub fn version(&self) -> ReaperVersion {
+    pub fn version(&self) -> ReaperVersion<'_> {
         self.medium_reaper().get_app_version()
     }
 
@@ -465,6 +465,7 @@ impl Reaper {
         Ok(result)
     }
 
+    #[allow(clippy::mut_from_ref)]
     pub fn get_preference_ref<'a, T>(
         &self,
         name: impl Into<ReaperStringArg<'a>>,

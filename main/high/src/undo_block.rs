@@ -9,7 +9,7 @@ pub(super) struct UndoBlock<'a> {
 }
 
 impl UndoBlock<'_> {
-    pub(crate) fn new(project: Project, label: &ReaperStr) -> UndoBlock {
+    pub(crate) fn new(project: Project, label: &ReaperStr) -> UndoBlock<'_> {
         UndoBlock { label, project }
     }
 }
