@@ -54,7 +54,7 @@ mod swell {
     pub static GET_SWELL_FUNC: OnceLock<crate::GetSwellFunc> = OnceLock::new();
 
     #[cfg(target_os = "linux")]
-    extern "C" {
+    unsafe extern "C" {
         /// On Linux, this function is implemented on C++ side (`swell-modstub-generic-custom.cpp`).
         ///
         /// This is supposed to be called by Rust as soon as it gets hold of the SWELL function provider

@@ -736,7 +736,7 @@ mod codegen {
         fn generate_function(ptr: &FnPtr, name: Ident, extern_type: &str) -> Item {
             Item::ForeignMod(ItemForeignMod {
                 attrs: vec![],
-                unsafety: None,
+                unsafety: Some(Unsafe::default()),
                 abi: Abi {
                     extern_token: Extern {
                         span: Span::call_site(),

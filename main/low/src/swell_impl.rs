@@ -266,7 +266,9 @@ impl Swell {
     ///
     /// REAPER can crash if you pass an invalid pointer.
     pub unsafe fn UpdateWindow(&self, hwnd: root::HWND) {
-        winapi::um::winuser::UpdateWindow(hwnd as _);
+        unsafe {
+            winapi::um::winuser::UpdateWindow(hwnd as _);
+        }
     }
 
     /// # Safety
@@ -281,16 +283,18 @@ impl Swell {
     ) -> root::LRESULT {
         if lParam != 0 && lparam_is_string(msg) {
             let utf16_string = utf8_to_16(lParam as _);
-            let result = winapi::um::winuser::SendMessageW(
-                hwnd as _,
-                msg,
-                wParam,
-                utf16_string.as_ptr() as _,
-            );
+            let result = unsafe {
+                winapi::um::winuser::SendMessageW(
+                    hwnd as _,
+                    msg,
+                    wParam,
+                    utf16_string.as_ptr() as _,
+                )
+            };
             std::mem::drop(utf16_string);
             result
         } else {
-            winapi::um::winuser::SendMessageW(hwnd as _, msg, wParam, lParam)
+            unsafe { winapi::um::winuser::SendMessageW(hwnd as _, msg, wParam, lParam) }
         }
     }
 
@@ -302,7 +306,7 @@ impl Swell {
         hwnd: root::HWND,
         idx: ::std::os::raw::c_int,
     ) -> root::LONG_PTR {
-        winapi::um::winuser::GetWindowLongW(hwnd as _, idx) as _
+        unsafe { winapi::um::winuser::GetWindowLongW(hwnd as _, idx) as _ }
     }
 
     /// # Safety
@@ -314,7 +318,7 @@ impl Swell {
         idx: ::std::os::raw::c_int,
         val: root::LONG_PTR,
     ) -> root::LONG_PTR {
-        winapi::um::winuser::SetWindowLongW(hwnd as _, idx, val as _) as _
+        unsafe { winapi::um::winuser::SetWindowLongW(hwnd as _, idx, val as _) as _ }
     }
 
     /// # Safety
@@ -329,16 +333,18 @@ impl Swell {
     ) -> root::BOOL {
         if lParam != 0 && lparam_is_string(msg) {
             let utf16_string = utf8_to_16(lParam as _);
-            let result = winapi::um::winuser::PostMessageW(
-                hwnd as _,
-                msg,
-                wParam,
-                utf16_string.as_ptr() as _,
-            );
+            let result = unsafe {
+                winapi::um::winuser::PostMessageW(
+                    hwnd as _,
+                    msg,
+                    wParam,
+                    utf16_string.as_ptr() as _,
+                )
+            };
             std::mem::drop(utf16_string);
             result as _
         } else {
-            winapi::um::winuser::PostMessageW(hwnd as _, msg, wParam, lParam) as _
+            unsafe { winapi::um::winuser::PostMessageW(hwnd as _, msg, wParam, lParam) as _ }
         }
     }
 
@@ -350,26 +356,28 @@ impl Swell {
             return std::ptr::null_mut();
         }
         let font = &*font;
-        let mut wide_font = winapi::um::wingdi::LOGFONTW {
-            lfHeight: font.lfHeight,
-            lfWidth: font.lfWidth,
-            lfEscapement: font.lfEscapement,
-            lfOrientation: font.lfOrientation,
-            lfWeight: font.lfWeight,
-            lfItalic: font.lfItalic as _,
-            lfUnderline: font.lfUnderline as _,
-            lfStrikeOut: font.lfStrikeOut as _,
-            lfCharSet: font.lfCharSet as _,
-            lfOutPrecision: font.lfOutPrecision as _,
-            lfClipPrecision: font.lfClipPrecision as _,
-            lfQuality: font.lfQuality as _,
-            lfPitchAndFamily: font.lfPitchAndFamily as _,
-            lfFaceName: [0; 32],
-        };
-        for (i, ch) in font.lfFaceName.iter().take(15).enumerate() {
-            (*ch as u8 as char).encode_utf16(&mut wide_font.lfFaceName[i * 2..]);
+        unsafe {
+            let mut wide_font = winapi::um::wingdi::LOGFONTW {
+                lfHeight: font.lfHeight,
+                lfWidth: font.lfWidth,
+                lfEscapement: font.lfEscapement,
+                lfOrientation: font.lfOrientation,
+                lfWeight: font.lfWeight,
+                lfItalic: font.lfItalic as _,
+                lfUnderline: font.lfUnderline as _,
+                lfStrikeOut: font.lfStrikeOut as _,
+                lfCharSet: font.lfCharSet as _,
+                lfOutPrecision: font.lfOutPrecision as _,
+                lfClipPrecision: font.lfClipPrecision as _,
+                lfQuality: font.lfQuality as _,
+                lfPitchAndFamily: font.lfPitchAndFamily as _,
+                lfFaceName: [0; 32],
+            };
+            for (i, ch) in font.lfFaceName.iter().take(15).enumerate() {
+                (*ch as u8 as char).encode_utf16(&mut wide_font.lfFaceName[i * 2..]);
+            }
+            winapi::um::wingdi::CreateFontIndirectW(&mut wide_font as *mut _) as _
         }
-        winapi::um::wingdi::CreateFontIndirectW(&mut wide_font as *mut _) as _
     }
 
     /// # Safety
@@ -382,16 +390,18 @@ impl Swell {
         caption: *const ::std::os::raw::c_char,
         type_: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int {
-        let text_utf16 = utf8_to_16(text);
-        let caption_utf16 = utf8_to_16(caption);
-        let result = winapi::um::winuser::MessageBoxW(
-            hwndParent as _,
-            text_utf16.as_ptr() as _,
-            caption_utf16.as_ptr() as _,
-            type_ as _,
-        );
-        std::mem::drop(text_utf16);
-        result as _
+        unsafe {
+            let text_utf16 = utf8_to_16(text);
+            let caption_utf16 = utf8_to_16(caption);
+            let result = winapi::um::winuser::MessageBoxW(
+                hwndParent as _,
+                text_utf16.as_ptr() as _,
+                caption_utf16.as_ptr() as _,
+                type_ as _,
+            );
+            std::mem::drop(text_utf16);
+            result as _
+        }
     }
 
     /// # Safety
@@ -404,21 +414,23 @@ impl Swell {
         val: *const ::std::os::raw::c_char,
         fn_: *const ::std::os::raw::c_char,
     ) -> root::BOOL {
-        let appname_utf16 = utf8_to_16(appname);
-        let keyname_utf16 = utf8_to_16(keyname);
-        let val_utf16 = utf8_to_16(val);
-        let fn_utf16 = utf8_to_16(fn_);
-        let result = winapi::um::winbase::WritePrivateProfileStringW(
-            appname_utf16.as_ptr() as _,
-            keyname_utf16.as_ptr() as _,
-            val_utf16.as_ptr() as _,
-            fn_utf16.as_ptr() as _,
-        );
-        std::mem::drop(appname_utf16);
-        std::mem::drop(keyname_utf16);
-        std::mem::drop(val_utf16);
-        std::mem::drop(fn_utf16);
-        result as _
+        unsafe {
+            let appname_utf16 = utf8_to_16(appname);
+            let keyname_utf16 = utf8_to_16(keyname);
+            let val_utf16 = utf8_to_16(val);
+            let fn_utf16 = utf8_to_16(fn_);
+            let result = winapi::um::winbase::WritePrivateProfileStringW(
+                appname_utf16.as_ptr() as _,
+                keyname_utf16.as_ptr() as _,
+                val_utf16.as_ptr() as _,
+                fn_utf16.as_ptr() as _,
+            );
+            std::mem::drop(appname_utf16);
+            std::mem::drop(keyname_utf16);
+            std::mem::drop(val_utf16);
+            std::mem::drop(fn_utf16);
+            result as _
+        }
     }
 
     /// # Safety
@@ -431,29 +443,31 @@ impl Swell {
         byPos: root::BOOL,
         mi: *mut root::MENUITEMINFO,
     ) -> root::BOOL {
-        let mi = *mi;
-        let mut utf16_mi = utf8_to_16_menu_item_info(&mi);
-        if menu_item_needs_string_conversion(mi) {
-            // Sets text. Must convert it.
-            let mut utf16_string = utf8_to_16(mi.dwTypeData);
-            utf16_mi.dwTypeData = utf16_string.as_mut_ptr();
-            let result = winapi::um::winuser::SetMenuItemInfoW(
-                hMenu as _,
-                pos as _,
-                byPos as _,
-                &utf16_mi as *const _,
-            );
-            std::mem::drop(utf16_string);
-            result as _
-        } else {
-            // Doesn't set text. No conversion necessary.
-            let result = winapi::um::winuser::SetMenuItemInfoW(
-                hMenu as _,
-                pos as _,
-                byPos as _,
-                &utf16_mi as *const _,
-            );
-            result as _
+        unsafe {
+            let mi = *mi;
+            let mut utf16_mi = utf8_to_16_menu_item_info(&mi);
+            if menu_item_needs_string_conversion(mi) {
+                // Sets text. Must convert it.
+                let mut utf16_string = utf8_to_16(mi.dwTypeData);
+                utf16_mi.dwTypeData = utf16_string.as_mut_ptr();
+                let result = winapi::um::winuser::SetMenuItemInfoW(
+                    hMenu as _,
+                    pos as _,
+                    byPos as _,
+                    &utf16_mi as *const _,
+                );
+                std::mem::drop(utf16_string);
+                result as _
+            } else {
+                // Doesn't set text. No conversion necessary.
+                let result = winapi::um::winuser::SetMenuItemInfoW(
+                    hMenu as _,
+                    pos as _,
+                    byPos as _,
+                    &utf16_mi as *const _,
+                );
+                result as _
+            }
         }
     }
 
@@ -467,27 +481,29 @@ impl Swell {
         byPos: root::BOOL,
         mi: *mut root::MENUITEMINFO,
     ) {
-        let mi = *mi;
-        let mut utf16_mi = utf8_to_16_menu_item_info(&mi);
-        if menu_item_needs_string_conversion(mi) {
-            // Sets text. Must convert it.
-            let mut utf16_string = utf8_to_16(mi.dwTypeData);
-            utf16_mi.dwTypeData = utf16_string.as_mut_ptr();
-            let result = winapi::um::winuser::InsertMenuItemW(
-                hMenu as _,
-                pos as _,
-                byPos as _,
-                &utf16_mi as *const _,
-            );
-            std::mem::drop(utf16_string);
-        } else {
-            // Doesn't set text. No conversion necessary.
-            let result = winapi::um::winuser::InsertMenuItemW(
-                hMenu as _,
-                pos as _,
-                byPos as _,
-                &utf16_mi as *const _,
-            );
+        unsafe {
+            let mi = *mi;
+            let mut utf16_mi = utf8_to_16_menu_item_info(&mi);
+            if menu_item_needs_string_conversion(mi) {
+                // Sets text. Must convert it.
+                let mut utf16_string = utf8_to_16(mi.dwTypeData);
+                utf16_mi.dwTypeData = utf16_string.as_mut_ptr();
+                let result = winapi::um::winuser::InsertMenuItemW(
+                    hMenu as _,
+                    pos as _,
+                    byPos as _,
+                    &utf16_mi as *const _,
+                );
+                std::mem::drop(utf16_string);
+            } else {
+                // Doesn't set text. No conversion necessary.
+                let result = winapi::um::winuser::InsertMenuItemW(
+                    hMenu as _,
+                    pos as _,
+                    byPos as _,
+                    &utf16_mi as *const _,
+                );
+            }
         }
     }
 
@@ -503,30 +519,32 @@ impl Swell {
         byPos: root::BOOL,
         mi: *mut root::MENUITEMINFO,
     ) -> root::BOOL {
-        let mi = &mut *mi;
-        if !mi.dwTypeData.is_null() {
-            todo!("Getting string information from menu item is not yet implemented.")
+        unsafe {
+            let mi = &mut *mi;
+            if !mi.dwTypeData.is_null() {
+                todo!("Getting string information from menu item is not yet implemented.")
+            }
+            let mut utf16_mi = utf8_to_16_menu_item_info(mi);
+            let result = winapi::um::winuser::GetMenuItemInfoW(
+                hMenu as _,
+                pos as _,
+                byPos as _,
+                &mut utf16_mi as _,
+            );
+            mi.cbSize = utf16_mi.cbSize;
+            mi.fMask = utf16_mi.fMask;
+            mi.fType = utf16_mi.fType;
+            mi.fState = utf16_mi.fState;
+            mi.wID = utf16_mi.wID;
+            mi.hSubMenu = utf16_mi.hSubMenu as _;
+            mi.hbmpChecked = utf16_mi.hbmpChecked as _;
+            mi.hbmpUnchecked = utf16_mi.hbmpUnchecked as _;
+            mi.dwItemData = utf16_mi.dwItemData;
+            mi.dwTypeData = std::ptr::null_mut();
+            mi.cch = utf16_mi.cch as _;
+            mi.hbmpItem = utf16_mi.hbmpItem as _;
+            result as _
         }
-        let mut utf16_mi = utf8_to_16_menu_item_info(mi);
-        let result = winapi::um::winuser::GetMenuItemInfoW(
-            hMenu as _,
-            pos as _,
-            byPos as _,
-            &mut utf16_mi as _,
-        );
-        mi.cbSize = utf16_mi.cbSize;
-        mi.fMask = utf16_mi.fMask;
-        mi.fType = utf16_mi.fType;
-        mi.fState = utf16_mi.fState;
-        mi.wID = utf16_mi.wID;
-        mi.hSubMenu = utf16_mi.hSubMenu as _;
-        mi.hbmpChecked = utf16_mi.hbmpChecked as _;
-        mi.hbmpUnchecked = utf16_mi.hbmpUnchecked as _;
-        mi.dwItemData = utf16_mi.dwItemData;
-        mi.dwTypeData = std::ptr::null_mut();
-        mi.cch = utf16_mi.cch as _;
-        mi.hbmpItem = utf16_mi.hbmpItem as _;
-        result as _
     }
 
     /// # Safety
@@ -538,10 +556,12 @@ impl Swell {
         fn_: *mut ::std::os::raw::c_char,
         nSize: root::DWORD,
     ) -> root::DWORD {
-        let len = with_utf16_to_8(fn_, nSize as _, |buffer, max_size| {
-            winapi::um::libloaderapi::GetModuleFileNameW(hInst as _, buffer, nSize) as _
-        });
-        len as _
+        unsafe {
+            let len = with_utf16_to_8(fn_, nSize as _, |buffer, max_size| {
+                winapi::um::libloaderapi::GetModuleFileNameW(hInst as _, buffer, nSize) as _
+            });
+            len as _
+        }
     }
 
     /// On Windows this is a constant but in SWELL this is a macro which translates to a function
@@ -574,16 +594,18 @@ impl std::fmt::Debug for SwellFunctionPointers {
 pub(crate) unsafe fn utf8_to_16(raw_utf8: *const std::os::raw::c_char) -> Vec<u16> {
     use std::ffi::{CStr, OsStr};
     use std::iter::once;
-    // Assumes that the given pointer points to a C-style string.
-    let utf8_c_str = CStr::from_ptr(raw_utf8);
-    // Interpret that string as UTF-8-encoded. Fall back to replacement characters if not.
-    let str = utf8_c_str.to_string_lossy();
-    // Now reencode it as UTF-16.
-    use std::os::windows::ffi::OsStrExt;
-    OsStr::new(str.as_ref())
-        .encode_wide()
-        .chain(once(0))
-        .collect()
+    unsafe {
+        // Assumes that the given pointer points to a C-style string.
+        let utf8_c_str = CStr::from_ptr(raw_utf8);
+        // Interpret that string as UTF-8-encoded. Fall back to replacement characters if not.
+        let str = utf8_c_str.to_string_lossy();
+        // Now reencode it as UTF-16.
+        use std::os::windows::ffi::OsStrExt;
+        OsStr::new(str.as_ref())
+            .encode_wide()
+            .chain(once(0))
+            .collect()
+    }
 }
 
 /// Creates a UTF-16 buffer (to be filled by the given function) and writes it as UTF-8 to the given
@@ -611,39 +633,41 @@ pub(crate) unsafe fn with_utf16_to_8(
     requested_max_size: std::os::raw::c_int,
     fill_utf16_source_buffer: impl FnOnce(*mut u16, std::os::raw::c_int) -> usize,
 ) -> usize {
-    if requested_max_size < 2 {
-        // With a buffer capacity of 1 byte, we can just write the nul terminator. Pointless.
-        return 0;
-    }
-    let mut utf16_vec: Vec<u16> = Vec::with_capacity(requested_max_size as usize);
-    // Returns length *without* nul terminator.
-    let len = fill_utf16_source_buffer(utf16_vec.as_mut_ptr(), requested_max_size);
-    if len == 0 {
-        // No characters written to UTF-16 buffer.
-        return 0;
-    }
-    utf16_vec.set_len(len);
-    // nul terminator will not be part of the string because len doesn't include it!
-    let utf8_string = String::from_utf16_lossy(&utf16_vec);
-    // If the UTF-16-encoded string contains characters that need more than one byte when
-    // encoded as UTF-8 (e.g. Chinese), the resulting String will have more bytes than
-    // `requested_max_size`! We will need to truncate the string so that it takes up at most
-    // `requested_max_size - 1` bytes (we still need to add a nul terminator).
-    let max_bytes_excluding_nul = (requested_max_size - 1) as usize;
-    let utf8_string_truncated = truncate_to_bytes(&utf8_string, max_bytes_excluding_nul);
-    let utf8_c_string = match std::ffi::CString::new(utf8_string_truncated) {
-        Ok(s) => s,
-        Err(_) => {
-            // String contained 0 byte. This would end a C-style string abruptly.
+    unsafe {
+        if requested_max_size < 2 {
+            // With a buffer capacity of 1 byte, we can just write the nul terminator. Pointless.
             return 0;
         }
-    };
-    let utf8_source_chars = utf8_c_string.as_bytes_with_nul();
-    let utf8_target_chars =
-        std::slice::from_raw_parts_mut(utf8_target_buffer, requested_max_size as usize);
-    let utf8_source_chars = &*(utf8_source_chars as *const [u8] as *const [i8]);
-    utf8_target_chars[..utf8_source_chars.len()].copy_from_slice(utf8_source_chars);
-    len
+        let mut utf16_vec: Vec<u16> = Vec::with_capacity(requested_max_size as usize);
+        // Returns length *without* nul terminator.
+        let len = fill_utf16_source_buffer(utf16_vec.as_mut_ptr(), requested_max_size);
+        if len == 0 {
+            // No characters written to UTF-16 buffer.
+            return 0;
+        }
+        utf16_vec.set_len(len);
+        // nul terminator will not be part of the string because len doesn't include it!
+        let utf8_string = String::from_utf16_lossy(&utf16_vec);
+        // If the UTF-16-encoded string contains characters that need more than one byte when
+        // encoded as UTF-8 (e.g. Chinese), the resulting String will have more bytes than
+        // `requested_max_size`! We will need to truncate the string so that it takes up at most
+        // `requested_max_size - 1` bytes (we still need to add a nul terminator).
+        let max_bytes_excluding_nul = (requested_max_size - 1) as usize;
+        let utf8_string_truncated = truncate_to_bytes(&utf8_string, max_bytes_excluding_nul);
+        let utf8_c_string = match std::ffi::CString::new(utf8_string_truncated) {
+            Ok(s) => s,
+            Err(_) => {
+                // String contained 0 byte. This would end a C-style string abruptly.
+                return 0;
+            }
+        };
+        let utf8_source_chars = utf8_c_string.as_bytes_with_nul();
+        let utf8_target_chars =
+            std::slice::from_raw_parts_mut(utf8_target_buffer, requested_max_size as usize);
+        let utf8_source_chars = &*(utf8_source_chars as *const [u8] as *const [i8]);
+        utf8_target_chars[..utf8_source_chars.len()].copy_from_slice(utf8_source_chars);
+        len
+    }
 }
 
 #[cfg(target_family = "windows")]

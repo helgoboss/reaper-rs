@@ -9340,16 +9340,16 @@ impl SwellFunctionPointers {
 #[cfg(target_family = "windows")]
 mod windows {
     use crate::bindings::root;
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetDlgItem(arg1: root::HWND, arg2: ::std::os::raw::c_int) -> root::HWND;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn ShowWindow(arg1: root::HWND, arg2: ::std::os::raw::c_int);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn DestroyWindow(hwnd: root::HWND);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn SetDlgItemInt(
             arg1: root::HWND,
             idx: ::std::os::raw::c_int,
@@ -9357,7 +9357,7 @@ mod windows {
             issigned: ::std::os::raw::c_int,
         ) -> root::BOOL;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetDlgItemInt(
             arg1: root::HWND,
             idx: ::std::os::raw::c_int,
@@ -9365,56 +9365,56 @@ mod windows {
             issigned: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn CheckDlgButton(
             hwnd: root::HWND,
             idx: ::std::os::raw::c_int,
             check: ::std::os::raw::c_int,
         );
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn IsDlgButtonChecked(
             hwnd: root::HWND,
             idx: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn EnableWindow(hwnd: root::HWND, enable: ::std::os::raw::c_int);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn SetFocus(hwnd: root::HWND);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetFocus() -> root::HWND;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn SetForegroundWindow(hwnd: root::HWND);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetForegroundWindow() -> root::HWND;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn SetCapture(hwnd: root::HWND) -> root::HWND;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetCapture() -> root::HWND;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn ReleaseCapture();
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn IsChild(hwndParent: root::HWND, hwndChild: root::HWND) -> ::std::os::raw::c_int;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetParent(hwnd: root::HWND) -> root::HWND;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn SetParent(hwnd: root::HWND, newPar: root::HWND) -> root::HWND;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetWindow(hwnd: root::HWND, what: ::std::os::raw::c_int) -> root::HWND;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn EnumWindows(
             proc_: ::std::option::Option<
                 unsafe extern "C" fn(arg1: root::HWND, arg2: root::LPARAM) -> root::BOOL,
@@ -9422,22 +9422,22 @@ mod windows {
             lp: root::LPARAM,
         ) -> root::BOOL;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn ClientToScreen(hwnd: root::HWND, p: *mut root::POINT);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn ScreenToClient(hwnd: root::HWND, p: *mut root::POINT);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetWindowRect(hwnd: root::HWND, r: *mut root::RECT) -> bool;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetClientRect(hwnd: root::HWND, r: *mut root::RECT);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn WindowFromPoint(p: root::POINT) -> root::HWND;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn SetWindowPos(
             hwnd: root::HWND,
             unused: root::HWND,
@@ -9448,14 +9448,14 @@ mod windows {
             flags: ::std::os::raw::c_int,
         );
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn InvalidateRect(
             hwnd: root::HWND,
             r: *const root::RECT,
             eraseBk: ::std::os::raw::c_int,
         ) -> root::BOOL;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn ScrollWindow(
             hwnd: root::HWND,
             xamt: ::std::os::raw::c_int,
@@ -9464,13 +9464,13 @@ mod windows {
             lpClipRect: *const root::RECT,
         ) -> root::BOOL;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn IsWindowVisible(hwnd: root::HWND) -> bool;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn IsWindow(hwnd: root::HWND) -> bool;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn SetTimer(
             hwnd: root::HWND,
             timerid: root::UINT_PTR,
@@ -9478,52 +9478,52 @@ mod windows {
             tProc: root::TIMERPROC,
         ) -> root::UINT_PTR;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn KillTimer(hwnd: root::HWND, timerid: root::UINT_PTR) -> root::BOOL;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn CreatePopupMenu() -> root::HMENU;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn DestroyMenu(hMenu: root::HMENU);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetSubMenu(hMenu: root::HMENU, pos: ::std::os::raw::c_int) -> root::HMENU;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetMenuItemCount(hMenu: root::HMENU) -> ::std::os::raw::c_int;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetMenuItemID(
             hMenu: root::HMENU,
             pos: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn EnableMenuItem(
             hMenu: root::HMENU,
             idx: ::std::os::raw::c_int,
             en: ::std::os::raw::c_int,
         ) -> bool;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn DeleteMenu(
             hMenu: root::HMENU,
             idx: ::std::os::raw::c_int,
             flag: ::std::os::raw::c_int,
         ) -> bool;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn CheckMenuItem(
             hMenu: root::HMENU,
             idx: ::std::os::raw::c_int,
             chk: ::std::os::raw::c_int,
         ) -> bool;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn DrawMenuBar(arg1: root::HWND);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn TrackPopupMenu(
             hMenu: root::HMENU,
             flags: ::std::os::raw::c_int,
@@ -9534,80 +9534,80 @@ mod windows {
             r: *const root::RECT,
         ) -> ::std::os::raw::c_int;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn SetMenu(hwnd: root::HWND, menu: root::HMENU) -> root::BOOL;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetMenu(hwnd: root::HWND) -> root::HMENU;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn EndDialog(arg1: root::HWND, arg2: ::std::os::raw::c_int);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetAsyncKeyState(key: ::std::os::raw::c_int) -> root::WORD;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetCursorPos(pt: *mut root::POINT);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetMessagePos() -> root::DWORD;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn OpenClipboard(hwndDlg: root::HWND) -> bool;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn CloseClipboard();
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetClipboardData(type_: root::UINT) -> root::HANDLE;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn EmptyClipboard();
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn SetClipboardData(type_: root::UINT, h: root::HANDLE);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn EnumClipboardFormats(lastfmt: root::UINT) -> root::UINT;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GlobalAlloc(flags: ::std::os::raw::c_int, sz: ::std::os::raw::c_int)
         -> root::HANDLE;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GlobalLock(h: root::HANDLE) -> *mut ::std::os::raw::c_void;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GlobalUnlock(h: root::HANDLE);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetCurrentThreadId() -> root::DWORD;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn SetThreadPriority(evt: root::HANDLE, prio: ::std::os::raw::c_int) -> root::BOOL;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn CreateSolidBrush(col: ::std::os::raw::c_int) -> root::HBRUSH;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetStockObject(wh: ::std::os::raw::c_int) -> root::HGDIOBJ;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn DeleteObject(arg1: root::HGDIOBJ);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn SetTextColor(ctx: root::HDC, col: ::std::os::raw::c_int);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn SetBkColor(ctx: root::HDC, col: ::std::os::raw::c_int);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn SetBkMode(ctx: root::HDC, col: ::std::os::raw::c_int);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn CreateIconIndirect(iconinfo: *mut root::ICONINFO) -> root::HICON;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn BitBlt(
             hdcOut: root::HDC,
             x: ::std::os::raw::c_int,
@@ -9620,7 +9620,7 @@ mod windows {
             mode: ::std::os::raw::c_int,
         );
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn StretchBlt(
             hdcOut: root::HDC,
             x: ::std::os::raw::c_int,
@@ -9635,28 +9635,28 @@ mod windows {
             mode: ::std::os::raw::c_int,
         );
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetSysColor(idx: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn BeginPaint(arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::HDC;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn EndPaint(arg1: root::HWND, arg2: *mut root::PAINTSTRUCT) -> root::BOOL;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetDC(arg1: root::HWND) -> root::HDC;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetWindowDC(arg1: root::HWND) -> root::HDC;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn ReleaseDC(arg1: root::HWND, arg2: root::HDC);
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn GetSystemMetrics(arg1: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn EnumChildWindows(
             hwnd: root::HWND,
             cwEnumFunc: ::std::option::Option<
@@ -9665,7 +9665,7 @@ mod windows {
             lParam: root::LPARAM,
         ) -> root::BOOL;
     }
-    extern "system" {
+    unsafe extern "system" {
         pub fn IsWindowEnabled(arg1: root::HWND) -> bool;
     }
 }
