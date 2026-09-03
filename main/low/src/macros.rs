@@ -41,7 +41,7 @@ macro_rules! dll_main {
         /// last instance gone) with DLL_PROCESS_DETACH.
         #[cfg(target_family = "windows")]
         #[allow(non_snake_case)]
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         extern "system" fn DllMain(
             hinstance: reaper_low::raw::HINSTANCE,
             reason: u32,
@@ -88,7 +88,7 @@ macro_rules! swell_dll_main {
         /// `swell-modstub-custom.mm`.
         #[cfg(target_os = "linux")]
         #[allow(non_snake_case)]
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         extern "C" fn SWELL_dllMain(
             hinstance: reaper_low::raw::HINSTANCE,
             reason: u32,

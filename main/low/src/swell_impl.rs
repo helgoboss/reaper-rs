@@ -281,20 +281,20 @@ impl Swell {
         wParam: root::WPARAM,
         lParam: root::LPARAM,
     ) -> root::LRESULT {
-        if lParam != 0 && lparam_is_string(msg) {
-            let utf16_string = utf8_to_16(lParam as _);
-            let result = unsafe {
-                winapi::um::winuser::SendMessageW(
+        unsafe {
+            if lParam != 0 && lparam_is_string(msg) {
+                let utf16_string = utf8_to_16(lParam as _);
+                let result = winapi::um::winuser::SendMessageW(
                     hwnd as _,
                     msg,
                     wParam,
                     utf16_string.as_ptr() as _,
-                )
-            };
-            std::mem::drop(utf16_string);
-            result
-        } else {
-            unsafe { winapi::um::winuser::SendMessageW(hwnd as _, msg, wParam, lParam) }
+                );
+                std::mem::drop(utf16_string);
+                result
+            } else {
+                winapi::um::winuser::SendMessageW(hwnd as _, msg, wParam, lParam)
+            }
         }
     }
 
@@ -331,20 +331,20 @@ impl Swell {
         wParam: root::WPARAM,
         lParam: root::LPARAM,
     ) -> root::BOOL {
-        if lParam != 0 && lparam_is_string(msg) {
-            let utf16_string = utf8_to_16(lParam as _);
-            let result = unsafe {
-                winapi::um::winuser::PostMessageW(
+        unsafe {
+            if lParam != 0 && lparam_is_string(msg) {
+                let utf16_string = utf8_to_16(lParam as _);
+                let result = winapi::um::winuser::PostMessageW(
                     hwnd as _,
                     msg,
                     wParam,
                     utf16_string.as_ptr() as _,
-                )
-            };
-            std::mem::drop(utf16_string);
-            result as _
-        } else {
-            unsafe { winapi::um::winuser::PostMessageW(hwnd as _, msg, wParam, lParam) as _ }
+                );
+                std::mem::drop(utf16_string);
+                result as _
+            } else {
+                winapi::um::winuser::PostMessageW(hwnd as _, msg, wParam, lParam) as _
+            }
         }
     }
 
@@ -355,8 +355,8 @@ impl Swell {
         if font.is_null() {
             return std::ptr::null_mut();
         }
-        let font = &*font;
         unsafe {
+            let font = &*font;
             let mut wide_font = winapi::um::wingdi::LOGFONTW {
                 lfHeight: font.lfHeight,
                 lfWidth: font.lfWidth,
