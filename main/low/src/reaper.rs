@@ -3365,6 +3365,9 @@ impl Reaper {
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(GetPlayLoopCnt)).as_ptr()),
                 ),
+                GSC_darkwrap: std::mem::transmute(
+                    plugin_context.GetFunc(c_str_macro::c_str!(stringify!(GSC_darkwrap)).as_ptr()),
+                ),
                 InitializeCoolSB: std::mem::transmute(
                     plugin_context
                         .GetFunc(c_str_macro::c_str!(stringify!(InitializeCoolSB)).as_ptr()),
@@ -5973,6 +5976,9 @@ impl Reaper {
             loaded_count += 1;
         }
         if pointers.GetPlayLoopCnt.is_some() {
+            loaded_count += 1;
+        }
+        if pointers.GSC_darkwrap.is_some() {
             loaded_count += 1;
         }
         if pointers.InitializeCoolSB.is_some() {
@@ -19910,6 +19916,15 @@ impl Reaper {
             Some(f) => unsafe { f(__proj, something) },
         }
     }
+    pub fn GSC_darkwrap(&self, which: ::std::os::raw::c_int) -> root::COLORREF {
+        match self.pointers.GSC_darkwrap {
+            None => panic!(
+                "Attempt to use a function that has not been loaded: {}",
+                stringify!(GSC_darkwrap)
+            ),
+            Some(f) => unsafe { f(which) },
+        }
+    }
     #[doc = r" # Safety"]
     #[doc = r""]
     #[doc = r" REAPER can crash if you pass an invalid pointer."]
@@ -24812,6 +24827,7 @@ pub struct ReaperFunctionPointers {
             something: *mut ::std::os::raw::c_void,
         ) -> ::std::os::raw::c_longlong,
     >,
+    pub GSC_darkwrap: Option<extern "C" fn(which: ::std::os::raw::c_int) -> root::COLORREF>,
     pub InitializeCoolSB: Option<unsafe extern "system" fn(hwnd: root::HWND) -> root::BOOL>,
     pub UninitializeCoolSB: Option<unsafe extern "system" fn(hwnd: root::HWND) -> root::HRESULT>,
     pub CoolSB_SetMinThumbSize: Option<
@@ -24867,5 +24883,5 @@ pub struct ReaperFunctionPointers {
     >,
 }
 impl ReaperFunctionPointers {
-    pub(crate) const TOTAL_COUNT: u32 = 866u32;
+    pub(crate) const TOTAL_COUNT: u32 = 867u32;
 }

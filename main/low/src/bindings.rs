@@ -9363,6 +9363,12 @@ pub mod root {
             >;
         }
         unsafe extern "C" {
+            #[link_name = "\u{1}_ZN16reaper_functions12GSC_darkwrapE"]
+            pub static mut GSC_darkwrap: ::std::option::Option<
+                unsafe extern "C" fn(which: ::std::os::raw::c_int) -> root::COLORREF,
+            >;
+        }
+        unsafe extern "C" {
             #[link_name = "\u{1}_ZN16reaper_functions16InitializeCoolSBE"]
             pub static mut InitializeCoolSB:
                 ::std::option::Option<unsafe extern "C" fn(hwnd: root::HWND) -> root::BOOL>;
