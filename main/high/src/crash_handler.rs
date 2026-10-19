@@ -241,10 +241,12 @@ impl Display for FormattedBacktrace<'_> {
 
 #[allow(deprecated)]
 pub fn log_panic(panic_info: &PanicInfo, backtrace: Option<&Backtrace>) {
-    tracing::error!(
-        message = extract_panic_message(panic_info),
-        backtrace = format!("{backtrace:#?}")
-    );
+    let msg = extract_panic_message(panic_info);
+    if let Some(backtrace) = backtrace {
+        tracing::error!("{msg}\n{backtrace:#?}");
+    } else {
+        tracing::error!("{msg}");
+    }
 }
 
 #[derive(Default)]
