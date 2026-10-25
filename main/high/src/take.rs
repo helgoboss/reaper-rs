@@ -1,7 +1,8 @@
 use crate::{FxChain, OwnedSource, Reaper, ReaperSource, Track};
 use reaper_medium::{
     DurationInSeconds, FullPitchShiftMode, MediaItemTake, NativeColorValue, PlaybackSpeedFactor,
-    ReaperFunctionError, ReaperStringArg, ReaperVolumeValue, RgbColor, Semitones, TakeAttributeKey,
+    PositionInSeconds, ReaperFunctionError, ReaperStringArg, ReaperVolumeValue, RgbColor,
+    Semitones, TakeAttributeKey,
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -100,16 +101,16 @@ impl Take {
         }
     }
 
-    pub fn start_offset(&self) -> DurationInSeconds {
+    pub fn start_offset(&self) -> PositionInSeconds {
         let pos = unsafe {
             Reaper::get()
                 .medium_reaper
                 .get_media_item_take_info_value(self.raw, TakeAttributeKey::StartOffs)
         };
-        DurationInSeconds::new_panic(pos)
+        PositionInSeconds::new_panic(pos)
     }
 
-    pub fn set_start_offset(&self, length: DurationInSeconds) -> Result<(), ReaperFunctionError> {
+    pub fn set_start_offset(&self, length: PositionInSeconds) -> Result<(), ReaperFunctionError> {
         unsafe {
             Reaper::get().medium_reaper.set_media_item_take_info_value(
                 self.raw,
