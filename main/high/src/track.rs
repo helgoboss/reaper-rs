@@ -22,9 +22,9 @@ use reaper_medium::{
     AutomationMode, BeatAttachMode, ChunkCacheHint, GangBehavior, GlobalAutomationModeOverride,
     InputMonitoringMode, MediaTrack, NativeColorValue, NotificationBehavior, Progress, ReaProject,
     ReaperFunctionError, ReaperPanValue, ReaperString, ReaperStringArg, ReaperVolumeValue,
-    ReaperWidthValue, RecordArmMode, RecordingInput, RecordingMode, RgbColor, SetTrackUiFlags,
-    SoloMode, TrackArea, TrackAttributeKey, TrackLocation, TrackMuteOperation, TrackMuteState,
-    TrackPolarity, TrackPolarityOperation, TrackRecArmOperation, TrackSendCategory,
+    ReaperWidthValue, RecordArmMode, RecordingInput, RecordingMode, RgbColor, SendTarget,
+    SetTrackUiFlags, SoloMode, TrackArea, TrackAttributeKey, TrackLocation, TrackMuteOperation,
+    TrackMuteState, TrackPolarity, TrackPolarityOperation, TrackRecArmOperation, TrackSendCategory,
     TrackSendDirection, TrackSoloOperation, ValueChange,
 };
 use std::convert::TryInto;
@@ -219,6 +219,17 @@ impl Track {
             )?;
         }
         Ok(())
+    }
+
+    pub fn get_num_channels(&self) -> u32 {
+        if self.load_and_check_if_necessary_or_err().is_err() {
+            return 0;
+        }
+        unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .get_set_media_track_info_get_nchan(self.raw_internal())
+        }
     }
 
     pub fn input_monitoring_mode(&self) -> InputMonitoringMode {
@@ -553,6 +564,18 @@ impl Track {
             )
         };
         Ok(value)
+    }
+
+    pub fn set_folder_depth(&self, depth: i32) -> ReaperResult<()> {
+        self.load_and_check_if_necessary_or_err()?;
+        unsafe {
+            Reaper::get().medium_reaper().set_media_track_info_value(
+                self.raw_unchecked(),
+                TrackAttributeKey::FolderDepth,
+                depth as _,
+            )?;
+        }
+        Ok(())
     }
 
     pub fn folder_depth_change(&self) -> i32 {
@@ -1365,6 +1388,17 @@ impl Track {
             TrackSendDirection::Send,
             hw_send_count + send_index,
         )
+    }
+
+    pub fn add_send_to_hardware_output(&self) -> TrackRoute {
+        // TODO-low Check how this behaves if send already exists
+        let send_index = unsafe {
+            Reaper::get()
+                .medium_reaper()
+                .create_track_send(self.raw_unchecked(), SendTarget::HardwareOutput)
+                .unwrap()
+        };
+        TrackRoute::new(self.clone(), TrackSendDirection::Send, send_index)
     }
 
     pub fn receives(&self) -> impl ExactSizeIterator<Item = TrackRoute> + '_ {

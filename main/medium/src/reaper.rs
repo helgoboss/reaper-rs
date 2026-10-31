@@ -1820,6 +1820,23 @@ where
         }
     }
 
+    /// Convenience function which returns the given track's number of channels.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid track.
+    pub unsafe fn get_set_media_track_info_get_nchan(&self, track: MediaTrack) -> u32
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe {
+            self.require_main_thread();
+            let ptr = self.get_set_media_track_info(track, TrackAttributeKey::Nchan, null_mut());
+            let value = deref_as::<i32>(ptr).expect("I_NCHAN pointer is null");
+            value as u32
+        }
+    }
+
     /// Convenience function which returns the given track's solo mode (`I_SOLO`).
     ///
     /// # Safety
