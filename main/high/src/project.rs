@@ -7,12 +7,11 @@ use camino::{Utf8Path, Utf8PathBuf};
 use either::Either;
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
 use reaper_medium::{
-    AutoSeekBehavior, BookmarkId, BookmarkRef, CountProjectMarkersResult, DurationInSeconds,
+    AutoSeekBehavior, BookmarkId, BookmarkRef, Bpm, CountProjectMarkersResult, DurationInSeconds,
     GetLastMarkerAndCurRegionResult, GetLoopTimeRange2Result, MasterTrackBehavior, PanMode,
     PlayState, PositionInSeconds, ProjectContext, ProjectRef, ReaProject, ReaperString,
-    ReaperStringArg, SetEditCurPosOptions, SetTempoTimeSigMarkerArgs, TimeMap2TimeToBeatsResult,
-    TimeMode, TimeModeOverride, TimeRangeType, TimeSignature, TrackDefaultsBehavior, TrackLocation,
-    UndoBehavior,
+    ReaperStringArg, SetEditCurPosOptions, TimeMap2TimeToBeatsResult, TimeMode, TimeModeOverride,
+    TimeRangeType, TimeSignature, TrackDefaultsBehavior, TrackLocation, UndoBehavior,
 };
 use std::fmt::Debug;
 use std::path::PathBuf;
@@ -378,18 +377,19 @@ impl Project {
 
     pub fn set_time_signature(self, time_signature: TimeSignature) -> ReaperResult<()> {
         self.complain_if_not_available()?;
-        Reaper::get().medium_reaper().set_tempo_time_sig_marker(
-            CurrentProject,
-            SetTempoTimeSigMarkerArgs {
-                marker_index: None,
-                position: Some(PositionInSeconds::ZERO),
-                measure_position: None,
-                beat_position: None,
-                tempo: None,
-                time_signature,
-                linear_tempo: false,
-            },
-        )?;
+        // Change project setting values
+        let projbpm = self.get_setting_ref::<f64>("projbpm")?;
+        let projmeaslen = self.get_setting_ref::<i32>("projmeaslen")?;
+        let projtsdenom = self.get_setting_ref::<i32>("projtsdenom")?;
+        *projmeaslen = time_signature.numerator.get() as i32;
+        *projtsdenom = time_signature.denominator.get() as i32;
+        // Apply values
+        let bpm = Bpm::new_panic(*projbpm);
+        Reaper::get().medium_reaper().set_current_bpm(
+            self.context(),
+            bpm,
+            UndoBehavior::OmitUndoPoint,
+        );
         Ok(())
     }
 
