@@ -5826,6 +5826,63 @@ where
         Some(NativeColor::new(raw))
     }
 
+    /// Inserts or modifies a tempo/time signature marker.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given project is not valid anymore.
+    pub fn set_tempo_time_sig_marker(
+        &self,
+        project: ProjectContext,
+        params: SetTempoTimeSigMarkerArgs,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_valid_project(project);
+        unsafe { self.set_tempo_time_sig_marker_unchecked(project, params) }
+    }
+
+    /// Like [`set_tempo_time_sig_marker()`] but doesn't check if project is valid.
+    ///
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid project.
+    ///
+    /// [`set_tempo_time_sig_marker()`]: #method.set_tempo_time_sig_marker
+    pub unsafe fn set_tempo_time_sig_marker_unchecked(
+        &self,
+        project: ProjectContext,
+        params: SetTempoTimeSigMarkerArgs,
+    ) -> ReaperFunctionResult<()>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        unsafe {
+            self.require_main_thread();
+
+            let successful = self.low.SetTempoTimeSigMarker(
+                project.to_raw(),
+                params.marker_index.map(|v| v as i32).unwrap_or(-1),
+                params.position.map(|v| v.get()).unwrap_or(-1.0),
+                params.measure_position.map(|v| v as i32).unwrap_or(-1),
+                params.beat_position.unwrap_or(-1.0),
+                params.tempo.map(|v| v.get()).unwrap_or(-1.0),
+                params.time_signature.numerator.get() as i32,
+                params.time_signature.denominator.get() as i32,
+                params.linear_tempo,
+            );
+
+            if !successful {
+                return Err(ReaperFunctionError::new(
+                    "couldn't set tempo/time signature marker",
+                ));
+            }
+
+            Ok(())
+        }
+    }
+
     /// Sets the track automation mode.
     ///
     /// # Safety
@@ -9755,6 +9812,30 @@ pub struct GetTouchedOrFocusedFxCurrentlyFocusedFxResult {
     pub is_still_focused: bool,
     /// Returns the actual FX.
     pub fx: FxLocation,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct SetTempoTimeSigMarkerArgs {
+    /// Existing marker index, or `None` to insert a new marker.
+    pub marker_index: Option<u32>,
+
+    /// Position in seconds. If `None`, measure and beat position are used.
+    pub position: Option<PositionInSeconds>,
+
+    /// Zero-based measure position.
+    pub measure_position: Option<u32>,
+
+    /// Beat position within the measure.
+    pub beat_position: Option<f64>,
+
+    /// Tempo, or `None` to preserve the existing tempo.
+    pub tempo: Option<Bpm>,
+
+    /// Time signature.
+    pub time_signature: TimeSignature,
+
+    /// Whether to use a linear tempo transition.
+    pub linear_tempo: bool,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]

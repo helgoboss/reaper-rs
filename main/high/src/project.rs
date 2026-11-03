@@ -3,9 +3,6 @@ use crate::{
     BasicBookmarkInfo, BookmarkType, IndexBasedBookmark, Item, PlayRate, Reaper, ReaperResult,
     Tempo, Track,
 };
-use std::fmt::Debug;
-use std::{iter, mem};
-
 use camino::{Utf8Path, Utf8PathBuf};
 use either::Either;
 use reaper_medium::ProjectContext::{CurrentProject, Proj};
@@ -13,10 +10,13 @@ use reaper_medium::{
     AutoSeekBehavior, BookmarkId, BookmarkRef, CountProjectMarkersResult, DurationInSeconds,
     GetLastMarkerAndCurRegionResult, GetLoopTimeRange2Result, MasterTrackBehavior, PanMode,
     PlayState, PositionInSeconds, ProjectContext, ProjectRef, ReaProject, ReaperString,
-    ReaperStringArg, SetEditCurPosOptions, TimeMap2TimeToBeatsResult, TimeMode, TimeModeOverride,
-    TimeRangeType, TimeSignature, TrackDefaultsBehavior, TrackLocation, UndoBehavior,
+    ReaperStringArg, SetEditCurPosOptions, SetTempoTimeSigMarkerArgs, TimeMap2TimeToBeatsResult,
+    TimeMode, TimeModeOverride, TimeRangeType, TimeSignature, TrackDefaultsBehavior, TrackLocation,
+    UndoBehavior,
 };
+use std::fmt::Debug;
 use std::path::PathBuf;
+use std::{iter, mem};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct Project {
@@ -376,6 +376,23 @@ impl Project {
         Ok(())
     }
 
+    pub fn set_time_signature(self, time_signature: TimeSignature) -> ReaperResult<()> {
+        self.complain_if_not_available()?;
+        Reaper::get().medium_reaper().set_tempo_time_sig_marker(
+            CurrentProject,
+            SetTempoTimeSigMarkerArgs {
+                marker_index: None,
+                position: Some(PositionInSeconds::ZERO),
+                measure_position: None,
+                beat_position: None,
+                tempo: None,
+                time_signature,
+                linear_tempo: false,
+            },
+        )?;
+        Ok(())
+    }
+
     pub fn is_playing(self) -> bool {
         self.play_state().is_playing
     }
@@ -676,15 +693,6 @@ impl Project {
                 .expect("couldn't get projtimemode")
         };
         TimeMode::from_raw(raw)
-    }
-
-    pub fn set_time_signature(self, _value: TimeSignature) {
-        todo!();
-        // let raw: i32 = unsafe {
-        //     self.get_project_config("tempo")
-        //         .expect("couldn't get tempo")
-        // };
-        // raw
     }
 
     pub fn transport_time_mode(self) -> TimeModeOverride {
