@@ -31,7 +31,7 @@ impl Reaper {
             .is_in_main_thread()
     }
 
-    pub fn audio_device_sample_rate(&self) -> Result<Hz, &'static str> {
+    pub fn audio_device_sample_rate(&self) -> ReaperResult<Hz> {
         let sample_rate_string = self
             .medium_reaper
             .get_audio_device_info(AudioDeviceAttributeKey::SRate, 10)
@@ -42,7 +42,7 @@ impl Reaper {
             .map_err(|_| "couldn't parse sample rate")?;
         sample_rate_number
             .try_into()
-            .map_err(|_| "invalid sample rate")
+            .map_err(|_| ReaperError::new("invalid sample rate"))
     }
 
     pub fn input_channels(&self) -> impl Iterator<Item = String> + '_ {
