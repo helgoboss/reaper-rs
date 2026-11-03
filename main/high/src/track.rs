@@ -308,6 +308,28 @@ impl Track {
         Ok(())
     }
 
+    /// This fires a change event.
+    pub fn set_recording_input_with_notification(&self, input: Option<RecordingInput>) {
+        self.set_recording_input(input);
+        // Unfortunately, just setting the rec input doesn't trigger any IReaperControlSurface
+        // callback. In the change detection middleware, we usually listen to
+        // CSURF_EXT_SETINPUTMONITOR, but this is also not triggered. But we can trigger it
+        // manually by setting the input monitoring mode to the current value, which triggers
+        // CSURF_EXT_SETINPUTMONITOR, which causes the change detection middleware to detect
+        // the recording input change and fire an appropriate event.
+        let input_monitoring_mode = self.input_monitoring_mode();
+        unsafe {
+            Reaper::get()
+                .medium_reaper
+                .csurf_on_input_monitoring_change_ex(
+                    self.raw_unchecked(),
+                    input_monitoring_mode,
+                    GangBehavior::DenyGang,
+                );
+        }
+    }
+
+    /// This doesn't fire any change event.
     pub fn set_recording_input(&self, input: Option<RecordingInput>) {
         self.load_and_check_if_necessary_or_complain();
         let rec_input_index = match input {
@@ -321,23 +343,6 @@ impl Track {
                 rec_input_index as f64,
             )
         };
-        // Only for triggering notification (as manual setting the rec input would also trigger it)
-        // This doesn't work for other surfaces but they are also not interested in record input
-        // changes.
-        let _rec_mon = unsafe {
-            Reaper::get()
-                .medium_reaper()
-                .get_media_track_info_value(self.raw_unchecked(), RecMon)
-        };
-        // TODO-low 5198273 This is ugly. Solve in other ways.
-        // let control_surface = get_control_surface_instance();
-        // let super_raw: *mut raw::MediaTrack = self.raw().as_ptr();
-        // control_surface.Extended(
-        //     CSURF_EXT_SETINPUTMONITOR as i32,
-        //     super_raw as *mut c_void,
-        //     &mut rec_mon as *mut f64 as *mut c_void,
-        //     null_mut(),
-        // );
     }
 
     pub fn recording_mode(&self) -> RecordingMode {
