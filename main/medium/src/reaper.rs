@@ -6595,6 +6595,35 @@ where
         unsafe { self.low.Help_Set(message.into().as_ptr(), mode.to_raw()) };
     }
 
+    /// Enumerates installed FX.
+    ///
+    /// Returns `None` if there is no FX at the given index.
+    ///
+    /// The identifier depends on the FX type. For example, it can be a
+    /// file path (VST), a plug-in ID (CLAP), or a relative path (JS).
+    pub fn enum_installed_fx(&self, index: u32) -> Option<EnumInstalledFxResult>
+    where
+        UsageScope: AnyThread,
+    {
+        // self.require_main_thread();
+        let mut name = MaybeUninit::uninit();
+        let mut ident = MaybeUninit::uninit();
+        let success = unsafe {
+            self.low
+                .EnumInstalledFX(index as c_int, name.as_mut_ptr(), ident.as_mut_ptr())
+        };
+        if !success {
+            return None;
+        }
+        let name = unsafe { name.assume_init() };
+        let ident = unsafe { ident.assume_init() };
+        let result = EnumInstalledFxResult {
+            name: unsafe { ReaperStr::from_ptr(name) }.to_owned(),
+            ident: unsafe { ReaperStr::from_ptr(ident) }.to_owned(),
+        };
+        Some(result)
+    }
+
     /// Parses the given string as GUID.
     ///
     /// # Errors
@@ -9812,6 +9841,19 @@ pub struct GetTouchedOrFocusedFxCurrentlyFocusedFxResult {
     pub is_still_focused: bool,
     /// Returns the actual FX.
     pub fx: FxLocation,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct EnumInstalledFxResult {
+    /// Display name including the FX type prefix.
+    ///
+    /// Example: "VST3i: Diva (u-he)"
+    pub name: ReaperString,
+
+    /// REAPER's identifier for the FX.
+    ///
+    /// Example: "/Library/Audio/Plug-Ins/VST3/Diva.vst3"
+    pub ident: ReaperString,
 }
 
 #[derive(Clone, Copy, Debug)]

@@ -9,10 +9,10 @@ use crate::{
 use camino::Utf8PathBuf;
 use helgoboss_midi::ShortMessage;
 use reaper_medium::{
-    AudioDeviceAttributeKey, CommandId, EnumPitchShiftModesResult, GetLastTouchedFxResult,
-    GlobalAutomationModeOverride, Hwnd, Hz, MidiInputDeviceId, MidiOutputDeviceId, PitchShiftMode,
-    PitchShiftSubMode, ProjectRef, ReaperStr, ReaperString, ReaperStringArg, ReaperVersion,
-    ResampleMode, SectionId, StuffMidiMessageTarget, TrackLocation,
+    AudioDeviceAttributeKey, CommandId, EnumInstalledFxResult, EnumPitchShiftModesResult,
+    GetLastTouchedFxResult, GlobalAutomationModeOverride, Hwnd, Hz, MidiInputDeviceId,
+    MidiOutputDeviceId, PitchShiftMode, PitchShiftSubMode, ProjectRef, ReaperStr, ReaperString,
+    ReaperStringArg, ReaperVersion, ResampleMode, SectionId, StuffMidiMessageTarget, TrackLocation,
 };
 use std::fmt::Debug;
 use std::path::PathBuf;
@@ -29,6 +29,13 @@ impl Reaper {
             .low()
             .plugin_context()
             .is_in_main_thread()
+    }
+
+    pub fn installed_fxs(&self) -> impl Iterator<Item = EnumInstalledFxResult> + '_ {
+        (0..)
+            .map(move |i| self.medium_reaper().enum_installed_fx(i))
+            .take_while(|r| !r.is_none())
+            .map(|r| r.unwrap())
     }
 
     pub fn audio_device_sample_rate(&self) -> ReaperResult<Hz> {
