@@ -38,6 +38,15 @@ impl Reaper {
             .map(|r| r.unwrap())
     }
 
+    /// REAPER versions < 7.86 don't support this query yet.
+    pub fn max_loopback_channel_count(&self) -> ReaperResult<u32> {
+        let loopback_size = self
+            .medium_reaper
+            .get_config_var_string("loopback_size", 32)?;
+        let loopback_size: u32 = loopback_size.to_str().parse().unwrap_or(0);
+        Ok(loopback_size)
+    }
+
     pub fn audio_device_sample_rate(&self) -> ReaperResult<Hz> {
         let sample_rate_string = self
             .medium_reaper
