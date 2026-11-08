@@ -3724,6 +3724,36 @@ where
         use_ini_file(path)
     }
 
+    /// Gets INI configuration variable value as string.
+    ///
+    /// For most keys, this will get the in-memory copy of it, but for others it will actually read
+    /// the .ini file directly.
+    ///
+    /// With `buffer_size` you can tell REAPER how many bytes of the resulting value you want.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the given buffer size is 0.
+    pub fn get_config_var_string<'a>(
+        &self,
+        name: impl Into<ReaperStringArg<'a>>,
+        buffer_size: u32,
+    ) -> ReaperFunctionResult<ReaperString>
+    where
+        UsageScope: MainThreadOnly,
+    {
+        self.require_main_thread();
+        let (value, successful) = with_string_buffer(buffer_size, |buffer, max_size| unsafe {
+            self.low
+                .get_config_var_string(name.into().as_ptr(), buffer, max_size)
+        });
+
+        if !successful {
+            return Err(ReaperFunctionError::new("couldn't get config var string"));
+        }
+        Ok(value)
+    }
+
     /// Returns the REAPER preference with the given name.
     pub fn get_config_var<'a>(
         &self,
