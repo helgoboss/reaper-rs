@@ -6633,9 +6633,9 @@ where
     /// file path (VST), a plug-in ID (CLAP), or a relative path (JS).
     pub fn enum_installed_fx(&self, index: u32) -> Option<EnumInstalledFxResult>
     where
-        UsageScope: AnyThread,
+        UsageScope: MainThreadOnly,
     {
-        // self.require_main_thread();
+        self.require_main_thread();
         let mut name = MaybeUninit::uninit();
         let mut ident = MaybeUninit::uninit();
         let success = unsafe {
