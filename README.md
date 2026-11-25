@@ -491,17 +491,17 @@ Regenerate the low-level API:
 
 - See section "Docker".
 
-### Docker
+### Docker/Podman
 
 Regenerating the low-level API should always be done on Linux. And for getting really deterministic results, it's best
-to always use the same distro and same environment, which is easy to achieve with Docker:
+to always use the same distro and same environment, which is easy to achieve with Docker/Podman:
 
 ```sh
 # Build image (official Rust image + LLVM and Clang)
-docker build --tag rust-for-reaper-rs .
+podman build --tag rust-for-reaper-rs .
 
 # Build reaper-low with feature "generate"
-docker run --rm --user "$(id -u)":"$(id -g)" -v "$PWD":/usr/src/myapp -w /usr/src/myapp rust-for-reaper-rs cargo build --package reaper-low --features generate
+podman run --rm --user "$(id -u)":"$(id -g)" -v "$PWD":/usr/src/myapp -w /usr/src/myapp rust-for-reaper-rs cargo build --package reaper-low --features generate
 
 # Format code
 cargo fmt

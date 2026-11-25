@@ -344,6 +344,13 @@ mod codegen {
             "GetCurrentThreadId",
         ];
 
+        /// SWELL functions whose runtime lookup names differ from
+        /// their names after C macro expansion.
+        static SWELL_FUNCTION_LOOKUP_NAMES: phf::Map<&'static str, &'static str> = phf::phf_map![
+            "SWELL_LineTo" => "LineTo",
+            "SWELL_SetPixel" => "SetPixel",
+        ];
+
         /// This is a list of types that influence if a generated method will be marked as unsafe
         /// or not.
         ///
@@ -504,6 +511,17 @@ mod codegen {
                 fn_ptr_signatures,
                 methods,
             } = build_compartments(fn_ptrs, &phf::phf_set![], &ADDITIONAL_SAFE_SWELL_FUNCTIONS);
+            let lookup_names: Vec<_> = names
+                .iter()
+                .map(|name| {
+                    let name = name.to_string();
+                    SWELL_FUNCTION_LOOKUP_NAMES
+                        .get(name.as_str())
+                        .copied()
+                        .unwrap_or(name.as_str())
+                        .to_owned()
+                })
+                .collect();
             let windows_functions: Vec<_> = fn_ptrs
                 .iter()
                 .filter_map(|p| {
@@ -590,7 +608,7 @@ mod codegen {
                                 SwellFunctionPointers {
                                     loaded_count: 0,
                                     #(
-                                        #names: std::mem::transmute(get_func(c_str_macro::c_str!(stringify!(#names)).as_ptr())),
+                                        #names: std::mem::transmute(get_func(c_str_macro::c_str!(#lookup_names).as_ptr())),
                                     )*
                                 }
                             };

@@ -53,1015 +53,992 @@ impl Swell {
                 SwellFunctionPointers {
                     loaded_count: 0,
                     lstrcpyn: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(lstrcpyn)).as_ptr(),
+                        c_str_macro::c_str!("lstrcpyn").as_ptr(),
                     )),
-                    MulDiv: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(MulDiv)).as_ptr(),
-                    )),
-                    Sleep: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(Sleep)).as_ptr(),
-                    )),
+                    MulDiv: std::mem::transmute(get_func(c_str_macro::c_str!("MulDiv").as_ptr())),
+                    Sleep: std::mem::transmute(get_func(c_str_macro::c_str!("Sleep").as_ptr())),
                     GetTickCount: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetTickCount)).as_ptr(),
+                        c_str_macro::c_str!("GetTickCount").as_ptr(),
                     )),
                     GetFileTime: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetFileTime)).as_ptr(),
+                        c_str_macro::c_str!("GetFileTime").as_ptr(),
                     )),
                     WritePrivateProfileString: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(WritePrivateProfileString)).as_ptr(),
+                        c_str_macro::c_str!("WritePrivateProfileString").as_ptr(),
                     )),
                     GetPrivateProfileString: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetPrivateProfileString)).as_ptr(),
+                        c_str_macro::c_str!("GetPrivateProfileString").as_ptr(),
                     )),
                     GetPrivateProfileInt: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetPrivateProfileInt)).as_ptr(),
+                        c_str_macro::c_str!("GetPrivateProfileInt").as_ptr(),
                     )),
                     GetPrivateProfileStruct: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetPrivateProfileStruct)).as_ptr(),
+                        c_str_macro::c_str!("GetPrivateProfileStruct").as_ptr(),
                     )),
                     WritePrivateProfileStruct: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(WritePrivateProfileStruct)).as_ptr(),
+                        c_str_macro::c_str!("WritePrivateProfileStruct").as_ptr(),
                     )),
                     WritePrivateProfileSection: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(WritePrivateProfileSection)).as_ptr(),
+                        c_str_macro::c_str!("WritePrivateProfileSection").as_ptr(),
                     )),
                     GetPrivateProfileSection: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetPrivateProfileSection)).as_ptr(),
+                        c_str_macro::c_str!("GetPrivateProfileSection").as_ptr(),
                     )),
                     GetModuleFileName: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetModuleFileName)).as_ptr(),
+                        c_str_macro::c_str!("GetModuleFileName").as_ptr(),
                     )),
                     SWELL_PtInRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_PtInRect)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_PtInRect").as_ptr(),
                     )),
                     ShellExecute: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ShellExecute)).as_ptr(),
+                        c_str_macro::c_str!("ShellExecute").as_ptr(),
                     )),
                     MessageBox: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(MessageBox)).as_ptr(),
+                        c_str_macro::c_str!("MessageBox").as_ptr(),
                     )),
                     BrowseForFiles: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(BrowseForFiles)).as_ptr(),
+                        c_str_macro::c_str!("BrowseForFiles").as_ptr(),
                     )),
                     BrowseForSaveFile: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(BrowseForSaveFile)).as_ptr(),
+                        c_str_macro::c_str!("BrowseForSaveFile").as_ptr(),
                     )),
                     BrowseForDirectory: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(BrowseForDirectory)).as_ptr(),
+                        c_str_macro::c_str!("BrowseForDirectory").as_ptr(),
                     )),
                     BrowseFile_SetTemplate: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(BrowseFile_SetTemplate)).as_ptr(),
+                        c_str_macro::c_str!("BrowseFile_SetTemplate").as_ptr(),
                     )),
                     GetDlgItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetDlgItem)).as_ptr(),
+                        c_str_macro::c_str!("GetDlgItem").as_ptr(),
                     )),
                     ShowWindow: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ShowWindow)).as_ptr(),
+                        c_str_macro::c_str!("ShowWindow").as_ptr(),
                     )),
                     DestroyWindow: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(DestroyWindow)).as_ptr(),
+                        c_str_macro::c_str!("DestroyWindow").as_ptr(),
                     )),
                     SWELL_GetGestureInfo: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetGestureInfo)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetGestureInfo").as_ptr(),
                     )),
                     SWELL_HideApp: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_HideApp)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_HideApp").as_ptr(),
                     )),
                     SetDlgItemText: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetDlgItemText)).as_ptr(),
+                        c_str_macro::c_str!("SetDlgItemText").as_ptr(),
                     )),
                     SetDlgItemInt: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetDlgItemInt)).as_ptr(),
+                        c_str_macro::c_str!("SetDlgItemInt").as_ptr(),
                     )),
                     GetDlgItemInt: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetDlgItemInt)).as_ptr(),
+                        c_str_macro::c_str!("GetDlgItemInt").as_ptr(),
                     )),
                     GetDlgItemText: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetDlgItemText)).as_ptr(),
+                        c_str_macro::c_str!("GetDlgItemText").as_ptr(),
                     )),
                     GetWindowTextLength: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetWindowTextLength)).as_ptr(),
+                        c_str_macro::c_str!("GetWindowTextLength").as_ptr(),
                     )),
                     CheckDlgButton: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CheckDlgButton)).as_ptr(),
+                        c_str_macro::c_str!("CheckDlgButton").as_ptr(),
                     )),
                     IsDlgButtonChecked: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(IsDlgButtonChecked)).as_ptr(),
+                        c_str_macro::c_str!("IsDlgButtonChecked").as_ptr(),
                     )),
                     EnableWindow: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(EnableWindow)).as_ptr(),
+                        c_str_macro::c_str!("EnableWindow").as_ptr(),
                     )),
                     SetFocus: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetFocus)).as_ptr(),
+                        c_str_macro::c_str!("SetFocus").as_ptr(),
                     )),
                     GetFocus: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetFocus)).as_ptr(),
+                        c_str_macro::c_str!("GetFocus").as_ptr(),
                     )),
                     SetForegroundWindow: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetForegroundWindow)).as_ptr(),
+                        c_str_macro::c_str!("SetForegroundWindow").as_ptr(),
                     )),
                     GetForegroundWindow: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetForegroundWindow)).as_ptr(),
+                        c_str_macro::c_str!("GetForegroundWindow").as_ptr(),
                     )),
                     SetCapture: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetCapture)).as_ptr(),
+                        c_str_macro::c_str!("SetCapture").as_ptr(),
                     )),
                     GetCapture: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetCapture)).as_ptr(),
+                        c_str_macro::c_str!("GetCapture").as_ptr(),
                     )),
                     ReleaseCapture: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ReleaseCapture)).as_ptr(),
+                        c_str_macro::c_str!("ReleaseCapture").as_ptr(),
                     )),
-                    IsChild: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(IsChild)).as_ptr(),
-                    )),
+                    IsChild: std::mem::transmute(get_func(c_str_macro::c_str!("IsChild").as_ptr())),
                     GetParent: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetParent)).as_ptr(),
+                        c_str_macro::c_str!("GetParent").as_ptr(),
                     )),
                     SetParent: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetParent)).as_ptr(),
+                        c_str_macro::c_str!("SetParent").as_ptr(),
                     )),
                     GetWindow: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetWindow)).as_ptr(),
+                        c_str_macro::c_str!("GetWindow").as_ptr(),
                     )),
                     EnumWindows: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(EnumWindows)).as_ptr(),
+                        c_str_macro::c_str!("EnumWindows").as_ptr(),
                     )),
                     FindWindowEx: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(FindWindowEx)).as_ptr(),
+                        c_str_macro::c_str!("FindWindowEx").as_ptr(),
                     )),
                     ClientToScreen: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ClientToScreen)).as_ptr(),
+                        c_str_macro::c_str!("ClientToScreen").as_ptr(),
                     )),
                     ScreenToClient: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ScreenToClient)).as_ptr(),
+                        c_str_macro::c_str!("ScreenToClient").as_ptr(),
                     )),
                     GetWindowRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetWindowRect)).as_ptr(),
+                        c_str_macro::c_str!("GetWindowRect").as_ptr(),
                     )),
                     GetWindowContentViewRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetWindowContentViewRect)).as_ptr(),
+                        c_str_macro::c_str!("GetWindowContentViewRect").as_ptr(),
                     )),
                     GetClientRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetClientRect)).as_ptr(),
+                        c_str_macro::c_str!("GetClientRect").as_ptr(),
                     )),
                     WindowFromPoint: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(WindowFromPoint)).as_ptr(),
+                        c_str_macro::c_str!("WindowFromPoint").as_ptr(),
                     )),
                     WinOffsetRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(WinOffsetRect)).as_ptr(),
+                        c_str_macro::c_str!("WinOffsetRect").as_ptr(),
                     )),
                     WinSetRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(WinSetRect)).as_ptr(),
+                        c_str_macro::c_str!("WinSetRect").as_ptr(),
                     )),
                     WinUnionRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(WinUnionRect)).as_ptr(),
+                        c_str_macro::c_str!("WinUnionRect").as_ptr(),
                     )),
                     WinIntersectRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(WinIntersectRect)).as_ptr(),
+                        c_str_macro::c_str!("WinIntersectRect").as_ptr(),
                     )),
                     SetWindowPos: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetWindowPos)).as_ptr(),
+                        c_str_macro::c_str!("SetWindowPos").as_ptr(),
                     )),
                     SWELL_SetWindowLevel: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetWindowLevel)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_SetWindowLevel").as_ptr(),
                     )),
                     InvalidateRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(InvalidateRect)).as_ptr(),
+                        c_str_macro::c_str!("InvalidateRect").as_ptr(),
                     )),
                     UpdateWindow: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(UpdateWindow)).as_ptr(),
+                        c_str_macro::c_str!("UpdateWindow").as_ptr(),
                     )),
                     GetWindowLong: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetWindowLong)).as_ptr(),
+                        c_str_macro::c_str!("GetWindowLong").as_ptr(),
                     )),
                     SetWindowLong: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetWindowLong)).as_ptr(),
+                        c_str_macro::c_str!("SetWindowLong").as_ptr(),
                     )),
                     ScrollWindow: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ScrollWindow)).as_ptr(),
+                        c_str_macro::c_str!("ScrollWindow").as_ptr(),
                     )),
                     EnumPropsEx: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(EnumPropsEx)).as_ptr(),
+                        c_str_macro::c_str!("EnumPropsEx").as_ptr(),
                     )),
-                    GetProp: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetProp)).as_ptr(),
-                    )),
-                    SetProp: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetProp)).as_ptr(),
-                    )),
+                    GetProp: std::mem::transmute(get_func(c_str_macro::c_str!("GetProp").as_ptr())),
+                    SetProp: std::mem::transmute(get_func(c_str_macro::c_str!("SetProp").as_ptr())),
                     RemoveProp: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(RemoveProp)).as_ptr(),
+                        c_str_macro::c_str!("RemoveProp").as_ptr(),
                     )),
                     IsWindowVisible: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(IsWindowVisible)).as_ptr(),
+                        c_str_macro::c_str!("IsWindowVisible").as_ptr(),
                     )),
                     IsWindow: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(IsWindow)).as_ptr(),
+                        c_str_macro::c_str!("IsWindow").as_ptr(),
                     )),
                     SetTimer: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetTimer)).as_ptr(),
+                        c_str_macro::c_str!("SetTimer").as_ptr(),
                     )),
                     KillTimer: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(KillTimer)).as_ptr(),
+                        c_str_macro::c_str!("KillTimer").as_ptr(),
                     )),
                     ListView_SetExtendedListViewStyleEx: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetExtendedListViewStyleEx))
-                            .as_ptr(),
+                        c_str_macro::c_str!("ListView_SetExtendedListViewStyleEx").as_ptr(),
                     )),
                     ListView_InsertColumn: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_InsertColumn)).as_ptr(),
+                        c_str_macro::c_str!("ListView_InsertColumn").as_ptr(),
                     )),
                     ListView_DeleteColumn: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_DeleteColumn)).as_ptr(),
+                        c_str_macro::c_str!("ListView_DeleteColumn").as_ptr(),
                     )),
                     ListView_SetColumn: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetColumn)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SetColumn").as_ptr(),
                     )),
                     ListView_GetColumnWidth: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetColumnWidth)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetColumnWidth").as_ptr(),
                     )),
                     ListView_InsertItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_InsertItem)).as_ptr(),
+                        c_str_macro::c_str!("ListView_InsertItem").as_ptr(),
                     )),
                     ListView_SetItemText: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetItemText)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SetItemText").as_ptr(),
                     )),
                     ListView_SetItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetItem)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SetItem").as_ptr(),
                     )),
                     ListView_GetNextItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetNextItem)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetNextItem").as_ptr(),
                     )),
                     ListView_GetItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetItem)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetItem").as_ptr(),
                     )),
                     ListView_GetItemState: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetItemState)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetItemState").as_ptr(),
                     )),
                     ListView_DeleteItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_DeleteItem)).as_ptr(),
+                        c_str_macro::c_str!("ListView_DeleteItem").as_ptr(),
                     )),
                     ListView_DeleteAllItems: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_DeleteAllItems)).as_ptr(),
+                        c_str_macro::c_str!("ListView_DeleteAllItems").as_ptr(),
                     )),
                     ListView_GetSelectedCount: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetSelectedCount)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetSelectedCount").as_ptr(),
                     )),
                     ListView_GetItemCount: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetItemCount)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetItemCount").as_ptr(),
                     )),
                     ListView_GetSelectionMark: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetSelectionMark)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetSelectionMark").as_ptr(),
                     )),
                     ListView_SetColumnWidth: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetColumnWidth)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SetColumnWidth").as_ptr(),
                     )),
                     ListView_SetItemState: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetItemState)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SetItemState").as_ptr(),
                     )),
                     ListView_RedrawItems: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_RedrawItems)).as_ptr(),
+                        c_str_macro::c_str!("ListView_RedrawItems").as_ptr(),
                     )),
                     ListView_SetItemCount: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetItemCount)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SetItemCount").as_ptr(),
                     )),
                     ListView_EnsureVisible: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_EnsureVisible)).as_ptr(),
+                        c_str_macro::c_str!("ListView_EnsureVisible").as_ptr(),
                     )),
                     ListView_SetImageList: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetImageList)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SetImageList").as_ptr(),
                     )),
                     ListView_SubItemHitTest: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SubItemHitTest)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SubItemHitTest").as_ptr(),
                     )),
                     ListView_GetItemText: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetItemText)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetItemText").as_ptr(),
                     )),
                     ListView_SortItems: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SortItems)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SortItems").as_ptr(),
                     )),
                     ListView_Scroll: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_Scroll)).as_ptr(),
+                        c_str_macro::c_str!("ListView_Scroll").as_ptr(),
                     )),
                     ListView_GetTopIndex: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetTopIndex)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetTopIndex").as_ptr(),
                     )),
                     ListView_GetCountPerPage: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetCountPerPage)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetCountPerPage").as_ptr(),
                     )),
                     ListView_SetColumnOrderArray: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetColumnOrderArray)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SetColumnOrderArray").as_ptr(),
                     )),
                     ListView_GetColumnOrderArray: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetColumnOrderArray)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetColumnOrderArray").as_ptr(),
                     )),
                     ListView_GetHeader: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetHeader)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetHeader").as_ptr(),
                     )),
                     Header_GetItemCount: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(Header_GetItemCount)).as_ptr(),
+                        c_str_macro::c_str!("Header_GetItemCount").as_ptr(),
                     )),
                     Header_GetItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(Header_GetItem)).as_ptr(),
+                        c_str_macro::c_str!("Header_GetItem").as_ptr(),
                     )),
                     Header_SetItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(Header_SetItem)).as_ptr(),
+                        c_str_macro::c_str!("Header_SetItem").as_ptr(),
                     )),
                     ListView_GetItemRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetItemRect)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetItemRect").as_ptr(),
                     )),
                     ListView_GetSubItemRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_GetSubItemRect)).as_ptr(),
+                        c_str_macro::c_str!("ListView_GetSubItemRect").as_ptr(),
                     )),
                     ListView_HitTest: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_HitTest)).as_ptr(),
+                        c_str_macro::c_str!("ListView_HitTest").as_ptr(),
                     )),
                     SWELL_GetListViewHeaderHeight: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetListViewHeaderHeight)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetListViewHeaderHeight").as_ptr(),
                     )),
                     ImageList_CreateEx: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ImageList_CreateEx)).as_ptr(),
+                        c_str_macro::c_str!("ImageList_CreateEx").as_ptr(),
                     )),
                     ImageList_Remove: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ImageList_Remove)).as_ptr(),
+                        c_str_macro::c_str!("ImageList_Remove").as_ptr(),
                     )),
                     ImageList_ReplaceIcon: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ImageList_ReplaceIcon)).as_ptr(),
+                        c_str_macro::c_str!("ImageList_ReplaceIcon").as_ptr(),
                     )),
                     ImageList_Add: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ImageList_Add)).as_ptr(),
+                        c_str_macro::c_str!("ImageList_Add").as_ptr(),
                     )),
                     ImageList_Destroy: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ImageList_Destroy)).as_ptr(),
+                        c_str_macro::c_str!("ImageList_Destroy").as_ptr(),
                     )),
                     TabCtrl_GetItemCount: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TabCtrl_GetItemCount)).as_ptr(),
+                        c_str_macro::c_str!("TabCtrl_GetItemCount").as_ptr(),
                     )),
                     TabCtrl_DeleteItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TabCtrl_DeleteItem)).as_ptr(),
+                        c_str_macro::c_str!("TabCtrl_DeleteItem").as_ptr(),
                     )),
                     TabCtrl_InsertItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TabCtrl_InsertItem)).as_ptr(),
+                        c_str_macro::c_str!("TabCtrl_InsertItem").as_ptr(),
                     )),
                     TabCtrl_SetCurSel: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TabCtrl_SetCurSel)).as_ptr(),
+                        c_str_macro::c_str!("TabCtrl_SetCurSel").as_ptr(),
                     )),
                     TabCtrl_GetCurSel: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TabCtrl_GetCurSel)).as_ptr(),
+                        c_str_macro::c_str!("TabCtrl_GetCurSel").as_ptr(),
                     )),
                     TabCtrl_AdjustRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TabCtrl_AdjustRect)).as_ptr(),
+                        c_str_macro::c_str!("TabCtrl_AdjustRect").as_ptr(),
                     )),
                     TreeView_InsertItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_InsertItem)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_InsertItem").as_ptr(),
                     )),
                     TreeView_Expand: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_Expand)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_Expand").as_ptr(),
                     )),
                     TreeView_GetSelection: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_GetSelection)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_GetSelection").as_ptr(),
                     )),
                     TreeView_DeleteItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_DeleteItem)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_DeleteItem").as_ptr(),
                     )),
                     TreeView_DeleteAllItems: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_DeleteAllItems)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_DeleteAllItems").as_ptr(),
                     )),
                     TreeView_SelectItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_SelectItem)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_SelectItem").as_ptr(),
                     )),
                     TreeView_EnsureVisible: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_EnsureVisible)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_EnsureVisible").as_ptr(),
                     )),
                     TreeView_GetItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_GetItem)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_GetItem").as_ptr(),
                     )),
                     TreeView_SetItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_SetItem)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_SetItem").as_ptr(),
                     )),
                     TreeView_HitTest: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_HitTest)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_HitTest").as_ptr(),
                     )),
                     TreeView_SetIndent: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_SetIndent)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_SetIndent").as_ptr(),
                     )),
                     TreeView_GetParent: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_GetParent)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_GetParent").as_ptr(),
                     )),
                     TreeView_GetChild: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_GetChild)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_GetChild").as_ptr(),
                     )),
                     TreeView_GetNextSibling: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_GetNextSibling)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_GetNextSibling").as_ptr(),
                     )),
                     TreeView_GetRoot: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_GetRoot)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_GetRoot").as_ptr(),
                     )),
                     TreeView_SetBkColor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_SetBkColor)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_SetBkColor").as_ptr(),
                     )),
                     TreeView_SetTextColor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TreeView_SetTextColor)).as_ptr(),
+                        c_str_macro::c_str!("TreeView_SetTextColor").as_ptr(),
                     )),
                     ListView_SetBkColor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetBkColor)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SetBkColor").as_ptr(),
                     )),
                     ListView_SetTextBkColor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetTextBkColor)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SetTextBkColor").as_ptr(),
                     )),
                     ListView_SetTextColor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetTextColor)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SetTextColor").as_ptr(),
                     )),
                     ListView_SetGridColor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetGridColor)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SetGridColor").as_ptr(),
                     )),
                     ListView_SetSelColors: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ListView_SetSelColors)).as_ptr(),
+                        c_str_macro::c_str!("ListView_SetSelColors").as_ptr(),
                     )),
                     SWELL_ModalWindowStart: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_ModalWindowStart)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_ModalWindowStart").as_ptr(),
                     )),
                     SWELL_ModalWindowRun: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_ModalWindowRun)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_ModalWindowRun").as_ptr(),
                     )),
                     SWELL_ModalWindowEnd: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_ModalWindowEnd)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_ModalWindowEnd").as_ptr(),
                     )),
                     SWELL_CloseWindow: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_CloseWindow)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_CloseWindow").as_ptr(),
                     )),
                     CreatePopupMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CreatePopupMenu)).as_ptr(),
+                        c_str_macro::c_str!("CreatePopupMenu").as_ptr(),
                     )),
                     CreatePopupMenuEx: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CreatePopupMenuEx)).as_ptr(),
+                        c_str_macro::c_str!("CreatePopupMenuEx").as_ptr(),
                     )),
                     DestroyMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(DestroyMenu)).as_ptr(),
+                        c_str_macro::c_str!("DestroyMenu").as_ptr(),
                     )),
                     AddMenuItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(AddMenuItem)).as_ptr(),
+                        c_str_macro::c_str!("AddMenuItem").as_ptr(),
                     )),
                     GetSubMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetSubMenu)).as_ptr(),
+                        c_str_macro::c_str!("GetSubMenu").as_ptr(),
                     )),
                     GetMenuItemCount: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetMenuItemCount)).as_ptr(),
+                        c_str_macro::c_str!("GetMenuItemCount").as_ptr(),
                     )),
                     GetMenuItemID: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetMenuItemID)).as_ptr(),
+                        c_str_macro::c_str!("GetMenuItemID").as_ptr(),
                     )),
                     SetMenuItemModifier: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetMenuItemModifier)).as_ptr(),
+                        c_str_macro::c_str!("SetMenuItemModifier").as_ptr(),
                     )),
                     SetMenuItemText: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetMenuItemText)).as_ptr(),
+                        c_str_macro::c_str!("SetMenuItemText").as_ptr(),
                     )),
                     EnableMenuItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(EnableMenuItem)).as_ptr(),
+                        c_str_macro::c_str!("EnableMenuItem").as_ptr(),
                     )),
                     DeleteMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(DeleteMenu)).as_ptr(),
+                        c_str_macro::c_str!("DeleteMenu").as_ptr(),
                     )),
                     CheckMenuItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CheckMenuItem)).as_ptr(),
+                        c_str_macro::c_str!("CheckMenuItem").as_ptr(),
                     )),
                     InsertMenuItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(InsertMenuItem)).as_ptr(),
+                        c_str_macro::c_str!("InsertMenuItem").as_ptr(),
                     )),
                     SWELL_InsertMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_InsertMenu)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_InsertMenu").as_ptr(),
                     )),
                     GetMenuItemInfo: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetMenuItemInfo)).as_ptr(),
+                        c_str_macro::c_str!("GetMenuItemInfo").as_ptr(),
                     )),
                     SetMenuItemInfo: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetMenuItemInfo)).as_ptr(),
+                        c_str_macro::c_str!("SetMenuItemInfo").as_ptr(),
                     )),
                     DrawMenuBar: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(DrawMenuBar)).as_ptr(),
+                        c_str_macro::c_str!("DrawMenuBar").as_ptr(),
                     )),
                     SWELL_LoadMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_LoadMenu)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_LoadMenu").as_ptr(),
                     )),
                     TrackPopupMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(TrackPopupMenu)).as_ptr(),
+                        c_str_macro::c_str!("TrackPopupMenu").as_ptr(),
                     )),
                     SWELL_SetMenuDestination: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetMenuDestination)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_SetMenuDestination").as_ptr(),
                     )),
                     SWELL_DuplicateMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_DuplicateMenu)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_DuplicateMenu").as_ptr(),
                     )),
-                    SetMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetMenu)).as_ptr(),
-                    )),
-                    GetMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetMenu)).as_ptr(),
-                    )),
+                    SetMenu: std::mem::transmute(get_func(c_str_macro::c_str!("SetMenu").as_ptr())),
+                    GetMenu: std::mem::transmute(get_func(c_str_macro::c_str!("GetMenu").as_ptr())),
                     SWELL_GetDefaultWindowMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetDefaultWindowMenu)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetDefaultWindowMenu").as_ptr(),
                     )),
                     SWELL_SetDefaultWindowMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetDefaultWindowMenu)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_SetDefaultWindowMenu").as_ptr(),
                     )),
                     SWELL_GetDefaultModalWindowMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetDefaultModalWindowMenu)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetDefaultModalWindowMenu").as_ptr(),
                     )),
                     SWELL_SetDefaultModalWindowMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetDefaultModalWindowMenu)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_SetDefaultModalWindowMenu").as_ptr(),
                     )),
                     SWELL_GetCurrentMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetCurrentMenu)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetCurrentMenu").as_ptr(),
                     )),
                     SWELL_SetCurrentMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetCurrentMenu)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_SetCurrentMenu").as_ptr(),
                     )),
                     SWELL_DialogBox: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_DialogBox)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_DialogBox").as_ptr(),
                     )),
                     SWELL_CreateDialog: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_CreateDialog)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_CreateDialog").as_ptr(),
                     )),
                     SWELL_RegisterCustomControlCreator: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_RegisterCustomControlCreator))
-                            .as_ptr(),
+                        c_str_macro::c_str!("SWELL_RegisterCustomControlCreator").as_ptr(),
                     )),
                     SWELL_UnregisterCustomControlCreator: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_UnregisterCustomControlCreator))
-                            .as_ptr(),
+                        c_str_macro::c_str!("SWELL_UnregisterCustomControlCreator").as_ptr(),
                     )),
                     DefWindowProc: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(DefWindowProc)).as_ptr(),
+                        c_str_macro::c_str!("DefWindowProc").as_ptr(),
                     )),
                     EndDialog: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(EndDialog)).as_ptr(),
+                        c_str_macro::c_str!("EndDialog").as_ptr(),
                     )),
                     SWELL_GetDefaultButtonID: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetDefaultButtonID)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetDefaultButtonID").as_ptr(),
                     )),
                     SendMessage: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SendMessage)).as_ptr(),
+                        c_str_macro::c_str!("SendMessage").as_ptr(),
                     )),
                     SWELL_BroadcastMessage: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_BroadcastMessage)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_BroadcastMessage").as_ptr(),
                     )),
                     PostMessage: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(PostMessage)).as_ptr(),
+                        c_str_macro::c_str!("PostMessage").as_ptr(),
                     )),
                     SWELL_MessageQueue_Flush: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_MessageQueue_Flush)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_MessageQueue_Flush").as_ptr(),
                     )),
                     SWELL_MessageQueue_Clear: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_MessageQueue_Clear)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_MessageQueue_Clear").as_ptr(),
                     )),
                     SWELL_KeyToASCII: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_KeyToASCII)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_KeyToASCII").as_ptr(),
                     )),
                     GetAsyncKeyState: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetAsyncKeyState)).as_ptr(),
+                        c_str_macro::c_str!("GetAsyncKeyState").as_ptr(),
                     )),
                     GetCursorPos: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetCursorPos)).as_ptr(),
+                        c_str_macro::c_str!("GetCursorPos").as_ptr(),
                     )),
                     GetMessagePos: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetMessagePos)).as_ptr(),
+                        c_str_macro::c_str!("GetMessagePos").as_ptr(),
                     )),
                     SWELL_LoadCursor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_LoadCursor)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_LoadCursor").as_ptr(),
                     )),
                     SWELL_SetCursor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetCursor)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_SetCursor").as_ptr(),
                     )),
                     SWELL_EnableRightClickEmulate: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_EnableRightClickEmulate)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_EnableRightClickEmulate").as_ptr(),
                     )),
                     SWELL_GetCursor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetCursor)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetCursor").as_ptr(),
                     )),
                     SWELL_GetLastSetCursor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetLastSetCursor)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetLastSetCursor").as_ptr(),
                     )),
                     SWELL_IsCursorVisible: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_IsCursorVisible)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_IsCursorVisible").as_ptr(),
                     )),
                     SWELL_ShowCursor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_ShowCursor)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_ShowCursor").as_ptr(),
                     )),
                     SWELL_SetCursorPos: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetCursorPos)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_SetCursorPos").as_ptr(),
                     )),
                     SWELL_GetViewPort: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetViewPort)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetViewPort").as_ptr(),
                     )),
                     OpenClipboard: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(OpenClipboard)).as_ptr(),
+                        c_str_macro::c_str!("OpenClipboard").as_ptr(),
                     )),
                     CloseClipboard: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CloseClipboard)).as_ptr(),
+                        c_str_macro::c_str!("CloseClipboard").as_ptr(),
                     )),
                     GetClipboardData: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetClipboardData)).as_ptr(),
+                        c_str_macro::c_str!("GetClipboardData").as_ptr(),
                     )),
                     EmptyClipboard: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(EmptyClipboard)).as_ptr(),
+                        c_str_macro::c_str!("EmptyClipboard").as_ptr(),
                     )),
                     SetClipboardData: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetClipboardData)).as_ptr(),
+                        c_str_macro::c_str!("SetClipboardData").as_ptr(),
                     )),
                     RegisterClipboardFormat: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(RegisterClipboardFormat)).as_ptr(),
+                        c_str_macro::c_str!("RegisterClipboardFormat").as_ptr(),
                     )),
                     EnumClipboardFormats: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(EnumClipboardFormats)).as_ptr(),
+                        c_str_macro::c_str!("EnumClipboardFormats").as_ptr(),
                     )),
                     GlobalAlloc: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GlobalAlloc)).as_ptr(),
+                        c_str_macro::c_str!("GlobalAlloc").as_ptr(),
                     )),
                     GlobalLock: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GlobalLock)).as_ptr(),
+                        c_str_macro::c_str!("GlobalLock").as_ptr(),
                     )),
                     GlobalSize: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GlobalSize)).as_ptr(),
+                        c_str_macro::c_str!("GlobalSize").as_ptr(),
                     )),
                     GlobalUnlock: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GlobalUnlock)).as_ptr(),
+                        c_str_macro::c_str!("GlobalUnlock").as_ptr(),
                     )),
                     GlobalFree: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GlobalFree)).as_ptr(),
+                        c_str_macro::c_str!("GlobalFree").as_ptr(),
                     )),
                     CreateThread: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CreateThread)).as_ptr(),
+                        c_str_macro::c_str!("CreateThread").as_ptr(),
                     )),
                     CreateEvent: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CreateEvent)).as_ptr(),
+                        c_str_macro::c_str!("CreateEvent").as_ptr(),
                     )),
                     CreateEventAsSocket: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CreateEventAsSocket)).as_ptr(),
+                        c_str_macro::c_str!("CreateEventAsSocket").as_ptr(),
                     )),
                     GetCurrentThreadId: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetCurrentThreadId)).as_ptr(),
+                        c_str_macro::c_str!("GetCurrentThreadId").as_ptr(),
                     )),
                     WaitForSingleObject: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(WaitForSingleObject)).as_ptr(),
+                        c_str_macro::c_str!("WaitForSingleObject").as_ptr(),
                     )),
                     WaitForAnySocketObject: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(WaitForAnySocketObject)).as_ptr(),
+                        c_str_macro::c_str!("WaitForAnySocketObject").as_ptr(),
                     )),
                     CloseHandle: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CloseHandle)).as_ptr(),
+                        c_str_macro::c_str!("CloseHandle").as_ptr(),
                     )),
                     SetThreadPriority: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetThreadPriority)).as_ptr(),
+                        c_str_macro::c_str!("SetThreadPriority").as_ptr(),
                     )),
                     SetEvent: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetEvent)).as_ptr(),
+                        c_str_macro::c_str!("SetEvent").as_ptr(),
                     )),
                     ResetEvent: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ResetEvent)).as_ptr(),
+                        c_str_macro::c_str!("ResetEvent").as_ptr(),
                     )),
                     SWELL_CreateProcessFromPID: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_CreateProcessFromPID)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_CreateProcessFromPID").as_ptr(),
                     )),
                     SWELL_CreateProcess: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_CreateProcess)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_CreateProcess").as_ptr(),
                     )),
                     SWELL_GetProcessExitCode: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetProcessExitCode)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetProcessExitCode").as_ptr(),
                     )),
                     LoadLibraryGlobals: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(LoadLibraryGlobals)).as_ptr(),
+                        c_str_macro::c_str!("LoadLibraryGlobals").as_ptr(),
                     )),
                     LoadLibrary: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(LoadLibrary)).as_ptr(),
+                        c_str_macro::c_str!("LoadLibrary").as_ptr(),
                     )),
                     GetProcAddress: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetProcAddress)).as_ptr(),
+                        c_str_macro::c_str!("GetProcAddress").as_ptr(),
                     )),
                     FreeLibrary: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(FreeLibrary)).as_ptr(),
+                        c_str_macro::c_str!("FreeLibrary").as_ptr(),
                     )),
                     SWELL_GetBundle: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetBundle)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetBundle").as_ptr(),
                     )),
                     SWELL_CreateMemContext: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_CreateMemContext)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_CreateMemContext").as_ptr(),
                     )),
                     SWELL_DeleteGfxContext: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_DeleteGfxContext)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_DeleteGfxContext").as_ptr(),
                     )),
                     SWELL_GetCtxGC: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetCtxGC)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetCtxGC").as_ptr(),
                     )),
                     SWELL_GetCtxFrameBuffer: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetCtxFrameBuffer)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetCtxFrameBuffer").as_ptr(),
                     )),
                     SWELL_PushClipRegion: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_PushClipRegion)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_PushClipRegion").as_ptr(),
                     )),
                     SWELL_SetClipRegion: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetClipRegion)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_SetClipRegion").as_ptr(),
                     )),
                     SWELL_PopClipRegion: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_PopClipRegion)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_PopClipRegion").as_ptr(),
                     )),
                     CreateFontIndirect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CreateFontIndirect)).as_ptr(),
+                        c_str_macro::c_str!("CreateFontIndirect").as_ptr(),
                     )),
                     CreateFont: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CreateFont)).as_ptr(),
+                        c_str_macro::c_str!("CreateFont").as_ptr(),
                     )),
                     CreatePen: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CreatePen)).as_ptr(),
+                        c_str_macro::c_str!("CreatePen").as_ptr(),
                     )),
                     CreateSolidBrush: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CreateSolidBrush)).as_ptr(),
+                        c_str_macro::c_str!("CreateSolidBrush").as_ptr(),
                     )),
                     CreatePenAlpha: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CreatePenAlpha)).as_ptr(),
+                        c_str_macro::c_str!("CreatePenAlpha").as_ptr(),
                     )),
                     CreateSolidBrushAlpha: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CreateSolidBrushAlpha)).as_ptr(),
+                        c_str_macro::c_str!("CreateSolidBrushAlpha").as_ptr(),
                     )),
                     SelectObject: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SelectObject)).as_ptr(),
+                        c_str_macro::c_str!("SelectObject").as_ptr(),
                     )),
                     GetStockObject: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetStockObject)).as_ptr(),
+                        c_str_macro::c_str!("GetStockObject").as_ptr(),
                     )),
                     DeleteObject: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(DeleteObject)).as_ptr(),
+                        c_str_macro::c_str!("DeleteObject").as_ptr(),
                     )),
                     SWELL_FillRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_FillRect)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_FillRect").as_ptr(),
                     )),
                     Rectangle: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(Rectangle)).as_ptr(),
+                        c_str_macro::c_str!("Rectangle").as_ptr(),
                     )),
-                    Ellipse: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(Ellipse)).as_ptr(),
-                    )),
+                    Ellipse: std::mem::transmute(get_func(c_str_macro::c_str!("Ellipse").as_ptr())),
                     SWELL_Polygon: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_Polygon)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_Polygon").as_ptr(),
                     )),
                     MoveToEx: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(MoveToEx)).as_ptr(),
+                        c_str_macro::c_str!("MoveToEx").as_ptr(),
                     )),
                     SWELL_LineTo: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_LineTo)).as_ptr(),
+                        c_str_macro::c_str!("LineTo").as_ptr(),
                     )),
                     SWELL_SetPixel: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetPixel)).as_ptr(),
+                        c_str_macro::c_str!("SetPixel").as_ptr(),
                     )),
                     PolyBezierTo: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(PolyBezierTo)).as_ptr(),
+                        c_str_macro::c_str!("PolyBezierTo").as_ptr(),
                     )),
                     SWELL_DrawText: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_DrawText)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_DrawText").as_ptr(),
                     )),
                     SetTextColor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetTextColor)).as_ptr(),
+                        c_str_macro::c_str!("SetTextColor").as_ptr(),
                     )),
                     GetTextColor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetTextColor)).as_ptr(),
+                        c_str_macro::c_str!("GetTextColor").as_ptr(),
                     )),
                     SetBkColor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetBkColor)).as_ptr(),
+                        c_str_macro::c_str!("SetBkColor").as_ptr(),
                     )),
                     SetBkMode: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetBkMode)).as_ptr(),
+                        c_str_macro::c_str!("SetBkMode").as_ptr(),
                     )),
                     GetGlyphIndicesW: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetGlyphIndicesW)).as_ptr(),
+                        c_str_macro::c_str!("GetGlyphIndicesW").as_ptr(),
                     )),
                     RoundRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(RoundRect)).as_ptr(),
+                        c_str_macro::c_str!("RoundRect").as_ptr(),
                     )),
                     PolyPolyline: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(PolyPolyline)).as_ptr(),
+                        c_str_macro::c_str!("PolyPolyline").as_ptr(),
                     )),
                     GetTextMetrics: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetTextMetrics)).as_ptr(),
+                        c_str_macro::c_str!("GetTextMetrics").as_ptr(),
                     )),
                     GetTextFace: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetTextFace)).as_ptr(),
+                        c_str_macro::c_str!("GetTextFace").as_ptr(),
                     )),
                     GetObject: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetObject)).as_ptr(),
+                        c_str_macro::c_str!("GetObject").as_ptr(),
                     )),
                     CreateIconIndirect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CreateIconIndirect)).as_ptr(),
+                        c_str_macro::c_str!("CreateIconIndirect").as_ptr(),
                     )),
                     LoadNamedImage: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(LoadNamedImage)).as_ptr(),
+                        c_str_macro::c_str!("LoadNamedImage").as_ptr(),
                     )),
                     DrawImageInRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(DrawImageInRect)).as_ptr(),
+                        c_str_macro::c_str!("DrawImageInRect").as_ptr(),
                     )),
-                    BitBlt: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(BitBlt)).as_ptr(),
-                    )),
+                    BitBlt: std::mem::transmute(get_func(c_str_macro::c_str!("BitBlt").as_ptr())),
                     StretchBlt: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(StretchBlt)).as_ptr(),
+                        c_str_macro::c_str!("StretchBlt").as_ptr(),
                     )),
                     StretchBltFromMem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(StretchBltFromMem)).as_ptr(),
+                        c_str_macro::c_str!("StretchBltFromMem").as_ptr(),
                     )),
                     SWELL_GetScaling256: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetScaling256)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetScaling256").as_ptr(),
                     )),
                     SWELL_ExtendedAPI: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_ExtendedAPI)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_ExtendedAPI").as_ptr(),
                     )),
                     GetSysColor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetSysColor)).as_ptr(),
+                        c_str_macro::c_str!("GetSysColor").as_ptr(),
                     )),
                     CreateBitmap: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(CreateBitmap)).as_ptr(),
+                        c_str_macro::c_str!("CreateBitmap").as_ptr(),
                     )),
                     SetOpaque: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetOpaque)).as_ptr(),
+                        c_str_macro::c_str!("SetOpaque").as_ptr(),
                     )),
                     SetAllowNoMiddleManRendering: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SetAllowNoMiddleManRendering)).as_ptr(),
+                        c_str_macro::c_str!("SetAllowNoMiddleManRendering").as_ptr(),
                     )),
                     SWELL_SetViewGL: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetViewGL)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_SetViewGL").as_ptr(),
                     )),
                     SWELL_GetViewGL: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetViewGL)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetViewGL").as_ptr(),
                     )),
                     SWELL_SetGLContextToView: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetGLContextToView)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_SetGLContextToView").as_ptr(),
                     )),
                     BeginPaint: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(BeginPaint)).as_ptr(),
+                        c_str_macro::c_str!("BeginPaint").as_ptr(),
                     )),
                     EndPaint: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(EndPaint)).as_ptr(),
+                        c_str_macro::c_str!("EndPaint").as_ptr(),
                     )),
-                    GetDC: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetDC)).as_ptr(),
-                    )),
+                    GetDC: std::mem::transmute(get_func(c_str_macro::c_str!("GetDC").as_ptr())),
                     GetWindowDC: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetWindowDC)).as_ptr(),
+                        c_str_macro::c_str!("GetWindowDC").as_ptr(),
                     )),
                     ReleaseDC: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(ReleaseDC)).as_ptr(),
+                        c_str_macro::c_str!("ReleaseDC").as_ptr(),
                     )),
                     SWELL_FillDialogBackground: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_FillDialogBackground)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_FillDialogBackground").as_ptr(),
                     )),
                     SWELL_CloneGDIObject: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_CloneGDIObject)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_CloneGDIObject").as_ptr(),
                     )),
                     GetSystemMetrics: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetSystemMetrics)).as_ptr(),
+                        c_str_macro::c_str!("GetSystemMetrics").as_ptr(),
                     )),
                     DragQueryPoint: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(DragQueryPoint)).as_ptr(),
+                        c_str_macro::c_str!("DragQueryPoint").as_ptr(),
                     )),
                     DragFinish: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(DragFinish)).as_ptr(),
+                        c_str_macro::c_str!("DragFinish").as_ptr(),
                     )),
                     DragQueryFile: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(DragQueryFile)).as_ptr(),
+                        c_str_macro::c_str!("DragQueryFile").as_ptr(),
                     )),
                     SWELL_InitiateDragDrop: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_InitiateDragDrop)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_InitiateDragDrop").as_ptr(),
                     )),
                     SWELL_InitiateDragDropOfFileList: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_InitiateDragDropOfFileList)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_InitiateDragDropOfFileList").as_ptr(),
                     )),
                     SWELL_FinishDragDrop: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_FinishDragDrop)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_FinishDragDrop").as_ptr(),
                     )),
                     SWELL_DrawFocusRect: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_DrawFocusRect)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_DrawFocusRect").as_ptr(),
                     )),
                     SWELL_MakeSetCurParms: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_MakeSetCurParms)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_MakeSetCurParms").as_ptr(),
                     )),
                     SWELL_MakeButton: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_MakeButton)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_MakeButton").as_ptr(),
                     )),
                     SWELL_MakeEditField: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_MakeEditField)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_MakeEditField").as_ptr(),
                     )),
                     SWELL_MakeLabel: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_MakeLabel)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_MakeLabel").as_ptr(),
                     )),
                     SWELL_MakeControl: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_MakeControl)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_MakeControl").as_ptr(),
                     )),
                     SWELL_MakeCombo: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_MakeCombo)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_MakeCombo").as_ptr(),
                     )),
                     SWELL_MakeGroupBox: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_MakeGroupBox)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_MakeGroupBox").as_ptr(),
                     )),
                     SWELL_MakeCheckBox: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_MakeCheckBox)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_MakeCheckBox").as_ptr(),
                     )),
                     SWELL_MakeListBox: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_MakeListBox)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_MakeListBox").as_ptr(),
                     )),
                     SWELL_Menu_AddMenuItem: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_Menu_AddMenuItem)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_Menu_AddMenuItem").as_ptr(),
                     )),
                     SWELL_GenerateMenuFromList: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GenerateMenuFromList)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GenerateMenuFromList").as_ptr(),
                     )),
                     SWELL_GenerateDialogFromList: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GenerateDialogFromList)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GenerateDialogFromList").as_ptr(),
                     )),
                     _controlfp: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(_controlfp)).as_ptr(),
+                        c_str_macro::c_str!("_controlfp").as_ptr(),
                     )),
                     SWELL_Internal_PostMessage_Init: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_Internal_PostMessage_Init)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_Internal_PostMessage_Init").as_ptr(),
                     )),
                     SWELL_LoadCursorFromFile: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_LoadCursorFromFile)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_LoadCursorFromFile").as_ptr(),
                     )),
                     SWELL_SetWindowWantRaiseAmt: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetWindowWantRaiseAmt)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_SetWindowWantRaiseAmt").as_ptr(),
                     )),
                     SWELL_GetWindowWantRaiseAmt: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetWindowWantRaiseAmt)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetWindowWantRaiseAmt").as_ptr(),
                     )),
                     SWELL_SetListViewFastClickMask: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetListViewFastClickMask)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_SetListViewFastClickMask").as_ptr(),
                     )),
                     GetTempPath: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetTempPath)).as_ptr(),
+                        c_str_macro::c_str!("GetTempPath").as_ptr(),
                     )),
                     SWELL_initargs: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_initargs)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_initargs").as_ptr(),
                     )),
                     SWELL_RunMessageLoop: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_RunMessageLoop)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_RunMessageLoop").as_ptr(),
                     )),
                     SWELL_CreateXBridgeWindow: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_CreateXBridgeWindow)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_CreateXBridgeWindow").as_ptr(),
                     )),
                     SWELL_GetOSWindow: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetOSWindow)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetOSWindow").as_ptr(),
                     )),
                     SWELL_GetOSEvent: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetOSEvent)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetOSEvent").as_ptr(),
                     )),
                     SWELL_GenerateGUID: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GenerateGUID)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GenerateGUID").as_ptr(),
                     )),
                     EnumChildWindows: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(EnumChildWindows)).as_ptr(),
+                        c_str_macro::c_str!("EnumChildWindows").as_ptr(),
                     )),
                     SWELL_IsGroupBox: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_IsGroupBox)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_IsGroupBox").as_ptr(),
                     )),
                     SWELL_IsButton: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_IsButton)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_IsButton").as_ptr(),
                     )),
                     SWELL_IsStaticText: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_IsStaticText)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_IsStaticText").as_ptr(),
                     )),
                     SWELL_GetDesiredControlSize: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_GetDesiredControlSize)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_GetDesiredControlSize").as_ptr(),
                     )),
                     AddFontResourceEx: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(AddFontResourceEx)).as_ptr(),
+                        c_str_macro::c_str!("AddFontResourceEx").as_ptr(),
                     )),
                     SWELL_Register_Cursor_Resource: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_Register_Cursor_Resource)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_Register_Cursor_Resource").as_ptr(),
                     )),
                     SWELL_ChooseColor: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_ChooseColor)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_ChooseColor").as_ptr(),
                     )),
                     SWELL_ChooseFont: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_ChooseFont)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_ChooseFont").as_ptr(),
                     )),
                     IsWindowEnabled: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(IsWindowEnabled)).as_ptr(),
+                        c_str_macro::c_str!("IsWindowEnabled").as_ptr(),
                     )),
                     GetClassName: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetClassName)).as_ptr(),
+                        c_str_macro::c_str!("GetClassName").as_ptr(),
                     )),
                     SWELL_SetClassName: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_SetClassName)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_SetClassName").as_ptr(),
                     )),
                     SWELL_DisableContextMenu: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_DisableContextMenu)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_DisableContextMenu").as_ptr(),
                     )),
                     EnumDisplayMonitors: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(EnumDisplayMonitors)).as_ptr(),
+                        c_str_macro::c_str!("EnumDisplayMonitors").as_ptr(),
                     )),
                     GetMonitorInfo: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(GetMonitorInfo)).as_ptr(),
+                        c_str_macro::c_str!("GetMonitorInfo").as_ptr(),
                     )),
                     SWELL_osx_is_dark_mode: std::mem::transmute(get_func(
-                        c_str_macro::c_str!(stringify!(SWELL_osx_is_dark_mode)).as_ptr(),
+                        c_str_macro::c_str!("SWELL_osx_is_dark_mode").as_ptr(),
                     )),
                 }
             };
