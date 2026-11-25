@@ -40,6 +40,7 @@ derive_more.workspace = true
 downcast-rs.workspace = true
 fragile.workspace = true
 tracing.workspace = true
+scopeguard.workspace = true
 
 [target.'cfg(windows)'.dependencies]
 winapi = { workspace = true, features = ["winuser", "winbase", "wingdi", "libloaderapi"] }

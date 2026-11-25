@@ -252,6 +252,71 @@ impl Swell {
             ((color >> 16) & 0xff) as _
         }
     }
+
+    /// On Windows this is a constant but in SWELL this is a macro which translates to a function
+    /// call.
+    pub fn CF_TEXT(&self) -> root::UINT {
+        #[cfg(target_family = "unix")]
+        {
+            unsafe { self.RegisterClipboardFormat(c_str_macro::c_str!("SWELL__CF_TEXT").as_ptr()) }
+        }
+        #[cfg(target_family = "windows")]
+        1
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn SetCursor(&self, curs: root::HCURSOR) {
+        #[cfg(target_family = "unix")]
+        {
+            unsafe {
+                self.SWELL_SetCursor(idx);
+            }
+        }
+        #[cfg(target_family = "windows")]
+        {
+            unsafe {
+                winapi::um::winuser::SetCursor(curs.cast());
+            }
+        }
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn LoadCursor(&self, idx: *const ::std::os::raw::c_char) -> root::HCURSOR {
+        #[cfg(target_family = "unix")]
+        {
+            unsafe { self.SWELL_LoadCursor(idx) }
+        }
+        #[cfg(target_family = "windows")]
+        {
+            unsafe {
+                winapi::um::winuser::LoadCursorW(std::ptr::null_mut(), idx.cast()) as root::HCURSOR
+            }
+        }
+    }
+    /// # Safety
+    ///
+    /// The device context handle must be valid.
+    pub unsafe fn LineTo(
+        &self,
+        ctx: root::HDC,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+    ) {
+        #[cfg(target_family = "unix")]
+        {
+            unsafe { self.SWELL_LineTo(ctx, x, y) }
+        }
+        #[cfg(target_family = "windows")]
+        {
+            unsafe {
+                winapi::um::wingdi::LineTo(ctx.cast(), x, y);
+            }
+        }
+    }
 }
 
 /// This impl block contains functions which delegate to native win32 functions but don't have
@@ -262,6 +327,111 @@ impl Swell {
 /// can use UTF-8 throughout: Rust, REAPER, SWELL ... just Windows was missing.
 #[cfg(target_family = "windows")]
 impl Swell {
+    /// # Safety
+    ///
+    /// The device context handle must be valid.
+    /// `op` must be null or point to a valid, writable POINT.
+    pub unsafe fn MoveToEx(
+        &self,
+        ctx: root::HDC,
+        x: ::std::os::raw::c_int,
+        y: ::std::os::raw::c_int,
+        op: *mut root::POINT,
+    ) {
+        unsafe {
+            winapi::um::wingdi::MoveToEx(ctx.cast(), x, y, op.cast());
+        }
+    }
+
+    pub fn CreatePen(
+        &self,
+        attr: ::std::os::raw::c_int,
+        wid: ::std::os::raw::c_int,
+        col: ::std::os::raw::c_int,
+    ) -> root::HPEN {
+        unsafe { winapi::um::wingdi::CreatePen(attr, wid, col as u32).cast() }
+    }
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointer.
+    pub unsafe fn CreateBitmap(
+        &self,
+        width: ::std::os::raw::c_int,
+        height: ::std::os::raw::c_int,
+        numplanes: ::std::os::raw::c_int,
+        bitsperpixel: ::std::os::raw::c_int,
+        bits: *mut ::std::os::raw::c_uchar,
+    ) -> root::HBITMAP {
+        unsafe {
+            winapi::um::wingdi::CreateBitmap(
+                width,
+                height,
+                numplanes as _,
+                bitsperpixel as _,
+                bits as _,
+            ) as _
+        }
+    }
+
+    /// # Safety
+    ///
+    /// REAPER can crash if you pass an invalid pointers.
+    pub unsafe fn SelectObject(&self, ctx: root::HDC, obj: root::HGDIOBJ) -> root::HGDIOBJ {
+        unsafe { winapi::um::wingdi::SelectObject(ctx.cast(), obj.cast()).cast() }
+    }
+
+    /// # Safety
+    ///
+    /// All handles and pointers must be valid.
+    /// `img` must represent an HBITMAP, not an actual HICON.
+    pub unsafe fn DrawImageInRect(&self, ctx: root::HDC, img: root::HICON, r: *const root::RECT) {
+        use winapi::um::wingdi::*;
+        unsafe {
+            let dc = ctx.cast();
+            let rect = &*r;
+            // Retrieve the bitmap dimensions
+            let mut info: BITMAP = std::mem::zeroed();
+            let result = GetObjectW(
+                img.cast(),
+                std::mem::size_of::<BITMAP>() as i32,
+                (&mut info as *mut BITMAP).cast(),
+            );
+            if result == 0 {
+                return;
+            }
+            // Create a temporary memory device context
+            let mem_dc = CreateCompatibleDC(dc);
+            if mem_dc.is_null() {
+                return;
+            }
+            scopeguard::defer! {
+                DeleteDC(mem_dc);
+            }
+            // Select the bitmap into the memory DC
+            let old_bitmap = SelectObject(mem_dc, img.cast());
+            if old_bitmap.is_null() {
+                return;
+            }
+            scopeguard::defer! {
+                SelectObject(mem_dc, old_bitmap);
+            }
+            // Draw the scaled bitmap
+            StretchBlt(
+                dc,
+                rect.left,
+                rect.top,
+                rect.right - rect.left,
+                rect.bottom - rect.top,
+                mem_dc,
+                0,
+                0,
+                info.bmWidth,
+                info.bmHeight,
+                SRCCOPY,
+            );
+        }
+    }
+
     /// # Safety
     ///
     /// REAPER can crash if you pass an invalid pointer.
@@ -562,17 +732,6 @@ impl Swell {
             });
             len as _
         }
-    }
-
-    /// On Windows this is a constant but in SWELL this is a macro which translates to a function
-    /// call.
-    pub fn CF_TEXT(&self) -> root::UINT {
-        #[cfg(target_family = "unix")]
-        {
-            unsafe { self.RegisterClipboardFormat(c_str_macro::c_str!("SWELL__CF_TEXT").as_ptr()) }
-        }
-        #[cfg(target_family = "windows")]
-        1
     }
 }
 
