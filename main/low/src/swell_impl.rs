@@ -271,7 +271,7 @@ impl Swell {
         #[cfg(target_family = "unix")]
         {
             unsafe {
-                self.SWELL_SetCursor(idx);
+                self.SWELL_SetCursor(curs);
             }
         }
         #[cfg(target_family = "windows")]
@@ -386,10 +386,12 @@ impl Swell {
     /// `img` must represent an HBITMAP, not an actual HICON.
     pub unsafe fn DrawImageInRect(&self, ctx: root::HDC, img: root::HICON, r: *const root::RECT) {
         use winapi::um::wingdi::*;
+
         unsafe {
             let dc = ctx.cast();
             let rect = &*r;
-            // Retrieve the bitmap dimensions
+
+            // Retrieve the bitmap dimensions.
             let mut info: BITMAP = std::mem::zeroed();
             let result = GetObjectW(
                 img.cast(),
@@ -399,7 +401,8 @@ impl Swell {
             if result == 0 {
                 return;
             }
-            // Create a temporary memory device context
+
+            // Create a temporary memory device context.
             let mem_dc = CreateCompatibleDC(dc);
             if mem_dc.is_null() {
                 return;
@@ -407,7 +410,8 @@ impl Swell {
             scopeguard::defer! {
                 DeleteDC(mem_dc);
             }
-            // Select the bitmap into the memory DC
+
+            // Select the bitmap into the memory DC.
             let old_bitmap = SelectObject(mem_dc, img.cast());
             if old_bitmap.is_null() {
                 return;
@@ -415,7 +419,24 @@ impl Swell {
             scopeguard::defer! {
                 SelectObject(mem_dc, old_bitmap);
             }
-            // Draw the scaled bitmap
+
+            // Preserve the destination DC state.
+            let saved_dc = SaveDC(dc);
+            scopeguard::defer! {
+                if saved_dc != 0 {
+                    RestoreDC(dc, saved_dc);
+                }
+            }
+
+            // Enable high-quality bitmap scaling.
+            if saved_dc != 0 {
+                if SetStretchBltMode(dc, HALFTONE) != 0 {
+                    // Required after setting HALFTONE mode.
+                    SetBrushOrgEx(dc, 0, 0, std::ptr::null_mut());
+                }
+            }
+
+            // Draw the scaled bitmap.
             StretchBlt(
                 dc,
                 rect.left,
