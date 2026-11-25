@@ -427,15 +427,11 @@ impl Swell {
                     RestoreDC(dc, saved_dc);
                 }
             }
-
             // Enable high-quality bitmap scaling.
-            if saved_dc != 0 {
-                if SetStretchBltMode(dc, HALFTONE) != 0 {
-                    // Required after setting HALFTONE mode.
-                    SetBrushOrgEx(dc, 0, 0, std::ptr::null_mut());
-                }
+            if saved_dc != 0 && SetStretchBltMode(dc, HALFTONE) != 0 {
+                // Required after setting HALFTONE mode.
+                SetBrushOrgEx(dc, 0, 0, std::ptr::null_mut());
             }
-
             // Draw the scaled bitmap.
             StretchBlt(
                 dc,
